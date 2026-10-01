@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Mes commandes - {{ organization.name }}{% endblock %}
+
+{% block content %}
+<h2 class="text-3xl font-bold mb-6">Mes commandes</h2>
+
+{% if orders %}
+<div class="bg-white rounded shadow overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="p-4 text-left">N° Commande</th>
+                <th class="p-4 text-left">Date</th>
+                <th class="p-4 text-center">Statut</th>
+                <th class="p-4 text-right">Total</th>
+                <th class="p-4 text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr class="border-t">
+                <td class="p-4 font-bold">{{ order.order_number }}</td>
+                <td class="p-4">{{ order.created_at|date:"d/m/Y" }}</td>
+                <td class="p-4 text-center">
+                    <span class="px-3 py-1 rounded text-sm 
+                        {% if order.status == 'VALIDEE' %}bg-green-100 text-green-800
+                        {% elif order.status == 'REFUSEE' %}bg-red-100 text-red-800
+                        {% elif order.status == 'LIVREE' %}bg-blue-100 text-blue-800
+                        {% else %}bg-yellow-100 text-yellow-800
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td class="p-4 text-right font-bold">{{ order.total_amount }} {{ order.currency_code }}</td>
+                <td class="p-4 text-center">
+                    <a href="{% url 'order_detail' order.id %}" class="text-blue-600 hover:underline">Détail</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-gray-600">Vous n'avez encore aucune commande. <a href="{% url 'catalog' %}" class="text-blue-600 underline">Explorez notre catalogue</a></p>
+{% endif %}
+{% endblock %}

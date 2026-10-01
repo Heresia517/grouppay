@@ -13,6 +13,10 @@ class EmptyCartError(Exception):
     pass
 
 
+class InvalidOrderStatusError(Exception):
+    pass
+
+
 def generate_order_number(organization):
     year = date.today().year
     prefix = f"{organization.slug.upper()}-{year}-"
@@ -47,7 +51,6 @@ def create_order_from_cart(user, delivery_address):
 
     total = 0
     for item in items:
-        # Verrouille la ligne produit avant de vérifier le stock — RG-01
         product = Product.objects.select_for_update().get(pk=item.product.pk)
 
         if product.stock_quantity < item.quantity:
@@ -60,7 +63,7 @@ def create_order_from_cart(user, delivery_address):
             order=order,
             product=product,
             quantity=item.quantity,
-            unit_price=product.price,  # figé, RG-02
+            unit_price=product.price,
         )
         product.stock_quantity -= item.quantity
         product.save(update_fields=["stock_quantity"])
@@ -79,14 +82,13 @@ def create_order_from_cart(user, delivery_address):
     return order
 
 
-class InvalidOrderStatusError(Exception):
-    pass
-
-
 @transaction.atomic
 def validate_order(order, actor):
     """RG-03 : la validation crée automatiquement une DeductionTransmission."""
     from apps.deductions.models import DeductionTransmission
+    from apps.documents.services import generate_purchase_order_pdf
+    from apps.notifications.models import Notification
+    from apps.notifications.tasks import send_email_notification
 
     if order.status != "EN_ATTENTE_VALIDATION":
         raise InvalidOrderStatusError(f"Impossible de valider une commande au statut {order.status}")
@@ -106,12 +108,34 @@ def validate_order(order, actor):
         status="EN_ATTENTE",
     )
 
+    # Génère le PDF
+    try:
+        generate_purchase_order_pdf(order)
+    except:
+        pass  # Si PDF échoue, ne pas bloquer la commande
+
+    # Envoie notification
+    notif = Notification.objects.create(
+        organization=order.organization,
+        recipient=order.member,
+        channel="EMAIL",
+        title=f"Votre commande {order.order_number} validée",
+        body=f"Montant : {order.total_amount} {order.currency_code}",
+    )
+    try:
+        send_email_notification.delay(notif.id)
+    except:
+        pass  # Celery optionnel
+
     return order
 
 
 @transaction.atomic
 def reject_order(order, actor, reason):
     """RG-04 : le refus restaure le stock exact des lignes de la commande."""
+    from apps.notifications.models import Notification
+    from apps.notifications.tasks import send_email_notification
+
     if order.status != "EN_ATTENTE_VALIDATION":
         raise InvalidOrderStatusError(f"Impossible de refuser une commande au statut {order.status}")
 
@@ -131,5 +155,18 @@ def reject_order(order, actor, reason):
     OrderStatusHistory.objects.create(
         order=order, from_status=old_status, to_status="REFUSEE", actor=actor, comment=reason
     )
+
+    # Notification
+    notif = Notification.objects.create(
+        organization=order.organization,
+        recipient=order.member,
+        channel="EMAIL",
+        title=f"Votre commande {order.order_number} refusée",
+        body=f"Motif : {reason}",
+    )
+    try:
+        send_email_notification.delay(notif.id)
+    except:
+        pass
 
     return order

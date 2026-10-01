@@ -1,0 +1,42 @@
+{% extends "base.html" %} {% block title %}Mes livraisons{% endblock %} {% block
+content %}
+<h2 class="text-3xl font-bold mb-6">Mes livraisons</h2>
+
+{% if deliveries %}
+<div class="bg-white rounded shadow overflow-hidden">
+  <table class="w-full">
+    <thead class="bg-gray-200">
+      <tr>
+        <th class="p-4 text-left">Commande</th>
+        <th class="p-4 text-left">Membre</th>
+        <th class="p-4 text-left">Adresse</th>
+        <th class="p-4 text-center">Statut</th>
+        <th class="p-4 text-center">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for delivery in deliveries %}
+      <tr class="border-t">
+        <td class="p-4 font-bold">{{ delivery.order.order_number }}</td>
+        <td class="p-4">{{ delivery.order.member.email }}</td>
+        <td class="p-4">{{ delivery.order.delivery_address }}</td>
+        <td class="p-4 text-center">
+          <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+            >{{ delivery.get_status_display }}</span
+          >
+        </td>
+        <td class="p-4 text-center">
+          <a
+            href="{% url 'delivery_detail' delivery.id %}"
+            class="text-blue-600 hover:underline"
+            >Détail</a
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-gray-600">Aucune livraison en attente.</p>
+{% endif %} {% endblock %}

@@ -3,46 +3,41 @@
 <head>
 <meta charset="utf-8">
 <style>
-    body { font-family: Helvetica, Arial, sans-serif; color: #1F2937; font-size: 12px; }
-    .header { border-bottom: 3px solid {{ organization.color_primary }}; padding-bottom: 10px; margin-bottom: 15px; }
-    .title { color: {{ organization.color_primary }}; font-size: 20px; font-weight: bold; }
-    .total { font-weight: bold; font-size: 14px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    th, td { border: 1px solid #D1D5DB; padding: 6px; text-align: left; }
-    th { background: #F3F4F6; }
+    body { font-family: Helvetica; font-size: 11px; }
+    .header { border-bottom: 3px solid #EF233C; padding-bottom: 10px; }
+    .title { font-size: 16px; font-weight: bold; color: #EF233C; }
+    .info { margin-top: 10px; font-size: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }
+    th { background-color: #2A9D8F; color: white; }
+    .total { text-align: right; font-weight: bold; margin-top: 10px; }
 </style>
 </head>
 <body>
     <div class="header">
-        <div class="title">Bon de commande {{ order.order_number }}</div>
-        <div>{{ organization.name }}</div>
+        <div class="title">{{ organization.name }}</div>
+        <div>BON DE COMMANDE N° {{ order.order_number }}</div>
+        <div class="info">Date : {{ order.created_at|date:"d/m/Y H:i" }}</div>
     </div>
 
-    <p>Date : {{ order.created_at|date:"d/m/Y" }}</p>
-    <p>Statut : {{ order.get_status_display }}</p>
-    <p>Adresse de livraison : {{ order.delivery_address }}</p>
+    <div class="info">
+        <p><strong>Employé :</strong> {{ order.member.email }} ({{ order.member.internal_id }})</p>
+        <p><strong>Adresse :</strong> {{ order.delivery_address }}</p>
+        <p><strong>Statut :</strong> {{ order.get_status_display }}</p>
+    </div>
 
     <table>
-        <thead>
-            <tr>
-                <th>Produit</th>
-                <th>Quantité</th>
-                <th>Prix unitaire</th>
-                <th>Sous-total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in order.items.all %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.unit_price }} {{ order.currency_code }}</td>
-                <td>{% widthratio item.unit_price 1 item.quantity %} {{ order.currency_code }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+        <tr><th>Produit</th><th>Quantité</th><th>Prix unitaire</th><th>Total</th></tr>
+        {% for item in order.items.all %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td style="text-align: center;">{{ item.quantity }}</td>
+            <td style="text-align: right;">{{ item.unit_price }}</td>
+            <td style="text-align: right;">{{ item.quantity|add:0 }}</td>
+        </tr>
+        {% endfor %}
     </table>
 
-    <p class="total">Total : {{ order.total_amount }} {{ order.currency_code }}</p>
+    <div class="total">TOTAL : {{ order.total_amount }} {{ order.currency_code }}</div>
 </body>
 </html>

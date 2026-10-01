@@ -6,6 +6,7 @@ from .models import PurchaseOrderDocument
 
 
 def generate_purchase_order_pdf(order):
+    """Génère le PDF du bon de commande."""
     html_content = render_to_string("documents/purchase_order.html", {
         "order": order,
         "organization": order.organization,
@@ -13,6 +14,7 @@ def generate_purchase_order_pdf(order):
 
     buffer = BytesIO()
     result = pisa.CreatePDF(html_content, dest=buffer)
+    
     if result.err:
         raise ValueError("Erreur de génération du PDF")
 
