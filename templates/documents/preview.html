@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Bon de commande {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 print:hidden">
+        <a href="{% url 'order_detail' order.id %}" class="text-sm text-slate-600 hover:text-brand-600">
+            ← Retour à la commande
+        </a>
+        <div class="flex gap-2">
+            <button onclick="window.print()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 shadow-sm transition">
+                🖨️ Imprimer
+            </button>
+            <a href="{% url 'preview_pdf' order.id %}" target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 shadow-sm transition">
+                👁️ Voir le PDF
+            </a>
+            <a href="{% url 'download_pdf' order.id %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm transition">
+                ⬇️ Télécharger PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-8" id="bc-preview">
+
+        <!-- Header -->
+        <div class="flex items-start justify-between pb-6 border-b-2 border-brand-600">
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-900">{{ organization.name }}</h1>
+                <p class="text-sm text-slate-500 mt-0.5">Bon de commande</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-slate-500 uppercase tracking-wide">N°</p>
+                <p class="font-bold text-lg text-slate-900">{{ order.order_number }}</p>
+            </div>
+        </div>
+
+        <!-- Infos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-6 border-b border-slate-100">
+            <div>
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Employé</p>
+                <p class="font-medium text-slate-900">{{ order.member.email }}</p>
+                {% if order.member.internal_id %}
+                <p class="text-sm text-slate-500">Matricule : {{ order.member.internal_id }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Date</p>
+                <p class="font-medium text-slate-900">{{ order.created_at|date:"d/m/Y à H:i" }}</p>
+            </div>
+            <div class="md:col-span-2">
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Adresse de livraison</p>
+                <p class="font-medium text-slate-900">{{ order.delivery_address }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Statut</p>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
+                    {% if order.status == 'LIVREE' %}bg-emerald-100 text-emerald-800
+                    {% elif order.status == 'REFUSEE' %}bg-red-100 text-red-800
+                    {% elif order.status == 'VALIDEE' %}bg-blue-100 text-blue-800
+                    {% else %}bg-amber-100 text-amber-800{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <table class="w-full mt-6">
+            <thead>
+                <tr class="border-b border-slate-200">
+                    <th class="text-left py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Produit</th>
+                    <th class="text-center py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Qté</th>
+                    <th class="text-right py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">PU</th>
+                    <th class="text-right py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="border-b border-slate-100">
+                    <td class="py-3 text-sm text-slate-900">{{ item.product.name }}</td>
+                    <td class="py-3 text-sm text-center">{{ item.quantity }}</td>
+                    <td class="py-3 text-sm text-right text-slate-700">{{ item.unit_price|floatformat:0 }}</td>
+                    <td class="py-3 text-sm text-right font-medium text-slate-900">
+                        {% widthratio item.unit_price 1 item.quantity %} {{ order.currency_code }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="border-t-2 border-slate-900">
+                    <td colspan="3" class="text-right py-4 font-bold text-slate-900 uppercase">Total</td>
+                    <td class="text-right py-4 font-extrabold text-lg text-slate-900">
+                        {{ order.total_amount|floatformat:0 }} {{ order.currency_code }}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="mt-8 pt-6 border-t border-slate-200 text-xs text-slate-500 text-center">
+            Document généré le {% now "d/m/Y à H:i" %} — GroupPay
+        </div>
+    </div>
+</div>
+
+<style media="print">
+    nav, footer, .print\:hidden, button { display: none !important; }
+    body { background: white !important; }
+    main { padding: 0 !important; max-width: 100% !important; }
+    #bc-preview { box-shadow: none !important; border: none !important; padding: 20px !important; }
+    @page { margin: 15mm; }
+</style>
+{% endblock %}

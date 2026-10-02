@@ -37,12 +37,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="users")
     email = models.EmailField()
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
     internal_id = models.CharField(max_length=50, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="MEMBRE")
     is_active = models.BooleanField(default=True)
     is_blocked = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     failed_login_count = models.PositiveIntegerField(default=0)
+    theme_preference = models.CharField(
+        max_length=10,
+        choices=[("light", "Clair"), ("dark", "Sombre")],
+        default="light",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()

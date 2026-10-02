@@ -1,0 +1,93 @@
+{# Usage: {% include "components/product_card.html" with product=product %} #}
+<div class="product-card group bg-white rounded-2xl shadow-card hover:shadow-card-hover overflow-hidden border border-slate-100 flex flex-col">
+    <!-- Image / placeholder -->
+    <div class="relative aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% else %}
+            <div class="w-full h-full flex items-center justify-center">
+                <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+            </div>
+        {% endif %}
+
+        <!-- Badges top-left -->
+        <!-- Wishlist heart -->
+        <div class="absolute top-3 right-3 z-10">
+            {% if product.id in wishlist_ids or in_wishlist %}
+                {% include "catalog/_wishlist_button.html" with product=product in_wishlist=True %}
+            {% else %}
+                {% include "catalog/_wishlist_button.html" with product=product in_wishlist=False %}
+            {% endif %}
+        </div>
+
+        <div class="absolute top-3 left-3 flex flex-col gap-1.5">
+            {% if not product.is_available %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-900/80 text-white backdrop-blur-sm">
+                    Rupture
+                </span>
+            {% elif product.stock_quantity <= 5 %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500 text-white shadow-sm">
+                    Plus que {{ product.stock_quantity }}
+                </span>
+            {% endif %}
+            {% if product.discount_percent and product.discount_percent > 0 %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-sm">
+                    -{{ product.discount_percent }}%
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4 flex-1 flex flex-col">
+        {% if product.category %}
+        <p class="text-xs font-medium text-brand-600 mb-1 uppercase tracking-wide">{{ product.category.name }}</p>
+        {% endif %}
+        <h3 class="font-semibold text-slate-900 mb-1 line-clamp-2 group-hover:text-brand-700 transition">
+            {{ product.name }}
+        </h3>
+        {% if product.description %}
+        <p class="text-sm text-slate-500 line-clamp-2 mb-3">{{ product.description|truncatewords:15 }}</p>
+        {% endif %}
+
+        <div class="mt-auto pt-3 flex items-end justify-between gap-3">
+            <div>
+                {% if product.compare_at_price and product.compare_at_price > product.price %}
+                <p class="text-xs text-slate-400 line-through">{{ product.compare_at_price|floatformat:0 }} {{ organization.currency_code }}</p>
+                {% endif %}
+                <p class="text-xl font-bold text-slate-900 leading-tight">
+                    {{ product.price|floatformat:0 }}
+                    <span class="text-xs font-medium text-slate-500 ml-0.5">{{ organization.currency_code }}</span>
+                </p>
+            </div>
+
+            {% if product.is_available %}
+            <form method="post" action="{% url 'add_to_cart' product.id %}"
+                  hx-post="{% url 'add_to_cart' product.id %}"
+                  hx-target="#cart-badge-container"
+                  hx-swap="innerHTML"
+                  hx-on::after-request="htmx.trigger(document.body, 'cart-updated')">
+                {% csrf_token %}
+                <button type="submit"
+                        class="p-2.5 rounded-xl bg-brand-600 text-white hover:bg-brand-700 active:scale-95 transition shadow-sm hover:shadow-md"
+                        title="Ajouter au panier">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </button>
+            </form>
+            {% else %}
+            <button disabled
+                    class="p-2.5 rounded-xl bg-slate-200 text-slate-400 cursor-not-allowed"
+                    title="Indisponible">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                </svg>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>

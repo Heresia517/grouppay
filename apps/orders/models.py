@@ -10,6 +10,8 @@ class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="cart")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="OPEN")
+    coupon_code = models.CharField(max_length=30, blank=True)
+    coupon_discount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
 

@@ -1,48 +1,279 @@
-<!DOCTYPE html>
-<html lang="fr">
+{% load static %}
+<html lang="fr" class="{% if user.is_authenticated and user.theme_preference == 'dark' %}dark{% endif %}">
 <head>
+    <script>
+        (function() {
+            try {
+                const saved = localStorage.getItem('gp-theme');
+                const server = '{{ user.theme_preference|default:"light" }}';
+                const theme = saved || server || 'light';
+                if (theme === 'dark') document.documentElement.classList.add('dark');
+                else document.documentElement.classList.remove('dark');
+            } catch(e) {}
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}GroupPay{% endblock %}</title>
+    <title>{% block title %}{{ organization.name }} — GroupPay{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',
+                            400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',
+                            800:'#1e40af',900:'#1e3a8a',
+                        },
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
+                        'card-hover': '0 20px 25px -5px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.10)',
+                    },
+                    animation: {
+                        'pulse-badge': 'pulseBadge 0.6s ease-out',
+                    },
+                    keyframes: {
+                        pulseBadge: {
+                            '0%,100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.2)' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { background-color: #f9fafb; }
-        .org-primary { color: {{ organization.color_primary }}; }
-        .org-bg { background-color: {{ organization.color_primary }}; }
+        :root { --brand-primary: {{ organization.color_primary|default:"#2563eb" }}; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
+        .htmx-request .htmx-indicator { opacity: 1; }
+        .htmx-request.htmx-indicator { opacity: 1; }
+        .product-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .product-card:hover { transform: translateY(-4px); }
+
+        /* DARK MODE OVERRIDES */
+        html.dark { color-scheme: dark; }
+        html.dark body { background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a) !important; color: #f1f5f9 !important; }
+        html.dark .bg-white { background-color: #1e293b !important; }
+        html.dark .bg-slate-50 { background-color: #0f172a !important; }
+        html.dark .bg-slate-100 { background-color: #334155 !important; }
+        html.dark .text-slate-900 { color: #f1f5f9 !important; }
+        html.dark .text-slate-800 { color: #e2e8f0 !important; }
+        html.dark .text-slate-700 { color: #cbd5e1 !important; }
+        html.dark .text-slate-600, html.dark .text-slate-500 { color: #94a3b8 !important; }
+        html.dark .text-slate-400 { color: #64748b !important; }
+        html.dark .border-slate-100, html.dark .border-slate-200 { border-color: #334155 !important; }
+        html.dark .divide-slate-100 > * + * { border-color: #334155 !important; }
+        html.dark input, html.dark textarea, html.dark select { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        html.dark .shadow-card { box-shadow: 0 1px 3px 0 rgba(0,0,0,.4) !important; }
+        html.dark nav { background-color: rgba(15,23,42,.85) !important; border-color: #334155 !important; }
+        html.dark footer { background-color: #0f172a !important; border-color: #334155 !important; }
+        html.dark .bg-slate-50\/50 { background-color: rgba(15,23,42,.5) !important; }
+        html.dark .from-slate-50 { --tw-gradient-from: #0f172a !important; }
+        html.dark .via-white { --tw-gradient-via: #1e293b !important; }
+        html.dark .to-slate-100 { --tw-gradient-to: #0f172a !important; }
+
+        [x-cloak] { display: none !important; }
+        *:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; border-radius: 4px; }
     </style>
+
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <nav class="org-bg text-white p-4 shadow">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">{{ organization.name }}</h1>
-            <div class="flex gap-4">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'catalog' %}" class="hover:underline">Catalogue</a>
-                    <a href="{% url 'view_cart' %}" class="hover:underline">Panier</a>
-                    <a href="{% url 'my_orders' %}" class="hover:underline">Mes commandes</a>
-                    <a href="/admin/logout/" class="hover:underline">Déconnexion</a>
-                {% else %}
-                    <a href="/admin/" class="hover:underline">Connexion</a>
-                {% endif %}
-            </div>
+<body class="bg-gradient-to-br from-slate-50 via-white to-slate-100 min-h-screen flex flex-col"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    {% include "components/navbar.html" %}
+
+    {% if messages %}
+    <div class="fixed top-20 right-4 z-50 space-y-2 max-w-sm">
+        {% for message in messages %}
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-8"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             class="flex items-start gap-3 p-4 rounded-xl shadow-lg backdrop-blur-sm border
+                    {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-900
+                    {% elif message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-900
+                    {% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-900
+                    {% else %}bg-blue-50 border-blue-200 text-blue-900{% endif %}">
+            <p class="text-sm font-medium flex-1">{{ message }}</p>
+            <button @click="show = false" class="text-current opacity-60 hover:opacity-100">✕</button>
         </div>
-    </nav>
-
-    <div class="max-w-6xl mx-auto p-6">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} p-4 mb-4 rounded bg-blue-100 text-blue-800">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        {% block content %}{% endblock %}
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <footer class="border-t mt-12 p-6 text-center text-gray-600">
-        <p>&copy; 2026 GroupPay — Achat groupé sur retenue salariale</p>
-    </footer>
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <div class="htmx-indicator fixed top-0 left-0 right-0 h-1 bg-brand-600 z-50 animate-pulse"></div>
+
+    <script>
+        document.body.addEventListener('productAdded', (e) => {
+            const name = e.detail?.name || 'Produit';
+            showToast(`✓ ${name} ajouté au panier`, 'success');
+        });
+    </script>
+
+
+    <script>
+        function notifBell() {
+            return {
+                open: false,
+                count: 0,
+                items: [],
+                async init() {
+                    await this.refreshCount();
+                    // Fallback polling si WS non disponible
+                    setInterval(() => this.refreshCount(), 60000);
+                    // Écoute WebSocket temps réel
+                    document.addEventListener('gp-notification', (e) => {
+                        this.count++;
+                        if (this.open) {
+                            this.items.unshift(e.detail);
+                            if (this.items.length > 10) this.items.pop();
+                        }
+                    });
+                },
+                async refreshCount() {
+                    try {
+                        const r = await fetch('/api/notifications/unread-count/');
+                        const d = await r.json();
+                        this.count = d.count;
+                    } catch(e) {}
+                },
+                async refresh() {
+                    try {
+                        const r = await fetch('/api/notifications/list/');
+                        const d = await r.json();
+                        this.items = d.notifications;
+                    } catch(e) {}
+                },
+                async markRead(n) {
+                    if (n.is_read) return;
+                    try {
+                        await fetch(`/api/notifications/${n.id}/read/`, {
+                            method: 'POST',
+                            headers: {'X-CSRFToken': getCsrfToken()},
+                        });
+                        n.is_read = true;
+                        this.count = Math.max(0, this.count - 1);
+                    } catch(e) {}
+                },
+                async markAllRead() {
+                    try {
+                        await fetch('/api/notifications/mark-all-read/', {
+                            method: 'POST',
+                            headers: {'X-CSRFToken': getCsrfToken()},
+                        });
+                        this.items.forEach(n => n.is_read = true);
+                        this.count = 0;
+                    } catch(e) {}
+                },
+            };
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('gp-theme', isDark ? 'dark' : 'light');
+            fetch('/api/theme/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+                body: JSON.stringify({ theme: isDark ? 'dark' : 'light' }),
+            }).catch(() => {});
+        }
+
+        function getCsrfToken() {
+            const m = document.cookie.match(/csrftoken=([^;]+)/);
+            return m ? m[1] : '';
+        }
+    </script>
+
+
+    <script>
+        // ─── PWA : Service worker ───
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+            });
+        }
+
+        // ─── WebSocket : notifications temps réel ───
+        window.GroupPayWS = (function() {
+            let ws = null;
+            let reconnectDelay = 1000;
+            const listeners = [];
+
+            function connect() {
+                const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const url = `${proto}//${location.host}/ws/notifications/`;
+                try {
+                    ws = new WebSocket(url);
+                } catch(e) { return; }
+
+                ws.onopen = () => {
+                    reconnectDelay = 1000;
+                    console.log('[WS] Connected');
+                };
+                ws.onmessage = (e) => {
+                    try {
+                        const data = JSON.parse(e.data);
+                        listeners.forEach(fn => fn(data));
+                    } catch(err) {}
+                };
+                ws.onclose = () => {
+                    setTimeout(connect, reconnectDelay);
+                    reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+                };
+            }
+
+            return {
+                init() { connect(); },
+                onMessage(fn) { listeners.push(fn); },
+            };
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Init seulement si user authentifié (la cloche existe)
+            if (document.querySelector('[x-data*="notifBell"]')) {
+                window.GroupPayWS.init();
+                window.GroupPayWS.onMessage((data) => {
+                    // Mettre à jour le badge + afficher toast + recharger la liste si ouverte
+                    const badge = document.querySelector('[x-data*="notifBell"] .bg-red-500');
+                    if (badge) {
+                        const cur = parseInt(badge.textContent) || 0;
+                        badge.textContent = cur + 1 > 9 ? '9+' : (cur + 1);
+                        badge.style.display = '';
+                    }
+                    if (typeof showToast === 'function') {
+                        showToast(`🔔 ${data.title}`, 'info');
+                    }
+                    document.dispatchEvent(new CustomEvent('gp-notification', { detail: data }));
+                });
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

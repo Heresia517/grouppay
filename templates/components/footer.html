@@ -1,0 +1,25 @@
+<footer class="border-t border-slate-200 bg-white mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                     style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                    {{ organization.name|slice:":1"|upper }}
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">{{ organization.name }}</p>
+                    <p class="text-xs text-slate-500">Propulsé par GroupPay</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 text-center">
+                &copy; {% now "Y" %} GroupPay — Achat groupé sur retenue salariale
+            </p>
+            <div class="flex items-center gap-3 text-xs text-slate-500">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Système opérationnel
+                </span>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Retenue salariale — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Retenue salariale</h1>
+                <p class="text-slate-500 text-sm">Génération et suivi des exports pour la paie</p>
+            </div>
+        </div>
+        <a href="{% url 'rh_dashboard' %}" class="text-sm text-slate-600 hover:text-brand-600">← Dashboard</a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">En attente</p>
+            <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ kpis.pending_count }}</p>
+            <p class="text-xs text-slate-500 mt-0.5">{{ kpis.pending_amount|floatformat:0 }} {{ organization.currency_code }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Envoyées</p>
+            <p class="text-2xl font-extrabold text-blue-600">{{ kpis.sent_count }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Confirmées</p>
+            <p class="text-2xl font-extrabold text-emerald-600">{{ kpis.confirmed_count }}</p>
+            <p class="text-xs text-slate-500 mt-0.5">{{ kpis.confirmed_amount|floatformat:0 }} {{ organization.currency_code }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl shadow-card p-5 text-white">
+            <p class="text-xs font-semibold uppercase tracking-wide mb-1 opacity-90">Période</p>
+            <p class="text-2xl font-extrabold tabular-nums">{{ kpis.period_count }}</p>
+            <p class="text-xs opacity-90 mt-0.5">{{ kpis.period_amount|floatformat:0 }} {{ organization.currency_code }}</p>
+        </div>
+    </div>
+
+    <!-- Sélecteur de période + aperçu -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 mb-6">
+        <h2 class="font-bold text-slate-900 mb-4">Générer un nouvel export</h2>
+
+        <div class="flex flex-wrap items-end gap-3 mb-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Du</label>
+                <input type="date" id="period-start" value="{{ period_start }}"
+                       class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Au</label>
+                <input type="date" id="period-end" value="{{ period_end }}"
+                       class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            </div>
+            <button type="button" onclick="previewPeriod()" class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800">
+                🔍 Aperçu
+            </button>
+        </div>
+
+        <div id="preview-container" class="text-sm text-slate-500">
+            Cliquez sur "Aperçu" pour visualiser les transmissions de la période.
+        </div>
+
+        <form method="post" action="{% url 'generate_export' %}" id="generate-form" class="mt-4 flex justify-end gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="start" id="form-start" value="{{ period_start }}">
+            <input type="hidden" name="end" id="form-end" value="{{ period_end }}">
+            <button type="submit" id="generate-btn" class="px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm disabled:opacity-50">
+                📥 Générer le CSV pour la paie
+            </button>
+        </form>
+    </div>
+
+    <!-- Historique des batchs -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900">Historique des exports</h2>
+            <p class="text-xs text-slate-500 mt-0.5">{{ batches|length }} batch{{ batches|length|pluralize }}</p>
+        </div>
+
+        {% if batches %}
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Période</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Lignes</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Généré le</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for b in batches %}
+                <tr>
+                    <td class="p-3">{{ b.period_start|date:"d/m/Y" }} → {{ b.period_end|date:"d/m/Y" }}</td>
+                    <td class="p-3 font-semibold">{{ b.row_count }}</td>
+                    <td class="p-3 text-slate-500">{{ b.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="p-3 text-center">
+                        {% if b.file %}
+                        <a href="{% url 'download_batch' b.id %}" class="inline-block px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700">📥 CSV</a>
+                        {% else %}<span class="text-slate-400 text-xs">Pas de fichier</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-12 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <p class="text-slate-500">Aucun export généré pour le moment</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+async function previewPeriod() {
+    const start = document.getElementById('period-start').value;
+    const end = document.getElementById('period-end').value;
+    document.getElementById('form-start').value = start;
+    document.getElementById('form-end').value = end;
+
+    const container = document.getElementById('preview-container');
+    container.innerHTML = '<p class="text-slate-500">Chargement...</p>';
+
+    try {
+        const r = await fetch(`{% url 'preview_export' %}?start=${start}&end=${end}`);
+        if (!r.ok) throw new Error('Erreur');
+        container.innerHTML = await r.text();
+    } catch (e) {
+        container.innerHTML = '<p class="text-red-600">Erreur de chargement</p>';
+    }
+}
+</script>
+{% endblock %}

@@ -7,6 +7,7 @@ class Organization(models.Model):
         ("TRIAL", "Trial"),
         ("ACTIVE", "Active"),
         ("SUSPENDED", "Suspended"),
+        ("ARCHIVED", "Archivée"),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -19,7 +20,16 @@ class Organization(models.Model):
     currency_code = models.CharField(max_length=3, default="XOF")
     timezone = models.CharField(max_length=50, default="UTC")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="TRIAL")
+
+    website = models.URLField(blank=True)
+    contact_email = models.EmailField(blank=True)
+    contact_phone = models.CharField(max_length=20, blank=True)
+    max_users = models.PositiveIntegerField(default=1000)
+    storage_gb = models.PositiveIntegerField(default=10)
+
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.name

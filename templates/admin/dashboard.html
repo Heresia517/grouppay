@@ -1,0 +1,666 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard RH — {{ organization.name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard RH</h1>
+                <p class="text-sm text-slate-500">Tour de contrôle · {{ organization.name }}</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Filtres période -->
+            <div class="inline-flex items-center bg-white rounded-xl border border-slate-200 shadow-sm p-1">
+                <a href="?period=7"
+                   class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition
+                          {% if period == 7 %}bg-brand-600 text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    7 jours
+                </a>
+                <a href="?period=30"
+                   class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition
+                          {% if period == 30 %}bg-brand-600 text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    30 jours
+                </a>
+                <a href="?period=90"
+                   class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition
+                          {% if period == 90 %}bg-brand-600 text-white shadow-sm{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    90 jours
+                </a>
+            </div>
+
+            <a href="{% url 'export_dashboard_pdf' %}?period={{ period }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                PDF
+            </a>
+            <a href="{% url 'export_dashboard_excel' %}?period={{ period }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Excel
+            </a>
+            <a href="/admin/" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- KPI CARDS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+        <!-- CA -->
+        <div class="relative bg-white rounded-2xl border border-slate-100 shadow-card hover:shadow-card-hover transition p-5 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 opacity-60"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Chiffre d'affaires</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ kpis.revenue.value|floatformat:0 }}</p>
+                    <span class="text-xs font-medium text-slate-500">{{ organization.currency_code }}</span>
+                </div>
+                {% if kpis.revenue.delta is not None %}
+                <div class="flex items-center gap-1 mt-2">
+                    {% if kpis.revenue.delta >= 0 %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>
+                        +{{ kpis.revenue.delta }}%
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                        {{ kpis.revenue.delta }}%
+                    </span>
+                    {% endif %}
+                    <span class="text-xs text-slate-400">vs période préc.</span>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 mt-2">Aucune donnée précédente</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Commandes -->
+        <div class="relative bg-white rounded-2xl border border-slate-100 shadow-card hover:shadow-card-hover transition p-5 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 opacity-60"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Commandes</span>
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ kpis.orders.value }}</p>
+                {% if kpis.orders.delta is not None %}
+                <div class="flex items-center gap-1 mt-2">
+                    {% if kpis.orders.delta >= 0 %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>
+                        +{{ kpis.orders.delta }}%
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                        {{ kpis.orders.delta }}%
+                    </span>
+                    {% endif %}
+                    <span class="text-xs text-slate-400">vs période préc.</span>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 mt-2">Aucune donnée précédente</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Panier moyen -->
+        <div class="relative bg-white rounded-2xl border border-slate-100 shadow-card hover:shadow-card-hover transition p-5 overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 opacity-60"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Panier moyen</span>
+                    <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ kpis.avg_basket.value|floatformat:0 }}</p>
+                    <span class="text-xs font-medium text-slate-500">{{ organization.currency_code }}</span>
+                </div>
+                {% if kpis.avg_basket.delta is not None %}
+                <div class="flex items-center gap-1 mt-2">
+                    {% if kpis.avg_basket.delta >= 0 %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>
+                        +{{ kpis.avg_basket.delta }}%
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                        {{ kpis.avg_basket.delta }}%
+                    </span>
+                    {% endif %}
+                    <span class="text-xs text-slate-400">vs période préc.</span>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 mt-2">Aucune donnée précédente</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- En attente (spécial) -->
+        <a href="#pending-orders"
+           class="relative bg-gradient-to-br {% if kpis.pending > 0 %}from-amber-500 to-orange-600 text-white{% else %}from-slate-800 to-slate-900 text-white{% endif %} rounded-2xl shadow-card hover:shadow-card-hover transition p-5 overflow-hidden group">
+            <div class="absolute top-0 right-0 w-40 h-40 -mr-12 -mt-12 rounded-full bg-white/10"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold uppercase tracking-wider opacity-80">En attente</span>
+                    <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-2xl font-extrabold tabular-nums">{{ kpis.pending }}</p>
+                <p class="text-xs mt-2 opacity-80 flex items-center gap-1">
+                    {% if kpis.pending > 0 %}
+                    À valider maintenant
+                    <svg class="w-3 h-3 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    {% else %}
+                    Tout est traité ✓
+                    {% endif %}
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CHARTS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+        <!-- Évolution -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-card p-6">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h2 class="font-bold text-slate-900">Évolution sur {{ period }} jours</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Basculez entre commandes et chiffre d'affaires</p>
+                </div>
+                <div class="inline-flex items-center bg-slate-100 rounded-lg p-0.5">
+                    <button id="toggle-orders" type="button"
+                            class="px-3 py-1.5 text-xs font-semibold rounded-md transition bg-white text-brand-600 shadow-sm">
+                        Commandes
+                    </button>
+                    <button id="toggle-revenue" type="button"
+                            class="px-3 py-1.5 text-xs font-semibold rounded-md transition text-slate-600 hover:text-slate-900">
+                        CA
+                    </button>
+                </div>
+            </div>
+            <div class="h-56">
+                <canvas id="chartEvolution"></canvas>
+            </div>
+        </div>
+
+        <!-- Top produits -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-card p-6">
+            <div class="mb-5">
+                <h2 class="font-bold text-slate-900">Top 5 produits</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Par quantité vendue</p>
+            </div>
+            <div class="h-56">
+                <canvas id="chartTopProducts"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ALERTES STOCK -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    {% if low_stock %}
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 mb-6">
+        <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-amber-900 mb-1">{{ low_stock|length }} produit{{ low_stock|length|pluralize }} en stock critique</h3>
+                <p class="text-xs text-amber-700 mb-3">Ces produits sont sous leur seuil de réapprovisionnement</p>
+                <div class="flex flex-wrap gap-2">
+                    {% for p in low_stock|slice:":6" %}
+                    <div class="inline-flex items-center gap-2 bg-white/70 backdrop-blur px-3 py-1.5 rounded-lg border border-amber-200 text-xs">
+                        <span class="font-medium text-amber-900">{{ p.name|truncatechars:25 }}</span>
+                        <span class="px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold text-[10px]">{{ p.stock_quantity }} / {{ p.reorder_level }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if low_stock|length > 6 %}
+                    <span class="inline-flex items-center px-3 py-1.5 text-xs text-amber-700 font-medium">+{{ low_stock|length|add:"-6" }} autres</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- COMMANDES EN ATTENTE -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="pending-orders" class="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
+
+        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="font-bold text-slate-900 flex items-center gap-2">
+                    <span class="relative flex h-3 w-3">
+                        {% if kpis.pending > 0 %}
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                        {% else %}
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        {% endif %}
+                    </span>
+                    Commandes en attente de validation
+                </h2>
+                <p class="text-sm text-slate-500 mt-0.5">
+                    {% if kpis.pending > 0 %}
+                    {{ kpis.pending }} commande{{ kpis.pending|pluralize }} à traiter
+                    {% else %}
+                    Aucune commande en attente
+                    {% endif %}
+                </p>
+            </div>
+            {% if pending_orders %}
+            <div class="flex items-center gap-2 text-xs">
+                <kbd class="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-600 font-mono">Ctrl+A</kbd>
+                <span class="text-slate-500">tout sélectionner</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if pending_orders %}
+        <form method="post" action="{% url 'bulk_validate' %}" id="bulk-form">
+            {% csrf_token %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50/50 border-b border-slate-100">
+                        <tr>
+                            <th class="p-4 text-left w-10">
+                                <input type="checkbox" id="select-all"
+                                       class="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
+                            </th>
+                            <th class="p-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Commande</th>
+                            <th class="p-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Membre</th>
+                            <th class="p-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                            <th class="p-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Montant</th>
+                            <th class="p-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for order in pending_orders %}
+                        <tr class="hover:bg-slate-50/70 transition group">
+                            <td class="p-4">
+                                <input type="checkbox" name="order_ids" value="{{ order.id }}"
+                                       class="order-checkbox w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
+                            </td>
+                            <td class="p-4">
+                                <a href="{% url 'order_detail' order.id %}"
+                                   class="font-semibold text-slate-900 hover:text-brand-600 transition text-sm">
+                                    {{ order.order_number }}
+                                </a>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-sm flex-shrink-0">
+                                        {{ order.member.email|slice:":1"|upper }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-slate-900 truncate">{{ order.member.email }}</p>
+                                        {% if order.member.internal_id %}
+                                        <p class="text-xs text-slate-400 truncate">{{ order.member.internal_id }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <p class="text-sm text-slate-700">{{ order.created_at|date:"d M Y" }}</p>
+                                <p class="text-xs text-slate-400">{{ order.created_at|date:"H:i" }}</p>
+                            </td>
+                            <td class="p-4 text-right">
+                                <p class="font-bold text-slate-900 text-sm tabular-nums">{{ order.total_amount|floatformat:0 }}</p>
+                                <p class="text-xs text-slate-400">{{ organization.currency_code }}</p>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center justify-center gap-1">
+                                    <button type="button"
+                                            onclick="validateOne('{{ order.id }}')"
+                                            class="p-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:scale-105 transition-all"
+                                            title="Valider">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </button>
+                                    <a href="{% url 'order_detail' order.id %}"
+                                       class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-105 transition-all"
+                                       title="Détail">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Barre bulk (apparaît quand coche) -->
+            <div id="bulk-bar" class="hidden p-4 bg-slate-900 text-white items-center justify-between sticky bottom-0 shadow-lg">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-white/10 backdrop-blur flex items-center justify-center">
+                        <span id="selected-count" class="text-sm font-bold">0</span>
+                    </div>
+                    <p class="text-sm">commande(s) sélectionnée(s)</p>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="rejectBulk()"
+                            class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-semibold transition border border-white/10">
+                        ✕ Refuser
+                    </button>
+                    <button type="submit" name="action" value="validate_bulk"
+                            class="px-5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-sm font-bold transition shadow-sm">
+                        ✓ Valider la sélection
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="p-16 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 mb-5">
+                <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Tout est à jour ✨</h3>
+            <p class="text-sm text-slate-500 max-w-sm mx-auto">
+                Aucune commande en attente de validation. Les nouvelles commandes apparaîtront ici automatiquement.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{{ daily|json_script:"daily-data" }}
+{{ top_products_data|json_script:"top-data" }}
+
+<script>
+(function() {
+    const daily = JSON.parse(document.getElementById('daily-data').textContent);
+    const topData = JSON.parse(document.getElementById('top-data').textContent);
+
+    // Chart global defaults
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#64748b';
+
+    // Chart Évolution avec toggle
+    const evoCanvas = document.getElementById('chartEvolution');
+    let evoChart = null;
+    let currentMode = 'orders'; // 'orders' | 'revenue'
+
+    function buildEvoConfig(mode) {
+        const ctx = evoCanvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+        const isRevenue = mode === 'revenue';
+        const color = isRevenue ? '#10b981' : '#2563eb';
+        gradient.addColorStop(0, isRevenue ? 'rgba(16, 185, 129, 0.25)' : 'rgba(37, 99, 235, 0.25)');
+        gradient.addColorStop(1, isRevenue ? 'rgba(16, 185, 129, 0.0)' : 'rgba(37, 99, 235, 0.0)');
+
+        const data = daily.length
+            ? daily.map(d => isRevenue ? d.revenue : d.count)
+            : [0];
+
+        return {
+            type: 'line',
+            data: {
+                labels: daily.length ? daily.map(d => d.day) : ['Aucune donnée'],
+                datasets: [{
+                    label: isRevenue ? "Chiffre d'affaires" : 'Commandes',
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: gradient,
+                    borderWidth: 2.5,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: color,
+                    pointBorderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    pointHoverBorderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: { size: 12, weight: '600' },
+                        bodyFont: { size: 12 },
+                        displayColors: false,
+                        callbacks: {
+                            label: (ctx) => isRevenue
+                                ? `${ctx.parsed.y.toLocaleString('fr-FR')} XOF`
+                                : `${ctx.parsed.y} commande${ctx.parsed.y > 1 ? 's' : ''}`,
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: isRevenue ? 0 : 0,
+                            padding: 8,
+                            callback: (v) => isRevenue
+                                ? (v >= 1000000 ? (v/1000000).toFixed(1) + 'M' : v >= 1000 ? (v/1000).toFixed(0) + 'k' : v)
+                                : v,
+                        },
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { padding: 8, maxRotation: 0, autoSkipPadding: 20 },
+                    }
+                }
+            }
+        };
+    }
+
+    if (evoCanvas) {
+        evoChart = new Chart(evoCanvas, buildEvoConfig(currentMode));
+
+        const btnOrders = document.getElementById('toggle-orders');
+        const btnRevenue = document.getElementById('toggle-revenue');
+
+        function setActive(active, inactive) {
+            active.classList.add('bg-white', 'text-brand-600', 'shadow-sm');
+            active.classList.remove('text-slate-600');
+            inactive.classList.remove('bg-white', 'text-brand-600', 'shadow-sm');
+            inactive.classList.add('text-slate-600');
+        }
+
+        btnOrders.addEventListener('click', () => {
+            if (currentMode === 'orders') return;
+            currentMode = 'orders';
+            setActive(btnOrders, btnRevenue);
+            evoChart.destroy();
+            evoChart = new Chart(evoCanvas, buildEvoConfig(currentMode));
+        });
+
+        btnRevenue.addEventListener('click', () => {
+            if (currentMode === 'revenue') return;
+            currentMode = 'revenue';
+            setActive(btnRevenue, btnOrders);
+            evoChart.destroy();
+            evoChart = new Chart(evoCanvas, buildEvoConfig(currentMode));
+        });
+    }
+
+    // Chart Top produits
+    const topCanvas = document.getElementById('chartTopProducts');
+    if (topCanvas) {
+        const labels = topData.length ? topData.map(d => d.name) : ['Aucune donnée'];
+        const values = topData.length ? topData.map(d => d.qty) : [0];
+
+        new Chart(topCanvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barThickness: 20,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { precision: 0, padding: 8 },
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { padding: 8, font: { size: 11, weight: '500' } },
+                    }
+                }
+            }
+        });
+    }
+
+    // Bulk selection
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    const bulkBar = document.getElementById('bulk-bar');
+    const selectedCount = document.getElementById('selected-count');
+
+    function updateBar() {
+        const n = document.querySelectorAll('.order-checkbox:checked').length;
+        if (n > 0) {
+            bulkBar.classList.remove('hidden');
+            bulkBar.classList.add('flex');
+            selectedCount.textContent = n;
+        } else {
+            bulkBar.classList.add('hidden');
+            bulkBar.classList.remove('flex');
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', () => {
+            checkboxes.forEach(c => c.checked = selectAll.checked);
+            updateBar();
+        });
+    }
+    checkboxes.forEach(c => c.addEventListener('change', updateBar));
+
+    // Ctrl+A : tout sélectionner
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.target.matches('input, textarea')) {
+            e.preventDefault();
+            checkboxes.forEach(c => c.checked = true);
+            if (selectAll) selectAll.checked = true;
+            updateBar();
+        }
+    });
+})();
+
+// Valider 1 commande
+function validateOne(orderId) {
+    const form = document.getElementById('bulk-form');
+    // Décocher tout
+    form.querySelectorAll('.order-checkbox').forEach(c => c.checked = false);
+    // Cocher celle-ci
+    form.querySelector(`input[value="${orderId}"]`).checked = true;
+    // Soumettre
+    form.submit();
+}
+
+// Refuser en masse
+function rejectBulk() {
+    const reason = prompt('Motif du refus (visible par les membres) :', 'Stock indisponible');
+    if (reason === null) return;
+    if (!reason.trim()) return alert('Motif obligatoire');
+
+    const form = document.getElementById('bulk-form');
+    form.action = "{% url 'bulk_reject' %}";
+
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'reason';
+    hidden.value = reason;
+    form.appendChild(hidden);
+
+    form.submit();
+}
+</script>
+{% endblock %}

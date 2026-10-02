@@ -1,0 +1,34 @@
+{% if rows %}
+<div class="overflow-x-auto rounded-xl border border-slate-200">
+    <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="p-2 text-left text-xs font-semibold text-slate-600">Matricule</th>
+                <th class="p-2 text-left text-xs font-semibold text-slate-600">Email</th>
+                <th class="p-2 text-left text-xs font-semibold text-slate-600">Réf. commande</th>
+                <th class="p-2 text-right text-xs font-semibold text-slate-600">Montant</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            {% for r in rows %}
+            <tr>
+                <td class="p-2 font-mono text-xs">{{ r.internal_id }}</td>
+                <td class="p-2 text-xs">{{ r.email }}</td>
+                <td class="p-2 text-xs text-slate-500">{{ r.order_number }}</td>
+                <td class="p-2 text-right font-semibold text-xs">{{ r.amount|floatformat:0 }} {{ r.currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot class="bg-slate-900 text-white">
+            <tr>
+                <td colspan="3" class="p-2 text-right font-bold text-sm">TOTAL ({{ count }} ligne{{ count|pluralize }})</td>
+                <td class="p-2 text-right font-extrabold">{{ total|floatformat:0 }} {{ currency }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% else %}
+<div class="p-8 text-center bg-amber-50 border border-amber-200 rounded-xl">
+    <p class="text-sm text-amber-800">Aucune transmission en attente sur cette période.</p>
+</div>
+{% endif %}

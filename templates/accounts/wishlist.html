@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Mes favoris — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900">Mes favoris ❤️</h1>
+        <p class="text-slate-500 mt-1">Vos produits sauvegardés · {{ items|length }} produit{{ items|length|pluralize }}</p>
+    </div>
+
+    {% if items %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {% for item in items %}
+            {% include "components/product_card.html" with product=item.product in_wishlist=True %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
+        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-50 mb-5">
+            <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucun favori</h3>
+        <p class="text-slate-500 mb-6 max-w-sm mx-auto">Cliquez sur le cœur d'un produit pour le sauvegarder ici.</p>
+        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm transition">Explorer le catalogue</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

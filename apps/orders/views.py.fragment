@@ -1,0 +1,48 @@
+# ─── À AJOUTER dans apps/orders/views.py ───
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+
+from apps.catalog.models import Product
+from .models import Cart, CartItem
+
+
+def _render_cart_badge(request):
+    """Retourne juste le badge panier (pour HTMX swap)."""
+    cart = Cart.objects.filter(user=request.user, status="OPEN").first()
+    count = cart.items.count() if cart else 0
+    return render(request, "orders/cart_badge.html", {"count": count})
+
+
+@login_required
+@require_POST
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id, organization=request.user.organization)
+
+    cart, _ = Cart.objects.get_or_create(user=request.user, status="OPEN")
+    item, created = CartItem.objects.get_or_create(
+        cart=cart, product=product, defaults={"quantity": 1},
+    )
+    if not created:
+        item.quantity += 1
+        item.save(update_fields=["quantity"])
+
+    # Réponse HTMX : renvoie juste le badge
+    if request.headers.get("HX-Request"):
+        return _render_cart_badge(request)
+
+    # Fallback (navigateur sans JS)
+    return redirect("view_cart")
+
+
+@login_required
+def remove_from_cart(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    item.delete()
+
+    if request.headers.get("HX-Request"):
+        return _render_cart_badge(request)
+
+    return redirect("view_cart")

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Importer des membres — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Importer des membres</h1>
+                <p class="text-slate-500 text-sm">Ajoutez plusieurs employés en une seule fois</p>
+            </div>
+        </div>
+        <a href="{% url 'import_members_template' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50">
+            ⬇ Télécharger le modèle
+        </a>
+    </div>
+
+    {% if error %}
+    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 text-sm">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+    <div class="mb-6 grid grid-cols-3 gap-4">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+            <p class="text-3xl font-extrabold text-emerald-700">{{ result.created|length }}</p>
+            <p class="text-sm text-emerald-700 font-semibold">Créés</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+            <p class="text-3xl font-extrabold text-amber-700">{{ result.skipped|length }}</p>
+            <p class="text-sm text-amber-700 font-semibold">Ignorés (existent)</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+            <p class="text-3xl font-extrabold text-red-700">{{ result.errors|length }}</p>
+            <p class="text-sm text-red-700 font-semibold">Erreurs</p>
+        </div>
+    </div>
+
+    {% if result.created %}
+    <div class="mb-6 bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="font-bold text-slate-900">🔑 Identifiants créés</h2>
+            <p class="text-xs text-slate-500">⚠️ Notez ces mots de passe — ils ne seront plus visibles</p>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Email</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Mot de passe</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Matricule</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for u in result.created %}
+                <tr>
+                    <td class="p-3 font-mono text-xs">{{ u.email }}</td>
+                    <td class="p-3 font-mono text-xs font-bold text-brand-700">{{ u.password }}</td>
+                    <td class="p-3 text-xs text-slate-500">{{ u.internal_id|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if result.errors %}
+    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200">
+        <p class="font-semibold text-red-900 mb-2">Erreurs :</p>
+        <ul class="text-sm text-red-800 space-y-1 list-disc list-inside">
+            {% for e in result.errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+        {% csrf_token %}
+        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:border-brand-400 transition">
+            <svg class="w-12 h-12 mx-auto text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Sélectionner un fichier CSV</label>
+            <input type="file" name="csv_file" accept=".csv" required
+                   class="block mx-auto text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-600 file:text-white file:font-semibold hover:file:bg-brand-700">
+            <p class="text-xs text-slate-500 mt-3">Format : email, first_name, last_name, internal_id, role</p>
+        </div>
+        <div class="flex justify-end mt-6">
+            <button type="submit" class="px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm">
+                Importer les membres
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

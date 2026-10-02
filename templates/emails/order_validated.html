@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Inter,system-ui,sans-serif;background:#f8fafc;margin:0;padding:32px 16px">
+<table width="100%"><tr><td align="center">
+<table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+<tr><td style="background:linear-gradient(135deg,{{ color_primary|default:'#2563eb' }},{{ color_secondary|default:'#1e40af' }});padding:32px;color:#fff">
+<h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Achat groupé</p>
+</td></tr>
+<tr><td style="padding:32px">
+<h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">✓ Commande validée</h2>
+<p style="margin:0 0 24px;color:#64748b;font-size:14px">Bonjour, votre commande est confirmée.</p>
+<div style="background:#f1f5f9;border-radius:12px;padding:16px;margin-bottom:24px">
+<p style="margin:0 0 8px;font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Numéro</p>
+<p style="margin:0;font-size:18px;font-weight:700;color:#0f172a">{{ order_number }}</p>
+</div>
+<table width="100%" style="border-collapse:collapse;margin-bottom:24px">
+<tr><td style="padding:8px 0;color:#64748b;font-size:14px">Montant</td>
+<td style="padding:8px 0;text-align:right;font-weight:700;color:#0f172a">{{ total_amount }} {{ currency }}</td></tr>
+<tr><td style="padding:8px 0;color:#64748b;font-size:14px">Retenue salariale</td>
+<td style="padding:8px 0;text-align:right;color:#10b981;font-weight:600">Automatique</td></tr>
+</table>
+<a href="{{ order_url }}" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Voir ma commande →</a>
+</td></tr>
+<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">
+© {% now "Y" %} GroupPay — Ne pas répondre à cet email
+</td></tr>
+</table>
+</td></tr></table>
+</body></html>

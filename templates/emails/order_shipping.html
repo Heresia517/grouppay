@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Inter,system-ui,sans-serif;background:#f8fafc;margin:0;padding:32px 16px">
+<table width="100%"><tr><td align="center">
+<table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+<tr><td style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:32px;color:#fff">
+<h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Achat groupé</p>
+</td></tr>
+<tr><td style="padding:32px">
+<h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">🚚 En cours de livraison</h2>
+<p style="margin:0 0 24px;color:#64748b;font-size:14px">Votre commande est en route vers vous.</p>
+<div style="background:#f1f5f9;border-radius:12px;padding:16px;margin-bottom:24px">
+<p style="margin:0 0 8px;font-size:12px;color:#64748b;text-transform:uppercase">Numéro</p>
+<p style="margin:0;font-size:18px;font-weight:700;color:#0f172a">{{ order_number }}</p>
+</div>
+<a href="{{ order_url }}" style="display:inline-block;background:#8b5cf6;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Suivre la livraison →</a>
+</td></tr>
+<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">© {% now "Y" %} GroupPay</td></tr>
+</table>
+</td></tr></table>
+</body></html>

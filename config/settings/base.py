@@ -22,6 +22,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -29,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
+    "drf_spectacular",
     "rest_framework_simplejwt",
     "apps.core",
     "apps.organizations",
@@ -39,6 +41,8 @@ INSTALLED_APPS = [
     "apps.documents",
     "apps.deliveries",
     "apps.notifications",
+    "channels",
+    "apps.audit",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -49,6 +53,7 @@ PASSWORD_HASHERS = [
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
@@ -91,8 +96,22 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,                    # 30s avant "database is locked"
+            'init_command': '''
+                PRAGMA journal_mode=WAL;
+                PRAGMA synchronous=NORMAL;
+                PRAGMA busy_timeout=30000;
+                PRAGMA foreign_keys=ON;
+            ''',
+        },
     }
 }
+
+# Sessions en cache (évite les écritures SQLite à chaque requête)
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_CACHE_ALIAS = "default"
+
 
 
 # Password validation
@@ -130,6 +149,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
@@ -151,3 +171,88 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # E003 : Django veut USERNAME_FIELD unique globalement.
 # Ici l'unicité est garantie par organization+email (contrainte composite) — volontaire, pas un oubli.
 SILENCED_SYSTEM_CHECKS = ["auth.E003"]
+
+
+# --- Celery Beat Schedule ---
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-expired-carts": {
+        "task": "orders.cleanup_expired_carts",
+        "schedule": crontab(hour=3, minute=0),
+    },
+    "check-low-stock-alerts": {
+        "task": "catalog.check_low_stock_alerts",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "cleanup-expired-deductions": {
+        "task": "deductions.cleanup_expired_transmissions",
+        "schedule": crontab(hour=4, minute=0),
+    },
+}
+
+
+# --- OpenAPI / Swagger ---
+SPECTACULAR_SETTINGS = {
+    "TITLE": "GroupPay API",
+    "DESCRIPTION": "Plateforme d'achat groupé sur retenue salariale",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+
+# ============================================================
+# Django Channels (WebSocket notifications)
+# ============================================================
+ASGI_APPLICATION = "config.asgi.application"
+
+# InMemory pour dev — remplacer par channels_redis en prod
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
+# Daphne comme serveur ASGI par défaut (dev)
+if "daphne" in INSTALLED_APPS:
+    try:
+        # 'daphne' doit être le 1er de INSTALLED_APPS pour prendre le runserver
+        INSTALLED_APPS.remove("daphne")
+        INSTALLED_APPS.insert(0, "daphne")
+    except ValueError:
+        pass
+
+
+# ============================================================
+# Cache (LocMem pour dev — Redis en prod)
+# ============================================================
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "grouppay-default",
+    }
+}
+
+
+# ============================================================
+# EMAIL & SITE
+# ============================================================
+SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="GroupPay <noreply@grouppay.app>")
+
+# Dev = console, prod = SMTP
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = env("EMAIL_HOST", default="smtp.sendgrid.net")
+    EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="apikey")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+
+
+# ============================================================
+# SMS (Africa's Talking) — optionnel
+# ============================================================
+AFRICASTALKING_USERNAME = env("AFRICASTALKING_USERNAME", default="")
+AFRICASTALKING_API_KEY = env("AFRICASTALKING_API_KEY", default="")

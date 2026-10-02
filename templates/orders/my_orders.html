@@ -1,48 +1,98 @@
 {% extends "base.html" %}
 
-{% block title %}Mes commandes - {{ organization.name }}{% endblock %}
+{% block title %}Mes commandes — {{ organization.name }}{% endblock %}
 
 {% block content %}
-<h2 class="text-3xl font-bold mb-6">Mes commandes</h2>
+<div class="max-w-6xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Mes commandes</h1>
+            <p class="text-slate-500 mt-1">Suivez l'état de vos achats</p>
+        </div>
+        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Nouvelle commande
+        </a>
+    </div>
 
-{% if orders %}
-<div class="bg-white rounded shadow overflow-hidden">
-    <table class="w-full">
-        <thead class="bg-gray-200">
-            <tr>
-                <th class="p-4 text-left">N° Commande</th>
-                <th class="p-4 text-left">Date</th>
-                <th class="p-4 text-center">Statut</th>
-                <th class="p-4 text-right">Total</th>
-                <th class="p-4 text-center">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr class="border-t">
-                <td class="p-4 font-bold">{{ order.order_number }}</td>
-                <td class="p-4">{{ order.created_at|date:"d/m/Y" }}</td>
-                <td class="p-4 text-center">
-                    <span class="px-3 py-1 rounded text-sm 
-                        {% if order.status == 'VALIDEE' %}bg-green-100 text-green-800
-                        {% elif order.status == 'REFUSEE' %}bg-red-100 text-red-800
-                        {% elif order.status == 'LIVREE' %}bg-blue-100 text-blue-800
-                        {% else %}bg-yellow-100 text-yellow-800
-                        {% endif %}">
-                        {{ order.get_status_display }}
-                    </span>
-                </td>
-                <td class="p-4 text-right font-bold">{{ order.total_amount }} {{ order.currency_code }}</td>
-                <td class="p-4 text-center">
-                    <a href="{% url 'order_detail' order.id %}" class="text-blue-600 hover:underline">Détail</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if orders %}
+    <div class="space-y-3">
+        {% for order in orders %}
+        <a href="{% url 'order_detail' order.id %}"
+           class="block bg-white rounded-2xl shadow-card border border-slate-100 p-5 hover:shadow-card-hover hover:border-brand-200 transition group">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <!-- Icon -->
+                <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center
+                            {% if order.status == 'LIVREE' %}bg-emerald-100 text-emerald-600
+                            {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-100 text-red-600
+                            {% elif order.status == 'VALIDEE' %}bg-blue-100 text-blue-600
+                            {% else %}bg-amber-100 text-amber-600{% endif %}">
+                    {% if order.status == 'LIVREE' %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    {% elif order.status == 'REFUSEE' %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    {% else %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    {% endif %}
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-bold text-slate-900 group-hover:text-brand-700 transition">
+                            {{ order.order_number }}
+                        </h3>
+                        <!-- Status badge -->
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
+                            {% if order.status == 'LIVREE' %}bg-emerald-100 text-emerald-800
+                            {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-100 text-red-800
+                            {% elif order.status == 'VALIDEE' %}bg-blue-100 text-blue-800
+                            {% elif order.status == 'EN_LIVRAISON' %}bg-purple-100 text-purple-800
+                            {% else %}bg-amber-100 text-amber-800{% endif %}">
+                            <span class="w-1.5 h-1.5 rounded-full
+                                {% if order.status == 'LIVREE' %}bg-emerald-500
+                                {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-500
+                                {% elif order.status == 'VALIDEE' %}bg-blue-500
+                                {% elif order.status == 'EN_LIVRAISON' %}bg-purple-500
+                                {% else %}bg-amber-500{% endif %}"></span>
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-1 flex items-center gap-3">
+                        <span>{{ order.created_at|date:"d/m/Y à H:i" }}</span>
+                        <span>·</span>
+                        <span>{{ order.items.count }} article{{ order.items.count|pluralize }}</span>
+                    </p>
+                </div>
+
+                <!-- Total + arrow -->
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-lg font-extrabold text-slate-900">{{ order.total_amount|floatformat:0 }}</p>
+                        <p class="text-xs text-slate-500">{{ order.currency_code }}</p>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
+        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-100 mb-5">
+            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucune commande</h3>
+        <p class="text-slate-500 mb-6 max-w-sm mx-auto">Vous n'avez pas encore passé de commande.</p>
+        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm transition">
+            Explorer le catalogue
+        </a>
+    </div>
+    {% endif %}
 </div>
-
-{% else %}
-<p class="text-gray-600">Vous n'avez encore aucune commande. <a href="{% url 'catalog' %}" class="text-blue-600 underline">Explorez notre catalogue</a></p>
-{% endif %}
 {% endblock %}

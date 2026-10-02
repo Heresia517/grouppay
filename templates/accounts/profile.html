@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Mon profil — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 sm:p-8 mb-6">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <div class="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-3xl font-extrabold shadow-lg flex-shrink-0"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                {{ user.email|slice:":1"|upper }}
+            </div>
+            <div class="flex-1 text-center sm:text-left">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ user.email }}</h1>
+                <div class="flex flex-wrap items-center gap-2 justify-center sm:justify-start mt-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">{{ user.get_role_display }}</span>
+                    {% if user.internal_id %}<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">{{ user.internal_id }}</span>{% endif %}
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">{{ organization.name }}</span>
+                </div>
+                <p class="text-sm text-slate-500 mt-2">Membre depuis le {{ user.created_at|date:"d F Y" }}</p>
+            </div>
+            <a href="/admin/password_change/" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition">Changer mot de passe</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Commandes</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.total_orders }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Total dépensé</p>
+            <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ stats.total_spent|floatformat:0 }}</p>
+            <p class="text-xs text-slate-500">{{ organization.currency_code }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Livrées</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.delivered }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-card p-5 text-white">
+            <p class="text-xs font-semibold uppercase tracking-wide mb-1 opacity-90">Économies</p>
+            <p class="text-2xl font-extrabold tabular-nums">{{ stats.savings|floatformat:0 }}</p>
+            <p class="text-xs opacity-90">{{ organization.currency_code }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="font-bold text-slate-900">Commandes récentes</h2>
+            <a href="{% url 'my_orders' %}" class="text-sm font-medium text-brand-600 hover:text-brand-700">Tout voir →</a>
+        </div>
+        {% if recent_orders %}
+        <div class="divide-y divide-slate-100">
+            {% for order in recent_orders %}
+            <a href="{% url 'order_detail' order.id %}" class="flex items-center gap-4 p-4 hover:bg-slate-50 transition">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-slate-900">{{ order.order_number }}</p>
+                    <p class="text-xs text-slate-500">{{ order.created_at|date:"d/m/Y H:i" }} — {{ order.get_status_display }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-slate-900 tabular-nums">{{ order.total_amount|floatformat:0 }}</p>
+                    <p class="text-xs text-slate-500">{{ order.currency_code }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <p class="text-slate-500">Aucune commande pour le moment</p>
+            <a href="{% url 'catalog' %}" class="inline-block mt-4 px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold">Explorer le catalogue</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,49 +1,155 @@
 {% extends "base.html" %}
 
-{% block title %}Commande {{ order.order_number }} - {{ organization.name }}{% endblock %}
+{% block title %}Commande {{ order.order_number }} — {{ organization.name }}{% endblock %}
 
 {% block content %}
-<h2 class="text-3xl font-bold mb-6">Commande {{ order.order_number }}</h2>
+<div class="max-w-5xl mx-auto">
 
-<div class="grid grid-cols-2 gap-6 mb-6">
-    <div class="bg-white rounded shadow p-6">
-        <h3 class="font-bold mb-4">Informations</h3>
-        <p><strong>Statut :</strong> <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded">{{ order.get_status_display }}</span></p>
-        <p><strong>Date :</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
-        <p><strong>Adresse :</strong> {{ order.delivery_address }}</p>
-        <p><strong>Total :</strong> {{ order.total_amount }} {{ organization.currency_code }}</p>
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+        <a href="{% url 'my_orders' %}" class="hover:text-brand-600 transition">Mes commandes</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-900 font-medium">{{ order.order_number }}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Commande {{ order.order_number }}</h1>
+            <p class="text-slate-500 mt-1">Passée le {{ order.created_at|date:"d/m/Y à H:i" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
+            <a href="{% url 'preview_invoice_html' order.id %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 shadow-sm transition">
+                🧾 Facture
+            </a>
+            <a href="{% url 'preview_order_html' order.id %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Aperçu
+            </a>
+            <a href="{% url 'preview_pdf' order.id %}" target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                PDF
+            </a>
+            <a href="{% url 'download_pdf' order.id %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Télécharger
+            </a>
+        </div>
+        </div>
     </div>
 
-    <div class="bg-white rounded shadow p-6">
-        <h3 class="font-bold mb-4">Historique</h3>
-        {% for h in history %}
-        <p class="text-sm text-gray-600">{{ h.created_at|date:"d/m/Y H:i" }} → <strong>{{ h.to_status }}</strong></p>
-        {% endfor %}
-    </div>
-</div>
+    <!-- Info cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Statut</p>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold
+                {% if order.status == 'LIVREE' %}bg-emerald-100 text-emerald-800
+                {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-100 text-red-800
+                {% elif order.status == 'VALIDEE' %}bg-blue-100 text-blue-800
+                {% elif order.status == 'EN_LIVRAISON' %}bg-purple-100 text-purple-800
+                {% else %}bg-amber-100 text-amber-800{% endif %}">
+                <span class="w-2 h-2 rounded-full
+                    {% if order.status == 'LIVREE' %}bg-emerald-500
+                    {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-500
+                    {% elif order.status == 'VALIDEE' %}bg-blue-500
+                    {% elif order.status == 'EN_LIVRAISON' %}bg-purple-500
+                    {% else %}bg-amber-500{% endif %}"></span>
+                {{ order.get_status_display }}
+            </span>
+        </div>
 
-<div class="bg-white rounded shadow overflow-hidden">
-    <table class="w-full">
-        <thead class="bg-gray-200">
-            <tr>
-                <th class="p-4 text-left">Produit</th>
-                <th class="p-4 text-center">Quantité</th>
-                <th class="p-4 text-right">Prix unitaire</th>
-            </tr>
-        </thead>
-        <tbody>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 md:col-span-2">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Livraison</p>
+            <p class="text-sm text-slate-900 font-medium">{{ order.delivery_address }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Items -->
+        <div class="lg:col-span-2 space-y-3">
+            <h2 class="font-bold text-slate-900 text-lg mb-2">Articles commandés</h2>
             {% for item in items %}
-            <tr class="border-t">
-                <td class="p-4">{{ item.product.name }}</td>
-                <td class="p-4 text-center">{{ item.quantity }}</td>
-                <td class="p-4 text-right">{{ item.unit_price }} {{ organization.currency_code }}</td>
-            </tr>
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-slate-900 truncate">{{ item.product.name }}</h3>
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        {{ item.unit_price|floatformat:0 }} {{ organization.currency_code }} × {{ item.quantity }}
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-slate-900">
+                        {% widthratio item.unit_price 1 item.quantity %} {{ organization.currency_code }}
+                    </p>
+                </div>
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
-</div>
 
-<a href="{% url 'my_orders' %}" class="mt-6 inline-block bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
-    Retour aux commandes
-</a>
+            <!-- Total -->
+            <div class="bg-slate-900 rounded-2xl p-5 flex justify-between items-center text-white shadow-md">
+                <span class="font-semibold">Total</span>
+                <span class="text-2xl font-extrabold">
+                    {{ order.total_amount|floatformat:0 }}
+                    <span class="text-sm font-medium text-slate-300">{{ organization.currency_code }}</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="lg:col-span-1">
+            <h2 class="font-bold text-slate-900 text-lg mb-3">Historique</h2>
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+                <ol class="relative border-l-2 border-slate-200 ml-2">
+                    {% for h in history %}
+                    <li class="mb-6 ml-6 last:mb-0">
+                        <span class="absolute -left-[7px] flex items-center justify-center w-4 h-4 rounded-full ring-4 ring-white
+                            {% if forloop.first %}bg-brand-600
+                            {% else %}bg-slate-300{% endif %}">
+                        </span>
+                        <div class="flex flex-col">
+                            <time class="text-xs text-slate-500 mb-0.5">
+                                {{ h.created_at|date:"d/m/Y à H:i" }}
+                            </time>
+                            <span class="text-sm font-semibold text-slate-900">
+                                {% if h.to_status == 'EN_ATTENTE_VALIDATION' %}Commande passée
+                                {% elif h.to_status == 'VALIDEE' %}Validée
+                                {% elif h.to_status == 'REFUSEE' %}Refusée
+                                {% elif h.to_status == 'EN_LIVRAISON' %}En cours de livraison
+                                {% elif h.to_status == 'LIVREE' %}Livrée
+                                {% else %}{{ h.to_status }}{% endif %}
+                            </span>
+                            {% if h.comment %}
+                            <p class="text-xs text-slate-500 mt-1 italic">{{ h.comment }}</p>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="text-sm text-slate-500">Aucun historique</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

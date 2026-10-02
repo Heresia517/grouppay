@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #0f172a; }
+    h1 { color: #1e3a8a; font-size: 20pt; margin: 0 0 5pt 0; }
+    h2 { color: #1e3a8a; font-size: 13pt; margin: 18pt 0 8pt 0; border-bottom: 2pt solid #2563eb; padding-bottom: 4pt; }
+    .subtitle { color: #64748b; font-size: 9pt; margin-bottom: 15pt; }
+    .kpi-table { width: 100%; border-collapse: separate; border-spacing: 6pt 0; margin-bottom: 15pt; }
+    .kpi-table td { padding: 10pt; border: 1pt solid #e2e8f0; width: 25%; }
+    .kpi-label { font-size: 8pt; color: #64748b; text-transform: uppercase; letter-spacing: 0.5pt; }
+    .kpi-value { font-size: 15pt; font-weight: bold; color: #0f172a; margin-top: 4pt; }
+    table.data { width: 100%; border-collapse: collapse; }
+    table.data th { background: #2563eb; color: white; padding: 6pt; text-align: left; font-size: 8pt; text-transform: uppercase; }
+    table.data td { padding: 5pt; border-bottom: 0.5pt solid #e2e8f0; font-size: 9pt; }
+    .low-stock { background: #fef3c7; padding: 8pt; border: 1pt solid #f59e0b; margin-top: 10pt; }
+    .footer { margin-top: 30pt; text-align: center; font-size: 8pt; color: #94a3b8; }
+</style>
+</head>
+<body>
+    <h1>{{ organization.name }} — Dashboard RH</h1>
+    <p class="subtitle">Periode : {{ period_start }} - {{ period_end }} ({{ period }} jours) · Genere le {{ generated_at }}</p>
+
+    <h2>Indicateurs cles</h2>
+    <table class="kpi-table">
+        <tr>
+            <td>
+                <div class="kpi-label">Chiffre d'affaires</div>
+                <div class="kpi-value">{{ kpis.revenue.value|floatformat:0 }} {{ organization.currency_code }}</div>
+            </td>
+            <td>
+                <div class="kpi-label">Commandes</div>
+                <div class="kpi-value">{{ kpis.orders.value }}</div>
+            </td>
+            <td>
+                <div class="kpi-label">Panier moyen</div>
+                <div class="kpi-value">{{ kpis.avg_basket.value|floatformat:0 }} {{ organization.currency_code }}</div>
+            </td>
+            <td>
+                <div class="kpi-label">En attente</div>
+                <div class="kpi-value">{{ kpis.pending }}</div>
+            </td>
+        </tr>
+    </table>
+
+    {% if low_stock %}
+    <div class="low-stock">
+        <strong>Attention :</strong> {{ low_stock|length }} produit(s) en stock critique :
+        {% for p in low_stock|slice:":8" %}{{ p.name }} ({{ p.stock_quantity }}/{{ p.reorder_level }}){% if not forloop.last %} · {% endif %}{% endfor %}
+    </div>
+    {% endif %}
+
+    <h2>Commandes de la periode ({{ orders|length }})</h2>
+    <table class="data">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Date</th>
+                <th>Membre</th>
+                <th>Statut</th>
+                <th style="text-align:right">Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td>{{ o.order_number }}</td>
+                <td>{{ o.created_at|date:"d/m/Y" }}</td>
+                <td>{{ o.member.email }}</td>
+                <td>{{ o.get_status_display }}</td>
+                <td style="text-align:right">{{ o.total_amount|floatformat:0 }} {{ o.currency_code }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:15pt;">Aucune commande sur cette periode</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Top 5 produits</h2>
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th style="text-align:right">Quantite vendue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in top_products %}
+            <tr>
+                <td>{{ p.name }}</td>
+                <td style="text-align:right">{{ p.qty }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" style="text-align:center; color:#94a3b8; padding:15pt;">Aucune donnee</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">Document genere par GroupPay · {{ organization.name }}</div>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+    @page { size: A4; margin: 15mm; }
+    body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #0f172a; }
+    h1 { color: #1e3a8a; font-size: 20pt; margin: 0; }
+    .subtitle { color: #64748b; font-size: 9pt; }
+    .header { border-bottom: 2pt solid #2563eb; padding-bottom: 8pt; margin-bottom: 12pt; }
+    .invoice-num { text-align: right; }
+    .invoice-num .label { font-size: 8pt; color: #64748b; text-transform: uppercase; }
+    .invoice-num .value { font-size: 13pt; font-weight: bold; color: #0f172a; }
+    .info-block { margin-bottom: 15pt; }
+    .info-block td { vertical-align: top; padding-right: 20pt; }
+    .info-label { font-size: 8pt; color: #64748b; text-transform: uppercase; margin-bottom: 3pt; }
+    .info-value { font-size: 10pt; color: #0f172a; }
+    table.items { width: 100%; border-collapse: collapse; margin-top: 15pt; }
+    table.items th { background: #2563eb; color: white; padding: 6pt; text-align: left; font-size: 8pt; text-transform: uppercase; }
+    table.items td { padding: 6pt; border-bottom: 0.5pt solid #e2e8f0; font-size: 9pt; }
+    table.items tfoot td { border-top: 1.5pt solid #0f172a; padding-top: 10pt; font-weight: bold; }
+    .totals { text-align: right; font-size: 14pt; font-weight: bold; color: #0f172a; }
+    .footer { margin-top: 30pt; padding-top: 10pt; border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color: #64748b; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <table width="100%">
+            <tr>
+                <td>
+                    <h1>{{ organization.name }}</h1>
+                    <div class="subtitle">{{ organization.country_code }} · {{ organization.currency_code }}</div>
+                </td>
+                <td class="invoice-num">
+                    <div class="label">Facture N°</div>
+                    <div class="value">{{ invoice_number }}</div>
+                    <div class="subtitle">Emise le {{ generated_at|date:"d/m/Y" }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="info-block" width="100%">
+        <tr>
+            <td>
+                <div class="info-label">Client</div>
+                <div class="info-value">{{ member.email }}</div>
+                {% if member.internal_id %}<div class="subtitle">Matricule : {{ member.internal_id }}</div>{% endif %}
+                {% if member.first_name or member.last_name %}<div class="subtitle">{{ member.first_name }} {{ member.last_name }}</div>{% endif %}
+            </td>
+            <td>
+                <div class="info-label">Commande</div>
+                <div class="info-value">{{ order.order_number }}</div>
+                <div class="subtitle">Passee le {{ order.created_at|date:"d/m/Y" }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div class="info-label">Adresse de livraison</div>
+                <div class="info-value">{{ order.delivery_address }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th>Designation</th>
+                <th style="text-align:center">Qte</th>
+                <th style="text-align:right">P.U. TTC</th>
+                <th style="text-align:right">Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td style="text-align:center">{{ item.quantity }}</td>
+                <td style="text-align:right">{{ item.unit_price|floatformat:0 }}</td>
+                <td style="text-align:right">{% widthratio item.unit_price 1 item.quantity %} {{ order.currency_code }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align:right">TOTAL TTC</td>
+                <td class="totals">{{ order.total_amount|floatformat:0 }} {{ order.currency_code }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="footer">
+        <strong>Mode de reglement :</strong> Retenue salariale automatique.<br>
+        <strong>Mention legale :</strong> Facture emise par GroupPay pour {{ organization.name }}. Pas de TVA applicable.<br>
+        <div style="text-align:center; margin-top:10pt; color:#94a3b8;">Document genere par GroupPay</div>
+    </div>
+</body>
+</html>
