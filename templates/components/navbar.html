@@ -85,6 +85,13 @@
                     </a>
                     {% endif %}
 
+                    <!-- Stock link (RH/Fournisseur) -->
+                    {% if user.role == 'ADMIN' or user.role == 'GESTIONNAIRE' or user.role == 'FOURNISSEUR' %}
+                    <a href="{% url 'stock_dashboard' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Stock">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    </a>
+                    {% endif %}
+
                     <!-- Notifications bell -->
                     <div class="relative" x-data="notifBell()">
                         <button @click="open = !open; if (open) refresh()"

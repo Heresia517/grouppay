@@ -191,3 +191,62 @@ class Review(TenantModel):
 
     def __str__(self):
         return f"{self.product.name} — {self.rating}★ by {self.member.email}"
+
+
+
+class StockMovement(TenantModel):
+    """Historique de tous les mouvements de stock (traçabilité)."""
+    TYPE_CHOICES = [
+        ("IN", "Entrée"),
+        ("OUT", "Sortie (commande)"),
+        ("ADJUST", "Ajustement manuel"),
+        ("RESTORE", "Restauration (refus)"),
+        ("RETURN", "Retour client"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="stock_movements")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="movements")
+    movement_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    quantity = models.IntegerField(help_text="Positif = entrée, négatif = sortie")
+    stock_before = models.PositiveIntegerField()
+    stock_after = models.PositiveIntegerField()
+    reason = models.CharField(max_length=200, blank=True)
+    order = models.ForeignKey(
+        "orders.Order", on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="stock_movements",
+    )
+    actor = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="stock_movements",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["product", "-created_at"]),
+            models.Index(fields=["organization", "-created_at"]),
+        ]
+
+    def __str__(self):
+        sign = "+" if self.quantity > 0 else ""
+        return f"{self.product.name} : {sign}{self.quantity} ({self.movement_type})"
+
+
+class StockAlert(TenantModel):
+    """Alerte seuil stock critique (créée une fois par franchissement)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="stock_alerts")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="alerts")
+    stock_at_alert = models.PositiveIntegerField()
+    reorder_level = models.PositiveIntegerField()
+    is_resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"ALERTE {self.product.name} ({self.stock_at_alert}/{self.reorder_level})"

@@ -39,3 +39,32 @@ class ReviewAdmin(admin.ModelAdmin):
     def unpublish(self, request, queryset):
         queryset.update(is_published=False)
     unpublish.short_description = "Dépublier les avis"
+
+
+
+from .models import StockMovement, StockAlert
+
+
+@admin.register(StockMovement)
+class StockMovementAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "product", "movement_type", "quantity",
+                    "stock_before", "stock_after", "actor")
+    list_filter = ("movement_type", "organization")
+    search_fields = ("product__name", "reason")
+    date_hierarchy = "created_at"
+    readonly_fields = [f.name for f in StockMovement._meta.fields]
+
+    def has_add_permission(self, request): return False
+    def has_change_permission(self, request, obj=None): return False
+
+
+@admin.register(StockAlert)
+class StockAlertAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "product", "stock_at_alert", "reorder_level", "is_resolved")
+    list_filter = ("is_resolved", "organization")
+    actions = ["resolve_alerts"]
+
+    def resolve_alerts(self, request, queryset):
+        from django.utils import timezone
+        queryset.update(is_resolved=True, resolved_at=timezone.now())
+    resolve_alerts.short_description = "Marquer comme résolues"

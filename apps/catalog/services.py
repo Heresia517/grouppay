@@ -43,9 +43,32 @@ def decrement_stock(product, quantity):
             f"(demandé: {quantity}, dispo: {locked.stock_quantity})"
         )
 
+    stock_before = locked.stock_quantity
     locked.stock_quantity = F("stock_quantity") - quantity
     locked.save(update_fields=["stock_quantity"])
     locked.refresh_from_db(fields=["stock_quantity"])
+
+    # Historique mouvement
+    from .models import StockMovement, StockAlert
+    StockMovement.objects.create(
+        organization=locked.organization,
+        product=locked,
+        movement_type="OUT",
+        quantity=-quantity,
+        stock_before=stock_before,
+        stock_after=locked.stock_quantity,
+        reason="Sortie commande",
+    )
+
+    # Créer une alerte si franchissement du seuil
+    if stock_before > locked.reorder_level >= locked.stock_quantity:
+        StockAlert.objects.create(
+            organization=locked.organization,
+            product=locked,
+            stock_at_alert=locked.stock_quantity,
+            reorder_level=locked.reorder_level,
+        )
+
     return True
 
 
@@ -58,8 +81,29 @@ def increment_stock(product, quantity):
         raise ValidationError("La quantité doit être > 0.")
 
     locked = Product.objects.select_for_update().get(pk=product.pk)
+    stock_before = locked.stock_quantity
     locked.stock_quantity = F("stock_quantity") + quantity
     locked.save(update_fields=["stock_quantity"])
+    locked.refresh_from_db(fields=["stock_quantity"])
+
+    from .models import StockMovement, StockAlert
+    StockMovement.objects.create(
+        organization=locked.organization,
+        product=locked,
+        movement_type="RESTORE",
+        quantity=quantity,
+        stock_before=stock_before,
+        stock_after=locked.stock_quantity,
+        reason="Restauration stock",
+    )
+
+    # Résoudre les alertes actives si on remonte au-dessus du seuil
+    if stock_before <= locked.reorder_level < locked.stock_quantity:
+        from django.utils import timezone
+        StockAlert.objects.filter(
+            product=locked, is_resolved=False,
+        ).update(is_resolved=True, resolved_at=timezone.now())
+
     return True
 
 

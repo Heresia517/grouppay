@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Stock — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+             style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Stock</h1>
+            <p class="text-slate-500 text-sm">Mouvements, alertes et ajustements</p>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Mouvements ({{ filters.period }}j)</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ kpis.total_movements }}</p>
+        </div>
+        <div class="bg-amber-50 rounded-2xl border border-amber-200 p-5">
+            <p class="text-xs font-semibold text-amber-700 uppercase mb-1">Stock faible</p>
+            <p class="text-2xl font-extrabold text-amber-700">{{ kpis.low_stock_count }}</p>
+        </div>
+        <div class="bg-red-50 rounded-2xl border border-red-200 p-5">
+            <p class="text-xs font-semibold text-red-700 uppercase mb-1">Rupture</p>
+            <p class="text-2xl font-extrabold text-red-700">{{ kpis.out_of_stock_count }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl shadow-card p-5 text-white">
+            <p class="text-xs font-semibold uppercase opacity-90 mb-1">Alertes actives</p>
+            <p class="text-2xl font-extrabold">{{ kpis.active_alerts }}</p>
+        </div>
+    </div>
+
+    <!-- Alertes -->
+    {% if alerts %}
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100 bg-amber-50">
+            <h2 class="font-bold text-amber-900">⚠️ Alertes stock actives ({{ alerts|length }})</h2>
+        </div>
+        <div class="divide-y divide-slate-100">
+            {% for a in alerts %}
+            <div class="p-4 flex items-center justify-between gap-3">
+                <div>
+                    <p class="font-medium text-slate-900">{{ a.product.name }}</p>
+                    <p class="text-xs text-slate-500">Stock : {{ a.stock_at_alert }} / Seuil : {{ a.reorder_level }}</p>
+                </div>
+                <form method="post" action="{% url 'resolve_alert' a.id %}">
+                    {% csrf_token %}
+                    <button class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-semibold hover:bg-emerald-200">
+                        Résoudre
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions rapides -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+                <h2 class="font-bold text-slate-900">Ajustement rapide</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Corriger le stock d'un produit (inventaire, casse, retour)</p>
+            </div>
+            <form method="get" action="" class="flex flex-wrap gap-2" onsubmit="event.preventDefault(); const pid=document.getElementById('quick-adjust-select').value; if(pid) window.location.href='/stock/product/'+pid+'/';">
+                <select id="quick-adjust-select" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Choisir un produit...</option>
+                    {% for p in products %}
+                    <option value="{{ p.id }}">{{ p.name|truncatechars:40 }} ({{ p.stock_quantity }})</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800">
+                    Ajuster le stock
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-6">
+        <form method="get" class="flex flex-wrap items-end gap-3">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Produit</label>
+                <select name="product" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for p in products %}
+                    <option value="{{ p.id }}" {% if filters.product == p.id|stringformat:"s" %}selected{% endif %}>{{ p.name|truncatechars:40 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Type</label>
+                <select name="type" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for val, label in movement_types %}
+                    <option value="{{ val }}" {% if filters.type == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Période</label>
+                <select name="period" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="7" {% if filters.period == 7 %}selected{% endif %}>7 jours</option>
+                    <option value="30" {% if filters.period == 30 %}selected{% endif %}>30 jours</option>
+                    <option value="90" {% if filters.period == 90 %}selected{% endif %}>90 jours</option>
+                </select>
+            </div>
+            <button class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">Filtrer</button>
+            <a href="{% url 'stock_dashboard' %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold">Reset</a>
+        </form>
+    </div>
+
+    <!-- Mouvements -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="p-5 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900">Derniers mouvements</h2>
+        </div>
+        {% if movements %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="p-3 text-left font-semibold text-slate-600">Date</th>
+                        <th class="p-3 text-left font-semibold text-slate-600">Produit</th>
+                        <th class="p-3 text-left font-semibold text-slate-600">Type</th>
+                        <th class="p-3 text-right font-semibold text-slate-600">Qté</th>
+                        <th class="p-3 text-right font-semibold text-slate-600">Avant → Après</th>
+                        <th class="p-3 text-left font-semibold text-slate-600">Motif</th>
+                        <th class="p-3 text-right font-semibold text-slate-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for m in movements %}
+                    <tr>
+                        <td class="p-3 text-xs text-slate-500">{{ m.created_at|date:"d/m H:i" }}</td>
+                        <td class="p-3 font-medium">
+                            <a href="{% url 'stock_history' m.product.id %}" class="text-slate-900 hover:text-brand-600">
+                                {{ m.product.name|truncatechars:30 }}
+                            </a>
+                        </td>
+                        <td class="p-3">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold
+                                {% if m.movement_type == 'IN' %}bg-emerald-100 text-emerald-800
+                                {% elif m.movement_type == 'OUT' %}bg-red-100 text-red-800
+                                {% elif m.movement_type == 'RESTORE' %}bg-blue-100 text-blue-800
+                                {% else %}bg-slate-100 text-slate-800{% endif %}">
+                                {{ m.get_movement_type_display }}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right font-bold {% if m.quantity > 0 %}text-emerald-600{% else %}text-red-600{% endif %}">
+                            {% if m.quantity > 0 %}+{% endif %}{{ m.quantity }}
+                        </td>
+                        <td class="p-3 text-right text-xs tabular-nums">{{ m.stock_before }} → {{ m.stock_after }}</td>
+                        <td class="p-3 text-xs text-slate-500">{{ m.reason|truncatechars:40 }}</td>
+                        <td class="p-3 text-right">
+                            <a href="{% url 'adjust_stock' m.product.id %}"
+                               class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-brand-100 hover:text-brand-700 transition"
+                               onclick="event.preventDefault(); document.getElementById('adjust-form-{{ m.product.id }}')?.submit() || (location.href='{% url 'stock_history' m.product.id %}');">
+                                ✏️ Ajuster
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <p class="text-slate-500">Aucun mouvement sur cette période</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
