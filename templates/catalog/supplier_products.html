@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Mes produits — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Mes produits</h1>
+                <p class="text-slate-500 text-sm">{{ products|length }} produit{{ products|length|pluralize }}</p>
+            </div>
+        </div>
+        <a href="{% url 'supplier_product_new' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Nouveau produit
+        </a>
+    </div>
+
+    {% if products %}
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="p-4 text-left font-semibold text-slate-600">Produit</th>
+                        <th class="p-4 text-left font-semibold text-slate-600">Catégorie</th>
+                        <th class="p-4 text-right font-semibold text-slate-600">Prix</th>
+                        <th class="p-4 text-center font-semibold text-slate-600">Stock</th>
+                        <th class="p-4 text-center font-semibold text-slate-600">Statut</th>
+                        <th class="p-4 text-center font-semibold text-slate-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for p in products %}
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="p-4">
+                            <div class="font-medium text-slate-900">{{ p.name }}</div>
+                            {% if p.sku %}<div class="text-xs text-slate-400">SKU : {{ p.sku }}</div>{% endif %}
+                            {% if p.supplier_reference %}<div class="text-xs text-slate-400">Réf : {{ p.supplier_reference }}</div>{% endif %}
+                        </td>
+                        <td class="p-4 text-slate-600">{{ p.category.name }}</td>
+                        <td class="p-4 text-right font-bold text-slate-900 tabular-nums">{{ p.price|floatformat:0 }}</td>
+                        <td class="p-4 text-center">
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold
+                                {% if p.stock_quantity == 0 %}bg-red-100 text-red-800
+                                {% elif p.stock_quantity <= p.reorder_level %}bg-amber-100 text-amber-800
+                                {% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                                {{ p.stock_quantity }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            {% if p.is_supplier_private %}
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">Brouillon</span>
+                            {% elif p.is_active %}
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Actif</span>
+                            {% else %}
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">Inactif</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            <div class="flex items-center justify-center gap-1">
+                                <a href="{% url 'supplier_product_edit' p.id %}" class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100" title="Modifier">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </a>
+                                <form method="post" action="{% url 'supplier_product_toggle' p.id %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100" title="Activer/Désactiver">
+                                        {% if p.is_active %}⏸{% else %}▶{% endif %}
+                                    </button>
+                                </form>
+                                <a href="{% url 'stock_history' p.id %}" class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100" title="Stock">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-5">
+            <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucun produit pour l'instant</h3>
+        <p class="text-slate-500 mb-6">Créez votre premier produit pour commencer à vendre.</p>
+        <a href="{% url 'supplier_product_new' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm">
+            Créer mon premier produit
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}{# CA genere (commentaire test) #}
+{% block title %}Fournisseurs — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+             style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Fournisseurs</h1>
+            <p class="text-slate-500 text-sm">{{ suppliers_data|length }} fournisseur{{ suppliers_data|length|pluralize }}</p>
+        </div>
+    </div>
+
+    {% if suppliers_data %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for data in suppliers_data %}
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center font-bold shadow-sm">
+                    {{ data.supplier.email|slice:":1"|upper }}
+                </div>
+                <div class="min-w-0">
+                    <p class="font-bold text-slate-900 truncate">{{ data.supplier.email }}</p>
+                    <p class="text-xs text-slate-500">{{ data.supplier.get_role_display }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="text-center">
+                    <p class="text-xl font-extrabold text-slate-900">{{ data.products_count }}</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold">Produits</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xl font-extrabold text-slate-900">{{ data.orders_count }}</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold">Commandes</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xl font-extrabold text-emerald-600">{{ data.items_count }}</p>
+                    <p class="text-[10px] text-slate-500 uppercase font-semibold">Articles</p>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-500 uppercase font-semibold">CA généré</p>
+                <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ data.revenue|floatformat:0 }} <span class="text-xs font-medium text-slate-500">{{ organization.currency_code }}</span></p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucun fournisseur</h3>
+        <p class="text-slate-500">Importez des utilisateurs avec le rôle FOURNISSEUR pour commencer.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

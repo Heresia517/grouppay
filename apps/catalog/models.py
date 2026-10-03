@@ -32,6 +32,26 @@ class Product(TenantModel):
 
     sku = models.CharField(max_length=50, blank=True)
     name = models.CharField(max_length=200)
+
+    # Gestion fournisseur
+    is_supplier_private = models.BooleanField(
+        default=False,
+        help_text="Produit visible uniquement par son fournisseur (brouillon)",
+    )
+    supplier_reference = models.CharField(
+        max_length=50, blank=True,
+        help_text="Référence interne du fournisseur",
+    )
+
+    # Gestion fournisseur
+    is_supplier_private = models.BooleanField(
+        default=False,
+        help_text="Produit visible uniquement par son fournisseur (brouillon)",
+    )
+    supplier_reference = models.CharField(
+        max_length=50, blank=True,
+        help_text="Référence interne du fournisseur",
+    )
     description = models.TextField(blank=True)
     tags = models.CharField(max_length=500, blank=True, help_text="CSV: promo,new,bulk")
 

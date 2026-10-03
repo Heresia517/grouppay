@@ -7,6 +7,10 @@ from rest_framework.routers import DefaultRouter
 from apps.catalog.views import catalog, product_detail
 from apps.catalog.supplier_views import supplier_dashboard
 from apps.catalog.review_views import product_reviews, submit_review, delete_review
+from apps.catalog.supplier_product_views import (
+    my_products as supplier_my_products, product_form as supplier_product_form,
+    toggle_product_active, delete_product, suppliers_overview,
+)
 from apps.catalog.stock_views import (
     stock_dashboard, product_stock_history, adjust_stock, resolve_alert,
 )
@@ -84,6 +88,14 @@ urlpatterns = [
     path('deliveries/<uuid:delivery_id>/update/', update_delivery_status, name='update_delivery_status'),
     
     # API REST
+    # Multi-fournisseurs
+    path('supplier/products/', supplier_my_products, name='supplier_my_products'),
+    path('supplier/products/new/', supplier_product_form, name='supplier_product_new'),
+    path('supplier/products/<uuid:product_id>/edit/', supplier_product_form, name='supplier_product_edit'),
+    path('supplier/products/<uuid:product_id>/toggle/', toggle_product_active, name='supplier_product_toggle'),
+    path('supplier/products/<uuid:product_id>/delete/', delete_product, name='supplier_product_delete'),
+    path('rh/suppliers/', suppliers_overview, name='suppliers_overview'),
+
     # Stock avancé
     path('stock/', stock_dashboard, name='stock_dashboard'),
     path('stock/product/<uuid:product_id>/', product_stock_history, name='stock_history'),
