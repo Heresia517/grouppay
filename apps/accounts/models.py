@@ -40,6 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     internal_id = models.CharField(max_length=50, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="MEMBRE")
     is_active = models.BooleanField(default=True)
     is_blocked = models.BooleanField(default=False)
