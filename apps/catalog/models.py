@@ -64,6 +64,18 @@ class Product(TenantModel):
     def is_available(self):
         return self.stock_quantity > 0 and self.is_active
 
+    @property
+    def average_rating(self):
+        """Note moyenne (0 si aucun avis)."""
+        from django.db.models import Avg
+        result = self.reviews.filter(is_published=True).aggregate(avg=Avg("rating"))
+        return round(result["avg"] or 0, 1)
+
+    @property
+    def review_count(self):
+        """Nombre d'avis publiés."""
+        return self.reviews.filter(is_published=True).count()
+
     def __str__(self):
         return self.name
 
@@ -145,3 +157,37 @@ class WishlistItem(TenantModel):
 
     def __str__(self):
         return f"{self.user.email} love {self.product.name}"
+
+
+
+class Review(TenantModel):
+    """Avis produit (5 étoiles + commentaire). Un membre ne peut reviewer
+    qu'un produit qu'il a commandé et reçu."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="reviews")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
+    member = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="reviews")
+    order = models.ForeignKey(
+        "orders.Order", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="product_reviews",
+    )
+    rating = models.PositiveSmallIntegerField(
+        choices=[(i, str(i)) for i in range(1, 6)],
+    )
+    title = models.CharField(max_length=120, blank=True)
+    comment = models.TextField(blank=True)
+
+    is_verified_purchase = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["product", "member"], name="unique_review_per_member_product"),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.product.name} — {self.rating}★ by {self.member.email}"

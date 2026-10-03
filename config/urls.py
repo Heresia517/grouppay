@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.catalog.views import catalog, product_detail
 from apps.catalog.supplier_views import supplier_dashboard
+from apps.catalog.review_views import product_reviews, submit_review, delete_review
 from apps.orders.views import (
     view_cart, add_to_cart, remove_from_cart, update_cart_item_qty,
     create_order_view, order_detail, my_orders,
@@ -80,6 +81,11 @@ urlpatterns = [
     path('deliveries/<uuid:delivery_id>/update/', update_delivery_status, name='update_delivery_status'),
     
     # API REST
+    # Avis produits
+    path('product/<uuid:product_id>/reviews/', product_reviews, name='product_reviews'),
+    path('product/<uuid:product_id>/review/', submit_review, name='submit_review'),
+    path('review/<uuid:review_id>/delete/', delete_review, name='delete_review'),
+
     # Fournisseur
     path('supplier/', supplier_dashboard, name='supplier_dashboard'),
 
