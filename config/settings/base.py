@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "apps.notifications",
     "channels",
     "apps.audit",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -65,6 +67,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -256,3 +259,10 @@ else:
 # ============================================================
 AFRICASTALKING_USERNAME = env("AFRICASTALKING_USERNAME", default="")
 AFRICASTALKING_API_KEY = env("AFRICASTALKING_API_KEY", default="")
+
+
+# ============================================================
+# 2FA (django-otp)
+# ============================================================
+OTP_TOTP_ISSUER = env("OTP_TOTP_ISSUER", default="GroupPay")
+OTP_LOGIN_URL = "/accounts/2fa/verify/"

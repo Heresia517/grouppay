@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Activer la 2FA — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'profile' %}" class="text-sm text-slate-600 hover:text-brand-600">← Mon profil</a>
+    </div>
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Authentification à 2 facteurs</h1>
+            <p class="text-slate-500 text-sm">Sécurisez votre compte avec Google Authenticator ou Authy</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Étape 1 : QR Code -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm font-bold">1</span>
+                <h2 class="font-bold text-slate-900">Scannez le QR code</h2>
+            </div>
+            <p class="text-sm text-slate-500 mb-4">Ouvrez votre app d'authentification (Google Authenticator, Authy, 1Password) et scannez ce code :</p>
+
+            {% if qr_code %}
+            <div class="bg-white p-4 rounded-xl border-2 border-dashed border-slate-300 text-center">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-48 h-48 mx-auto">
+            </div>
+            {% else %}
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800">
+                qrcode non installé. Lancez : <code>pip install qrcode[pil]</code>
+            </div>
+            {% endif %}
+
+            <details class="mt-4">
+                <summary class="text-sm text-slate-500 cursor-pointer hover:text-brand-600">Ou saisir manuellement</summary>
+                <div class="mt-2 p-3 bg-slate-50 rounded-lg">
+                    <p class="text-xs text-slate-500 mb-1">Clé secrète :</p>
+                    <code class="text-xs font-mono break-all text-slate-900">{{ secret }}</code>
+                </div>
+            </details>
+        </div>
+
+        <!-- Étape 2 : Vérification -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm font-bold">2</span>
+                <h2 class="font-bold text-slate-900">Entrez le code à 6 chiffres</h2>
+            </div>
+            <p class="text-sm text-slate-500 mb-4">Votre app affiche un nouveau code toutes les 30 secondes.</p>
+
+            <form method="post" action="{% url 'two_factor_verify' %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="text" name="token" required maxlength="6" minlength="6" pattern="[0-9]*"
+                       inputmode="numeric" autocomplete="one-time-code"
+                       placeholder="123456"
+                       class="block w-full text-center text-3xl font-mono tracking-widest rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-4 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition">
+                <button type="submit"
+                        class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm">
+                    Activer la 2FA
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-500">
+                    💡 <strong>Astuce :</strong> gardez votre téléphone synchronisé. Vous pouvez utiliser une app de sauvegarde des codes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <div>
+                <p class="font-semibold text-amber-900 text-sm">Important</p>
+                <p class="text-xs text-amber-700 mt-1">
+                    Une fois activée, vous devrez saisir un code à chaque connexion. Gardez votre téléphone à portée de main.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

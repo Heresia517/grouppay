@@ -32,6 +32,9 @@ from apps.deductions.views import (
     deductions_dashboard, preview_export, generate_export, download_batch, mark_batch_sent,
 )
 from apps.orders.export_views import export_dashboard_excel, export_dashboard_pdf
+from apps.accounts.two_factor_views import (
+    two_factor_setup, two_factor_verify, two_factor_disable, two_factor_status,
+)
 from apps.accounts.views import (
     profile, save_theme, import_members_page, import_members_csv, import_members_template,
 )
@@ -133,6 +136,12 @@ urlpatterns = [
     path('rh/deductions/generate/', generate_export, name='generate_export'),
     path('rh/deductions/batch/<uuid:batch_id>/download/', download_batch, name='download_batch'),
     path('rh/deductions/batch/<uuid:batch_id>/sent/', mark_batch_sent, name='mark_batch_sent'),
+
+    # 2FA
+    path('accounts/2fa/', two_factor_setup, name='two_factor_setup'),
+    path('accounts/2fa/verify/', two_factor_verify, name='two_factor_verify'),
+    path('accounts/2fa/disable/', two_factor_disable, name='two_factor_disable'),
+    path('accounts/2fa/status/', two_factor_status, name='two_factor_status'),
 
     # Import membres RH
     path('rh/members/import/', import_members_page, name='import_members'),
