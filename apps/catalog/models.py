@@ -270,3 +270,70 @@ class StockAlert(TenantModel):
 
     def __str__(self):
         return f"ALERTE {self.product.name} ({self.stock_at_alert}/{self.reorder_level})"
+
+
+
+class ProductRequest(TenantModel):
+    """Proposition de produit à négocier en achat groupé (wishlist collaborative)."""
+    STATUS_CHOICES = [
+        ("OPEN", "Ouverte aux votes"),
+        ("REVIEWING", "En négociation"),
+        ("ACCEPTED", "Acceptée"),
+        ("REJECTED", "Refusée"),
+        ("ARCHIVED", "Archivée"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="product_requests")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    category_hint = models.CharField(max_length=100, blank=True, help_text="Catégorie suggérée")
+    target_price = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        help_text="Prix cible souhaité",
+    )
+    proposed_by = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="product_requests",
+    )
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="OPEN")
+    reviewed_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="reviewed_requests",
+    )
+    review_note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization", "status", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def vote_count(self):
+        return self.votes.count()
+
+    @property
+    def has_voted(self):
+        return False  # définir via annotate dans la vue
+
+
+class ProductRequestVote(TenantModel):
+    """Vote d'un membre sur une proposition."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="product_request_votes")
+    request = models.ForeignKey(ProductRequest, on_delete=models.CASCADE, related_name="votes")
+    member = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="product_request_votes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["request", "member"], name="unique_vote_per_member_request"),
+        ]
+
+    def __str__(self):
+        return f"{self.member.email} vote pour {self.request.title}"

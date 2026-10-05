@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Demandes produits — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Demandes produits</h1>
+                <p class="text-slate-500 text-sm">Votez pour les produits que vous voulez voir en achat groupé</p>
+            </div>
+        </div>
+        <a href="{% url 'request_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Proposer un produit
+        </a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Total</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.total }}</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-blue-700 uppercase mb-1">Ouvertes</p>
+            <p class="text-2xl font-extrabold text-blue-700">{{ stats.open }}</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-amber-700 uppercase mb-1">En négo</p>
+            <p class="text-2xl font-extrabold text-amber-700">{{ stats.reviewing }}</p>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-emerald-700 uppercase mb-1">Acceptées</p>
+            <p class="text-2xl font-extrabold text-emerald-700">{{ stats.accepted }}</p>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="?status=ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold {% if status_filter == 'ALL' %}bg-slate-900 text-white{% else %}bg-white text-slate-700 border border-slate-200{% endif %}">Toutes</a>
+        {% for val, label in statuses %}
+        <a href="?status={{ val }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold {% if status_filter == val %}bg-slate-900 text-white{% else %}bg-white text-slate-700 border border-slate-200{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Liste -->
+    {% if requests %}
+    <div class="space-y-3">
+        {% for r in requests %}
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <div class="flex items-start gap-4">
+                <!-- Vote button -->
+                <form method="post" action="{% url 'vote_request' r.id %}" class="flex-shrink-0">
+                    {% csrf_token %}
+                    <button type="submit" class="flex flex-col items-center justify-center w-14 py-2 rounded-xl {% if r.user_voted %}bg-brand-600 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-brand-100{% endif %} transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+                        <span class="text-sm font-bold mt-0.5">{{ r.num_votes }}</span>
+                    </button>
+                </form>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <h3 class="font-bold text-slate-900">{{ r.title }}</h3>
+                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
+                            {% if r.status == 'OPEN' %}bg-blue-100 text-blue-800
+                            {% elif r.status == 'REVIEWING' %}bg-amber-100 text-amber-800
+                            {% elif r.status == 'ACCEPTED' %}bg-emerald-100 text-emerald-800
+                            {% elif r.status == 'REJECTED' %}bg-red-100 text-red-800
+                            {% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {{ r.get_status_display }}
+                        </span>
+                    </div>
+
+                    {% if r.description %}
+                    <p class="text-sm text-slate-600 mb-2">{{ r.description|truncatechars:200 }}</p>
+                    {% endif %}
+
+                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                        <span>Par {{ r.proposed_by.email|truncatechars:25 }}</span>
+                        {% if r.category_hint %}<span>· {{ r.category_hint }}</span>{% endif %}
+                        {% if r.target_price %}<span>· Cible: {{ r.target_price|floatformat:0 }} {{ organization.currency_code }}</span>{% endif %}
+                        <span>· {{ r.created_at|date:"d/m/Y" }}</span>
+                    </div>
+
+                    {% if r.review_note %}
+                    <div class="mt-2 p-2 rounded-lg bg-slate-50 text-xs text-slate-600">
+                        <strong>Note RH :</strong> {{ r.review_note }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if user.role == 'ADMIN' or user.role == 'GESTIONNAIRE' %}
+                <div class="flex flex-col gap-1">
+                    <form method="post" action="{% url 'update_request_status' r.id %}" class="inline">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()" class="text-xs rounded-lg border border-slate-200 px-2 py-1">
+                            {% for val, label in statuses %}
+                            <option value="{{ val }}" {% if r.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form method="post" action="{% url 'delete_request' r.id %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('Supprimer ?')" class="text-xs text-red-600 hover:text-red-700">Suppr.</button>
+                    </form>
+                </div>
+                {% elif r.proposed_by_id == user.id %}
+                <form method="post" action="{% url 'delete_request' r.id %}">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('Supprimer votre proposition ?')" class="text-xs text-red-600 hover:text-red-700">Suppr.</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-5">
+            <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucune proposition</h3>
+        <p class="text-slate-500 mb-6">Soyez le premier à proposer un produit à négocier !</p>
+        <a href="{% url 'request_create' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm">
+            Proposer un produit
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

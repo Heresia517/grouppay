@@ -68,3 +68,37 @@ class StockAlertAdmin(admin.ModelAdmin):
         from django.utils import timezone
         queryset.update(is_resolved=True, resolved_at=timezone.now())
     resolve_alerts.short_description = "Marquer comme résolues"
+
+
+
+from .models import ProductRequest, ProductRequestVote
+
+
+@admin.register(ProductRequest)
+class ProductRequestAdmin(admin.ModelAdmin):
+    list_display = ("title", "proposed_by", "status", "vote_count", "created_at")
+    list_filter = ("status", "organization")
+    search_fields = ("title", "description")
+    actions = ["mark_accepted", "mark_rejected", "mark_reviewing"]
+
+    def vote_count(self, obj):
+        return obj.votes.count()
+    vote_count.short_description = "Votes"
+
+    def mark_accepted(self, request, queryset):
+        queryset.update(status="ACCEPTED")
+    mark_accepted.short_description = "Marquer acceptées"
+
+    def mark_rejected(self, request, queryset):
+        queryset.update(status="REJECTED")
+    mark_rejected.short_description = "Marquer refusées"
+
+    def mark_reviewing(self, request, queryset):
+        queryset.update(status="REVIEWING")
+    mark_reviewing.short_description = "Marquer en négociation"
+
+
+@admin.register(ProductRequestVote)
+class ProductRequestVoteAdmin(admin.ModelAdmin):
+    list_display = ("request", "member", "created_at")
+    list_filter = ("organization",)
