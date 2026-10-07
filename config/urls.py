@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 
 from apps.catalog.views import catalog, product_detail
+from apps.core.views import health, sentry_test
 from apps.catalog.supplier_views import supplier_dashboard
 from apps.catalog.review_views import product_reviews, submit_review, delete_review
 from apps.catalog.request_views import (
@@ -55,6 +56,10 @@ router.register(r'orders', OrderViewSet, basename='order')
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
+    # Monitoring
+    path("health/", health, name="health_check"),
+    path("sentry-test/", sentry_test, name="sentry_test"),
+
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
