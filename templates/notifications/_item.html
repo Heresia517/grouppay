@@ -1,0 +1,9 @@
+{# Fragment notification — vars: notif #}
+<div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition {% if not notif.is_read %}bg-brand-50/50{% endif %}">
+    <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 {% if not notif.is_read %}bg-brand-500{% else %}bg-transparent{% endif %}"></div>
+    <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-slate-900 truncate">{{ notif.title }}</p>
+        <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">{{ notif.body }}</p>
+        <p class="text-[10px] text-slate-400 mt-1">{{ notif.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+</div>

@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 
 from .models import Notification
@@ -63,3 +63,18 @@ def mark_all_read(request):
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=500)
     return JsonResponse({"ok": True, "updated": updated})
+
+
+
+@login_required
+def notifications_page(request):
+    """Page dediee a la liste des notifications."""
+    notifs = Notification.objects.filter(
+        recipient=request.user,
+    ).order_by("-created_at")[:100]
+    unread = Notification.objects.filter(recipient=request.user, is_read=False).count()
+
+    return render(request, "notifications/list.html", {
+        "notifications": notifs,
+        "unread_count": unread,
+    })

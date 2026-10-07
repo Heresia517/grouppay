@@ -40,8 +40,7 @@ from apps.accounts.views import (
     profile, save_theme, import_members_page, import_members_csv, import_members_template,
 )
 from apps.notifications.views import (
-    unread_count, notification_list, mark_notification_read, mark_all_read,
-)
+    unread_count, notification_list, mark_notification_read, mark_all_read, notifications_page)
 
 from apps.catalog.viewsets import CategoryViewSet, ProductViewSet
 from apps.orders.viewsets import CartViewSet, OrderViewSet
@@ -58,6 +57,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 urlpatterns = [
     # Monitoring
     path("health/", health, name="health_check"),
+    path("notifications/", notifications_page, name="notifications_page"),
     path("sentry-test/", sentry_test, name="sentry_test"),
 
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
@@ -168,3 +168,12 @@ urlpatterns = [
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+# ============================================================
+# HANDLERS PAGES ERREUR (personnalises)
+# ============================================================
+handler400 = "django.views.defaults.bad_request"
+handler403 = "django.views.defaults.permission_denied"
+handler404 = "django.views.defaults.page_not_found"
+handler500 = "django.views.defaults.server_error"
