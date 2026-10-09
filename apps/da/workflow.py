@@ -16,6 +16,12 @@ from django.utils import timezone
 from apps.notifications.email_service import send_email
 from apps.notifications.sms_service import send_sms
 
+from .notification_service import (
+    notify_da_submitted, notify_da_visa_approved, notify_da_rejected,
+    notify_da_stock_verified, notify_da_validated,
+    notify_da_ordered, notify_da_received, notify_da_closed,
+)
+
 
 # ═══════════════════════════════════════════════════════════════
 # HELPERS
@@ -144,15 +150,10 @@ def submit_request(purchase_request, actor):
 
     _add_history(purchase_request, old_status, "SOUMISE", actor, "Soumission de la DA")
 
-    # Notifier le Directeur
+    # Notifier le Directeur (enrichi)
     director = _get_director_for_service(purchase_request.service)
     if director:
-        _notify(
-            director,
-            f"Nouvelle DA a viser : {purchase_request.number}",
-            f"Une DA de {purchase_request.requester.email} attend votre visa.",
-            action_url=f"/da/requests/{purchase_request.id}/",
-        )
+        notify_da_submitted(purchase_request, director)
 
     return purchase_request
 
@@ -240,12 +241,7 @@ def visa_by_director(purchase_request, actor, comment="", approved=True):
         purchase_request.save()
 
         _add_history(purchase_request, old_status, "REFUSEE", actor, comment)
-        _notify(
-            purchase_request.requester,
-            f"DA refusee : {purchase_request.number}",
-            f"Motif : {comment}",
-            action_url=f"/da/requests/{purchase_request.id}/",
-        )
+        notify_da_rejected(purchase_request, comment, rejected_by=actor)
         return purchase_request
 
     old_status = purchase_request.status
@@ -256,15 +252,9 @@ def visa_by_director(purchase_request, actor, comment="", approved=True):
 
     _add_history(purchase_request, old_status, "VISEE_DIRECTEUR", actor, comment or "Visa accorde")
 
-    # Notifier la Direction des Achats
+    # Notifier la Direction des Achats (enrichi)
     achats_director = _get_achats_director(purchase_request.organization)
-    if achats_director:
-        _notify(
-            achats_director,
-            f"DA visee a verifier : {purchase_request.number}",
-            f"La DA de {purchase_request.requester.email} attend votre verification stock.",
-            action_url=f"/da/requests/{purchase_request.id}/",
-        )
+    notify_da_visa_approved(purchase_request, achats_director)
 
     return purchase_request
 

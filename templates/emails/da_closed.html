@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:Inter,system-ui,sans-serif;background:#f8fafc;margin:0;padding:32px 16px">
+<table width="100%"><tr><td align="center">
+<table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+<tr><td style="background:linear-gradient(135deg,{{ color_primary|default:'#2563eb' }},{{ color_secondary|default:'#1e40af' }});padding:32px;color:#fff">
+<h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Demandes d'Achat</p>
+</td></tr>
+<tr><td style="padding:32px">
+<div style="display:inline-block;background:#05966920;color:#059669;padding:6px 12px;border-radius:20px;font-weight:600;font-size:13px;margin-bottom:16px">
+✓ DA clôturée
+</div>
+<h2 style="margin:0 0 12px;font-size:20px;color:#0f172a">{{ da_number }}</h2>
+<p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6">
+Votre demande d'achat est maintenant clôturée. Merci.
+</p>
+
+<div style="background:#f1f5f9;border-radius:12px;padding:16px;margin-bottom:24px">
+<table width="100%">
+<tr><td style="padding:4px 0;color:#64748b;font-size:12px">Demandeur</td>
+<td style="padding:4px 0;text-align:right;font-weight:600;color:#0f172a;font-size:13px">{{ requester_email }}</td></tr>
+<tr><td style="padding:4px 0;color:#64748b;font-size:12px">Service</td>
+<td style="padding:4px 0;text-align:right;font-weight:600;color:#0f172a;font-size:13px">{{ service_name }}</td></tr>
+<tr><td style="padding:4px 0;color:#64748b;font-size:12px">Montant</td>
+<td style="padding:4px 0;text-align:right;font-weight:700;color:#0f172a;font-size:15px">{{ da_amount }} {{ da_currency }}</td></tr>
+{% if reason %}
+<tr><td style="padding:4px 0;color:#64748b;font-size:12px">Motif</td>
+<td style="padding:4px 0;text-align:right;font-weight:600;color:#dc2626;font-size:13px">{{ reason }}</td></tr>
+{% endif %}
+{% if supplier %}
+<tr><td style="padding:4px 0;color:#64748b;font-size:12px">Fournisseur</td>
+<td style="padding:4px 0;text-align:right;font-weight:600;color:#0f172a;font-size:13px">{{ supplier }}</td></tr>
+{% endif %}
+</table>
+</div>
+
+<a href="{{ da_url }}" style="display:inline-block;background:#059669;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">
+Voir la DA →
+</a>
+</td></tr>
+<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">
+© {{ "now"|date:"Y" }} GroupPay — Notification automatique
+</td></tr>
+</table>
+</td></tr></table>
+</body></html>

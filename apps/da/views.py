@@ -657,3 +657,211 @@ def da_sign_refuse(request, request_id):
 
     messages.warning(request, f"DA {da.number} refusee.")
     return redirect("da_detail", request_id=da.id)
+
+
+
+# ═══════════════════════════════════════════════════════════════
+# EXPORT EXCEL
+# ═══════════════════════════════════════════════════════════════
+@login_required
+def da_export_excel_list(request):
+    """Export Excel de la liste des DA (avec filtres)."""
+    from django.http import HttpResponse
+    from .excel_service import export_da_list_excel
+
+    if request.user.role not in ("ADMIN", "GESTIONNAIRE") and not (
+        request.user.service and request.user.service.direction.is_achats
+    ) and not request.user.is_dg:
+        raise PermissionDenied("Reserve aux administrateurs DA.")
+
+    org = request.user.organization
+
+    # Filtres
+    status_filter = request.GET.get("status", "")
+    direction_id = request.GET.get("direction", "")
+    period = request.GET.get("period", "90")
+    try:
+        days = int(period)
+    except ValueError:
+        days = 90
+
+    qs = PurchaseRequest.objects.filter(
+        organization=org,
+        created_at__gte=timezone.now() - timedelta(days=days),
+    ).select_related("requester", "service", "service__direction", "validated_by")
+
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    if direction_id:
+        qs = qs.filter(service__direction_id=direction_id)
+
+    qs = qs.order_by("-created_at")[:5000]
+
+    buf = export_da_list_excel(qs)
+    filename = f"DA-{org.slug}-{timezone.now().strftime('%Y%m%d_%H%M')}.xlsx"
+
+    response = HttpResponse(
+        buf.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@login_required
+def da_export_single_excel(request, request_id):
+    """Export Excel d'une seule DA."""
+    from django.http import HttpResponse
+    from .excel_service import export_single_da_excel
+
+    da = get_object_or_404(
+        PurchaseRequest, id=request_id, organization=request.user.organization,
+    )
+
+    if da.requester_id != request.user.id and request.user.role not in ("ADMIN", "GESTIONNAIRE") and not (
+        request.user.service and request.user.service.direction.is_achats
+    ):
+        raise PermissionDenied("Acces refuse.")
+
+    buf = export_single_da_excel(da)
+    filename = f"{da.number}.xlsx"
+
+    response = HttpResponse(
+        buf.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+# ═══════════════════════════════════════════════════════════════
+# WORKFLOW : REFUS + ANNULATION
+# ═══════════════════════════════════════════════════════════════
+@login_required
+def da_reject_page(request, request_id):
+    """Page de refus avec motif."""
+    da = get_object_or_404(
+        PurchaseRequest, id=request_id, organization=request.user.organization,
+    )
+
+    # Verifier les droits
+    can_reject = False
+    reason_label = ""
+
+    if da.status == "SOUMISE":
+        # Directeur
+        if request.user.is_director and da.service and da.service.direction.director_id == request.user.id:
+            can_reject = True
+            reason_label = "Visa Directeur"
+    elif da.status == "VISEE_DIRECTEUR":
+        # Achats
+        if _is_achats(request.user):
+            can_reject = True
+            reason_label = "Verification stock"
+    elif da.status in ("STOCK_VERIFIE", "VALIDEE"):
+        # DG
+        if request.user.is_dg:
+            can_reject = True
+            reason_label = "Signature DG"
+
+    if not can_reject:
+        messages.error(request, "Vous ne pouvez pas refuser cette DA a ce stade.")
+        return redirect("da_detail", request_id=da.id)
+
+    return render(request, "da/reject.html", {
+        "da": da,
+        "reason_label": reason_label,
+    })
+
+
+@login_required
+@require_POST
+def da_reject_confirm(request, request_id):
+    """Confirme le refus."""
+    da = get_object_or_404(
+        PurchaseRequest, id=request_id, organization=request.user.organization,
+    )
+
+    reason = (request.POST.get("reason") or "").strip()
+    if not reason:
+        messages.error(request, "Le motif est obligatoire.")
+        return redirect("da_reject_page", request_id=da.id)
+
+    old_status = da.status
+    da.status = "REFUSEE"
+    da.rejection_reason = reason
+    da.validated_by = request.user
+    da.validated_at = timezone.now()
+    da.save(update_fields=["status", "rejection_reason", "validated_by", "validated_at", "updated_at"])
+
+    from .models import PurchaseRequestHistory
+    PurchaseRequestHistory.objects.create(
+        request=da,
+        from_status=old_status,
+        to_status="REFUSEE",
+        actor=request.user,
+        comment=f"Refus par {request.user.email} : {reason}",
+    )
+
+    # Notification
+    try:
+        from .notification_service import notify_da_rejected
+        notify_da_rejected(da, reason, rejected_by=request.user)
+    except Exception:
+        pass
+
+    messages.warning(request, f"DA {da.number} refusee.")
+    return redirect("da_detail", request_id=da.id)
+
+
+@login_required
+def da_cancel_page(request, request_id):
+    """Page d'annulation (par le demandeur)."""
+    da = get_object_or_404(
+        PurchaseRequest, id=request_id, organization=request.user.organization,
+    )
+
+    # Conditions : seul le demandeur, sur certaines etapes
+    if da.requester_id != request.user.id and request.user.role != "ADMIN":
+        raise PermissionDenied("Seul le demandeur peut annuler.")
+
+    if da.status not in ("BROUILLON", "SOUMISE", "VISEE_DIRECTEUR", "STOCK_VERIFIE"):
+        messages.error(request, "Cette DA ne peut plus etre annulee.")
+        return redirect("da_detail", request_id=da.id)
+
+    return render(request, "da/cancel.html", {"da": da})
+
+
+@login_required
+@require_POST
+def da_cancel_confirm(request, request_id):
+    """Confirme l'annulation."""
+    da = get_object_or_404(
+        PurchaseRequest, id=request_id, organization=request.user.organization,
+    )
+
+    if da.requester_id != request.user.id and request.user.role != "ADMIN":
+        raise PermissionDenied()
+
+    if da.status not in ("BROUILLON", "SOUMISE", "VISEE_DIRECTEUR", "STOCK_VERIFIE"):
+        messages.error(request, "Cette DA ne peut plus etre annulee.")
+        return redirect("da_detail", request_id=da.id)
+
+    reason = (request.POST.get("reason") or "").strip() or "Annulee par le demandeur"
+
+    old_status = da.status
+    da.status = "ANNULEE"
+    da.rejection_reason = reason
+    da.save(update_fields=["status", "rejection_reason", "updated_at"])
+
+    from .models import PurchaseRequestHistory
+    PurchaseRequestHistory.objects.create(
+        request=da,
+        from_status=old_status,
+        to_status="ANNULEE",
+        actor=request.user,
+        comment=reason,
+    )
+
+    messages.warning(request, f"DA {da.number} annulee.")
+    return redirect("da_detail", request_id=da.id)

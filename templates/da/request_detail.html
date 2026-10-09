@@ -108,6 +108,9 @@
                 <a href="{% url 'da_download_pdf' da.id %}" class="px-3 py-2 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700">
                     Telecharger PDF
                 </a>
+                <a href="{% url 'da_export_single_excel' da.id %}" class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
+                    Excel
+                </a>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -162,8 +165,27 @@
             </a>
             {% endif %}
 
-            {% if not can_submit and not can_visa and not can_verify_stock and not can_sign_dg and not can_order and not can_close %}
+            {% if not can_submit and not can_visa and not can_verify_stock and not can_sign_dg and not can_order and not can_receive and not can_close %}
             <p class="text-sm text-slate-500 italic">Aucune action disponible pour vous sur cette DA.</p>
+            {% endif %}
+
+            <!-- Refus / Annulation -->
+            {% if da.status == "SOUMISE" and user.is_director and da.service and da.service.direction.director_id == user.id %}
+            <a href="{% url 'da_reject_page' da.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-700 text-sm font-semibold hover:bg-red-100 border border-red-200">
+                ✗ Refuser
+            </a>
+            {% endif %}
+            {% if da.status == "VISEE_DIRECTEUR" and user.is_dg %}
+            <a href="{% url 'da_reject_page' da.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-700 text-sm font-semibold hover:bg-red-100 border border-red-200">
+                ✗ Refuser
+            </a>
+            {% endif %}
+
+            {% if da.requester_id == user.id and da.status in "BROUILLON,SOUMISE,VISEE_DIRECTEUR,STOCK_VERIFIE" %}
+            <a href="{% url 'da_cancel_page' da.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm font-semibold hover:bg-amber-100 border border-amber-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                Annuler la DA
+            </a>
             {% endif %}
         </div>
     </div>

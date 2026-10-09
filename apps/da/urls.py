@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import admin_views
+from .stats_view import da_stats
 
 
 urlpatterns = [
@@ -32,6 +33,16 @@ urlpatterns = [
     path("requests/<uuid:request_id>/pdf/", views.da_download_pdf, name="da_download_pdf"),
     path("requests/<uuid:request_id>/pdf/preview/", views.da_preview_pdf, name="da_preview_pdf"),
 
+    # Export Excel
+    path("export/excel/", views.da_export_excel_list, name="da_export_excel_list"),
+    path("requests/<uuid:request_id>/export/excel/", views.da_export_single_excel, name="da_export_single_excel"),
+
+    # Workflow refus + annulation
+    path("requests/<uuid:request_id>/reject/", views.da_reject_page, name="da_reject_page"),
+    path("requests/<uuid:request_id>/reject/confirm/", views.da_reject_confirm, name="da_reject_confirm"),
+    path("requests/<uuid:request_id>/cancel/", views.da_cancel_page, name="da_cancel_page"),
+    path("requests/<uuid:request_id>/cancel/confirm/", views.da_cancel_confirm, name="da_cancel_confirm"),
+
     # Verification publique
     path("verify/<str:signature_hash>/", views.verify_signature_public, name="da_verify_public"),
 
@@ -39,6 +50,7 @@ urlpatterns = [
     # ADMIN DA UI
     # ═══════════════════════════════════════════════════════════════
     path("admin/", admin_views.admin_home, name="da_admin_home"),
+    path("stats/", da_stats, name="da_stats"),
 
     # Categories
     path("admin/categories/", admin_views.admin_categories, name="da_admin_categories"),
