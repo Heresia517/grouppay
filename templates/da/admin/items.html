@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Articles DA — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'da_admin_home' %}" class="text-sm text-slate-600 hover:text-brand-600">← Admin DA</a>
+    </div>
+
+    <div class="flex items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Articles</h1>
+            <p class="text-slate-500 text-sm">{{ items|length }} article(s)</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'da_admin_items_import' %}" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50">
+                Importer CSV
+            </a>
+            <a href="{% url 'da_admin_item_new' %}" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+                + Nouvel article
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% elif message.tags == 'warning' %}bg-amber-50 border border-amber-200 text-amber-900{% else %}bg-emerald-50 border border-emerald-200 text-emerald-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 mb-6">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Recherche</label>
+                <input type="text" name="q" value="{{ filters.q }}" placeholder="Nom ou reference..."
+                       class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Categorie</label>
+                <select name="category" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Toutes</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if filters.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Stock</label>
+                <select name="stock" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    <option value="low" {% if filters.stock == 'low' %}selected{% endif %}>Stock bas</option>
+                    <option value="out" {% if filters.stock == 'out' %}selected{% endif %}>Rupture</option>
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold">Filtrer</button>
+            <a href="{% url 'da_admin_items' %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold">Reset</a>
+        </form>
+    </div>
+
+    <!-- Tableau -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-4 text-left font-semibold text-slate-600">Reference</th>
+                    <th class="p-4 text-left font-semibold text-slate-600">Article</th>
+                    <th class="p-4 text-left font-semibold text-slate-600">Categorie</th>
+                    <th class="p-4 text-right font-semibold text-slate-600">P.U.</th>
+                    <th class="p-4 text-center font-semibold text-slate-600">Stock</th>
+                    <th class="p-4 text-center font-semibold text-slate-600">Statut</th>
+                    <th class="p-4 text-center font-semibold text-slate-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for item in items %}
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 font-mono text-xs text-slate-500">{{ item.reference|default:"—" }}</td>
+                    <td class="p-4">
+                        <p class="font-medium text-slate-900">{{ item.name }}</p>
+                        <p class="text-xs text-slate-400">{{ item.get_unit_display }}</p>
+                    </td>
+                    <td class="p-4 text-slate-600">{{ item.category.name }}</td>
+                    <td class="p-4 text-right font-bold tabular-nums">{{ item.unit_price|floatformat:0 }}</td>
+                    <td class="p-4 text-center">
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold
+                            {% if item.stock_quantity == 0 %}bg-red-100 text-red-800
+                            {% elif item.stock_quantity <= item.reorder_level %}bg-amber-100 text-amber-800
+                            {% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                            {{ item.stock_quantity }}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        {% if item.is_active %}
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Actif</span>
+                        {% else %}
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center justify-center gap-1">
+                            <a href="{% url 'da_admin_item_edit' item.id %}" class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100" title="Modifier">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </a>
+                            <form method="post" action="{% url 'da_admin_item_toggle' item.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100" title="Activer/Desactiver">
+                                    {% if item.is_active %}<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {% else %}<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="p-12 text-center text-slate-500">Aucun article trouve</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,105 +1,457 @@
 {% extends "base.html" %}
-{% block title %}Demandes d'Achat — {{ organization.name }}{% endblock %}
+{% load static %}
+{% block title %}Dashboard DA — {{ organization.name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-7xl mx-auto">
 
-    <div class="flex items-center justify-between gap-4 mb-8">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
                  style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-900">Demandes d'Achat</h1>
-                <p class="text-slate-500 text-sm">Gestion des DA fournitures</p>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard DA</h1>
+                <p class="text-slate-500 text-sm">Suivi des Demandes d'Achat</p>
             </div>
         </div>
-        <a href="{% url 'da_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Nouvelle DA
+        <div class="flex items-center gap-2">
+            <a href="{% url 'da_admin_home' %}" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 shadow-sm inline-flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Admin DA
+            </a>
+            <a href="{% url 'da_list' %}" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 shadow-sm">
+                Toutes les DA
+            </a>
+            <a href="{% url 'da_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nouvelle DA
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 mb-6">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Période</label>
+                <select name="period" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="7" {% if filters.period == 7 %}selected{% endif %}>7 jours</option>
+                    <option value="30" {% if filters.period == 30 %}selected{% endif %}>30 jours</option>
+                    <option value="90" {% if filters.period == 90 %}selected{% endif %}>90 jours</option>
+                    <option value="365" {% if filters.period == 365 %}selected{% endif %}>1 an</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Direction</label>
+                <select name="direction" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Toutes</option>
+                    {% for d in all_directions %}
+                    <option value="{{ d.id }}" {% if filters.direction == d.id|stringformat:"s" %}selected{% endif %}>
+                        {{ d.code }} - {{ d.name|truncatechars:30 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Service</label>
+                <select name="service" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for s in all_services %}
+                    <option value="{{ s.id }}" {% if filters.service == s.id|stringformat:"s" %}selected{% endif %}>
+                        {{ s.code }} - {{ s.name|truncatechars:30 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Statut</label>
+                <select name="status" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for val, label in statuses %}
+                    <option value="{{ val }}" {% if filters.status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">
+                Filtrer
+            </button>
+            <a href="{% url 'da_dashboard' %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold">
+                Reset
+            </a>
+        </form>
+    </div>
+
+    <!-- KPIs row 1 -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">DA ({{ filters.period }}j)</p>
+                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+            </div>
+            <p class="text-3xl font-extrabold text-slate-900 tabular-nums">{{ kpis.total_period }}</p>
+            <p class="text-xs text-slate-500 mt-1">sur {{ kpis.total }} au total</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">En cours</p>
+                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+            <p class="text-3xl font-extrabold text-slate-900 tabular-nums">{{ kpis.in_progress }}</p>
+            <p class="text-xs text-slate-500 mt-1">En attente ou en traitement</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-card p-5 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-semibold uppercase tracking-wide opacity-90">Montant</p>
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                </div>
+            </div>
+            <p class="text-2xl font-extrabold tabular-nums">{{ kpis.total_amount_period|floatformat:0 }}</p>
+            <p class="text-xs opacity-90 mt-1">{{ organization.currency_code }} · {{ filters.period }} jours</p>
+        </div>
+
+        <a href="#pending-signatures" class="relative bg-gradient-to-br {% if kpis.pending_me > 0 %}from-purple-500 to-purple-700{% else %}from-slate-700 to-slate-900{% endif %} rounded-2xl shadow-card p-5 text-white overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full bg-white/10"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-semibold uppercase tracking-wide opacity-90">À signer</p>
+                    <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    </div>
+                </div>
+                <p class="text-3xl font-extrabold tabular-nums">{{ kpis.pending_me }}</p>
+                <p class="text-xs opacity-90 mt-1 flex items-center gap-1">
+                    {% if kpis.pending_me > 0 %}Action requise{% else %}Tout est à jour ✓{% endif %}
+                    {% if kpis.pending_me > 0 %}<svg class="w-3 h-3 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>{% endif %}
+                </p>
+            </div>
         </a>
     </div>
 
-    <!-- KPIs -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <!-- KPIs row 2 -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
-            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Total</p>
-            <p class="text-2xl font-extrabold text-slate-900">{{ stats.total }}</p>
+            <p class="text-xs text-slate-500 uppercase mb-1">Clôturées ({{ filters.period }}j)</p>
+            <p class="text-xl font-bold text-slate-900">{{ kpis.closed_period }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
-            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Mes DA</p>
-            <p class="text-2xl font-extrabold text-slate-900">{{ stats.my_total }}</p>
+            <p class="text-xs text-slate-500 uppercase mb-1">Montant moyen</p>
+            <p class="text-xl font-bold text-slate-900 tabular-nums">{{ kpis.avg_amount|floatformat:0 }}</p>
         </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-            <p class="text-xs font-semibold text-amber-700 uppercase mb-1">A signer</p>
-            <p class="text-2xl font-extrabold text-amber-700">{{ stats.pending_me }}</p>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
+            <p class="text-xs text-slate-500 uppercase mb-1">Taux de refus</p>
+            <p class="text-xl font-bold {% if kpis.rejection_rate > 20 %}text-red-600{% else %}text-emerald-600{% endif %}">{{ kpis.rejection_rate }}%</p>
         </div>
-        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-            <p class="text-xs font-semibold text-blue-700 uppercase mb-1">En cours</p>
-            <p class="text-2xl font-extrabold text-blue-700">{{ stats.in_progress }}</p>
-        </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-card p-4 text-white">
-            <p class="text-xs font-semibold uppercase mb-1 opacity-90">Cloturees (30j)</p>
-            <p class="text-2xl font-extrabold">{{ stats.completed_this_month }}</p>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
+            <p class="text-xs text-slate-500 uppercase mb-1">Stock critique</p>
+            <p class="text-xl font-bold {% if low_stock_items %}text-amber-600{% else %}text-emerald-600{% endif %}">{{ low_stock_items|length }}</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Mes DA -->
-        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                <h2 class="font-bold text-slate-900">Mes demandes recentes</h2>
-                <a href="{% url 'da_list' %}?scope=mine" class="text-sm text-brand-600 hover:underline">Tout voir →</a>
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Évolution -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="font-bold text-slate-900">Évolution des DA</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Nombre de DA par jour</p>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span> DA</span>
+                </div>
             </div>
-            {% if my_requests %}
-            <div class="divide-y divide-slate-100">
-                {% for da in my_requests %}
-                <a href="{% url 'da_detail' da.id %}" class="block p-4 hover:bg-slate-50 transition">
-                    <div class="flex items-center justify-between gap-3">
-                        <div class="min-w-0 flex-1">
-                            <p class="font-semibold text-slate-900">{{ da.number }}</p>
-                            <p class="text-xs text-slate-500 truncate">{{ da.purpose|truncatechars:60 }}</p>
-                        </div>
-                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap
-                            {% if da.status == 'CLOTUREE' %}bg-emerald-100 text-emerald-800
-                            {% elif da.status == 'REFUSEE' or da.status == 'ANNULEE' %}bg-red-100 text-red-800
-                            {% elif da.status == 'SOUMISE' or da.status == 'VISEE_DIRECTEUR' %}bg-amber-100 text-amber-800
-                            {% elif da.status == 'COMMANDEE' or da.status == 'RECUE' %}bg-blue-100 text-blue-800
-                            {% else %}bg-slate-100 text-slate-700{% endif %}">
-                            {{ da.get_status_display }}
-                        </span>
+            <div class="h-56">
+                <canvas id="chartEvolution"></canvas>
+            </div>
+        </div>
+
+        <!-- Répartition statuts -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="mb-4">
+                <h2 class="font-bold text-slate-900">Répartition statuts</h2>
+                <p class="text-xs text-slate-500 mt-0.5">{{ filters.period }} derniers jours</p>
+            </div>
+            <div class="h-56">
+                <canvas id="chartStatus"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Top 5 articles -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="mb-4">
+                <h2 class="font-bold text-slate-900">Top 5 articles demandés</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Par quantité totale</p>
+            </div>
+            <div class="h-56">
+                <canvas id="chartTopItems"></canvas>
+            </div>
+        </div>
+
+        <!-- Top 5 directions -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <div class="mb-4">
+                <h2 class="font-bold text-slate-900">Top 5 directions</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Par montant total ({{ organization.currency_code }})</p>
+            </div>
+            {% if top_directions %}
+            <div class="space-y-3">
+                {% for d in top_directions %}
+                <div>
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span class="font-medium text-slate-700">{{ d.code }} — {{ d.name|truncatechars:30 }}</span>
+                        <span class="font-bold text-slate-900 tabular-nums">{{ d.amount|floatformat:0 }}</span>
                     </div>
-                </a>
+                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        {% if top_directions.0.amount %}
+                        <div class="h-full bg-gradient-to-r from-brand-500 to-brand-700" style="width: {% widthratio d.amount top_directions.0.amount 100 %}%"></div>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">{{ d.count }} DA</p>
+                </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="p-12 text-center">
-                <p class="text-slate-500 text-sm">Aucune DA pour le moment</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- A signer par moi -->
-        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
-            <div class="p-5 border-b border-slate-100">
-                <h2 class="font-bold text-slate-900">DA en attente de ma signature ({{ pending_signatures|length }})</h2>
-            </div>
-            {% if pending_signatures %}
-            <div class="divide-y divide-slate-100">
-                {% for flow in pending_signatures %}
-                <a href="{% url 'da_detail' flow.purchase_request.id %}" class="block p-4 hover:bg-slate-50 transition">
-                    <p class="font-semibold text-slate-900">{{ flow.purchase_request.number }}</p>
-                    <p class="text-xs text-slate-500">Etape {{ flow.step_order }} · {{ flow.get_role_required_display }}</p>
-                    <p class="text-xs text-slate-400 mt-1">Par {{ flow.purchase_request.requester.email }}</p>
-                </a>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="p-12 text-center">
-                <p class="text-slate-500 text-sm">Aucune signature en attente</p>
-            </div>
+            <p class="text-sm text-slate-500 py-8 text-center">Aucune donnée</p>
             {% endif %}
         </div>
     </div>
+
+    <!-- Pending signatures -->
+    {% if pending_list %}
+    <div id="pending-signatures" class="bg-white rounded-2xl shadow-card border-2 border-purple-200 overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100 bg-purple-50">
+            <h2 class="font-bold text-purple-900 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                DA en attente de votre signature ({{ pending_list|length }})
+            </h2>
+        </div>
+        <div class="divide-y divide-slate-100">
+            {% for flow in pending_list %}
+            <a href="{% url 'da_detail' flow.purchase_request.id %}" class="block p-4 hover:bg-purple-50/50 transition">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-semibold text-slate-900">{{ flow.purchase_request.number }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Etape {{ flow.step_order }} · {{ flow.get_role_required_display }}
+                        </p>
+                        <p class="text-xs text-slate-400">Par {{ flow.purchase_request.requester.email }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-slate-900 tabular-nums">{{ flow.purchase_request.total_amount|floatformat:0 }}</p>
+                        <p class="text-xs text-slate-500">{{ flow.purchase_request.currency_code }}</p>
+                    </div>
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Alertes stock -->
+    {% if low_stock_items %}
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <div class="flex-1">
+                <h3 class="font-bold text-amber-900 mb-2">{{ low_stock_items|length }} article(s) en stock critique</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for item in low_stock_items %}
+                    <span class="inline-flex items-center gap-2 bg-white/70 backdrop-blur px-3 py-1.5 rounded-lg border border-amber-200 text-xs">
+                        <span class="font-medium text-amber-900">{{ item.name|truncatechars:25 }}</span>
+                        <span class="px-1.5 py-0.5 rounded {% if item.stock_quantity == 0 %}bg-red-500{% else %}bg-amber-500{% endif %} text-white font-bold text-[10px]">
+                            {{ item.stock_quantity }} / {{ item.reorder_level }}
+                        </span>
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent requests -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="font-bold text-slate-900">DA récentes</h2>
+            <a href="{% url 'da_list' %}" class="text-sm text-brand-600 hover:underline">Tout voir →</a>
+        </div>
+        {% if recent_requests %}
+        <div class="divide-y divide-slate-100">
+            {% for da in recent_requests %}
+            <a href="{% url 'da_detail' da.id %}" class="block p-4 hover:bg-slate-50 transition">
+                <div class="flex items-center gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <p class="font-semibold text-slate-900">{{ da.number }}</p>
+                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold
+                                {% if da.status == 'CLOTUREE' %}bg-emerald-100 text-emerald-800
+                                {% elif da.status == 'REFUSEE' or da.status == 'ANNULEE' %}bg-red-100 text-red-800
+                                {% elif da.status == 'SOUMISE' or da.status == 'VISEE_DIRECTEUR' or da.status == 'STOCK_VERIFIE' %}bg-amber-100 text-amber-800
+                                {% elif da.status == 'COMMANDEE' or da.status == 'RECUE' %}bg-blue-100 text-blue-800
+                                {% else %}bg-slate-100 text-slate-700{% endif %}">
+                                {{ da.get_status_display }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">
+                            {{ da.service.name|default:"—" }} · {{ da.requester.email|truncatechars:30 }}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-slate-900 tabular-nums">{{ da.total_amount|floatformat:0 }}</p>
+                        <p class="text-xs text-slate-500">{{ da.currency_code }}</p>
+                    </div>
+                    <p class="text-xs text-slate-400 whitespace-nowrap">{{ da.created_at|date:"d/m" }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <p class="text-slate-500 text-sm">Aucune DA trouvée</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Data pour Chart.js -->
+    {{ daily|json_script:"da-daily-data" }}
+    {{ top_items|json_script:"da-top-items-data" }}
+    {{ status_data|json_script:"da-status-data" }}
+
+    <script>
+    (function() {
+        const daily = JSON.parse(document.getElementById('da-daily-data').textContent);
+        const topItems = JSON.parse(document.getElementById('da-top-items-data').textContent);
+        const statusData = JSON.parse(document.getElementById('da-status-data').textContent);
+
+        Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+        Chart.defaults.font.size = 11;
+        Chart.defaults.color = '#64748b';
+
+        // Chart 1 : Evolution
+        const evoCanvas = document.getElementById('chartEvolution');
+        if (evoCanvas && daily.length) {
+            const ctx = evoCanvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 0, 200);
+            grad.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+            grad.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: daily.map(d => d.day),
+                    datasets: [{
+                        label: 'DA',
+                        data: daily.map(d => d.count),
+                        borderColor: '#2563eb',
+                        backgroundColor: grad,
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#2563eb',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        } else if (evoCanvas) {
+            evoCanvas.parentElement.innerHTML = '<div class="text-center text-sm text-slate-400 py-16">Aucune donnée sur cette période</div>';
+        }
+
+        // Chart 2 : Top items (horizontal bar)
+        const topCanvas = document.getElementById('chartTopItems');
+        if (topCanvas && topItems.length) {
+            new Chart(topCanvas, {
+                type: 'bar',
+                data: {
+                    labels: topItems.map(i => i.name),
+                    datasets: [{
+                        data: topItems.map(i => i.qty),
+                        backgroundColor: ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
+                        borderRadius: 6,
+                        barThickness: 20,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f1f5f9' } },
+                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        } else if (topCanvas) {
+            topCanvas.parentElement.innerHTML = '<div class="text-center text-sm text-slate-400 py-16">Aucune donnée</div>';
+        }
+
+        // Chart 3 : Status doughnut
+        const statusCanvas = document.getElementById('chartStatus');
+        if (statusCanvas && statusData.length) {
+            const colors = {
+                'BROUILLON': '#94a3b8',
+                'SOUMISE': '#f59e0b',
+                'VISEE_DIRECTEUR': '#8b5cf6',
+                'STOCK_VERIFIE': '#06b6d4',
+                'VALIDEE': '#3b82f6',
+                'COMMANDEE': '#6366f1',
+                'RECUE': '#10b981',
+                'CLOTUREE': '#059669',
+                'REFUSEE': '#ef4444',
+                'ANNULEE': '#64748b',
+            };
+            new Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: statusData.map(s => s.label),
+                    datasets: [{
+                        data: statusData.map(s => s.count),
+                        backgroundColor: statusData.map(s => colors[s.status] || '#cbd5e1'),
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 10 } } }
+                    }
+                }
+            });
+        } else if (statusCanvas) {
+            statusCanvas.parentElement.innerHTML = '<div class="text-center text-sm text-slate-400 py-16">Aucune donnée</div>';
+        }
+    })();
+    </script>
 </div>
 {% endblock %}

@@ -16,6 +16,7 @@ from .models import (
     DASignature, DASignatureFlow, DAOtpCode, DAStockMovement,
 )
 from . import workflow
+from .dashboard_view import da_dashboard
 from .services import (
     create_signature, generate_otp_code, hash_otp_code,
     send_otp_sms, verify_signature,
@@ -51,7 +52,7 @@ def _can_validate_da(user, da):
 # DASHBOARD
 # ═══════════════════════════════════════════════════════════════
 @login_required
-def da_dashboard(request):
+def da_dashboard_old(request):
     """Tableau de bord DA."""
     org = request.user.organization
 

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Admin DA — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Admin DA</h1>
+                <p class="text-slate-500 text-sm">Gestion du catalogue et de l'organisation</p>
+            </div>
+        </div>
+        <a href="{% url 'da_dashboard' %}" class="text-sm text-slate-600 hover:text-brand-600">← Dashboard DA</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Categories</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.categories }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Articles</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.items }}</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+            <p class="text-xs font-semibold text-amber-700 uppercase mb-1">Stock bas</p>
+            <p class="text-2xl font-extrabold text-amber-700">{{ stats.items_low_stock }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Directions</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.directions }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Services</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.services }}</p>
+        </div>
+    </div>
+
+    <!-- Cards navigation -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <a href="{% url 'da_admin_items' %}" class="group bg-white rounded-2xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover p-6 transition">
+            <div class="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mb-4 group-hover:bg-brand-600 group-hover:text-white transition">
+                <svg class="w-6 h-6 text-brand-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Articles</h3>
+            <p class="text-sm text-slate-500">Créer, modifier, gérer les articles et leur stock</p>
+        </a>
+
+        <a href="{% url 'da_admin_categories' %}" class="group bg-white rounded-2xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover p-6 transition">
+            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                <svg class="w-6 h-6 text-purple-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5a2 2 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Catégories</h3>
+            <p class="text-sm text-slate-500">Organiser les articles par catégorie</p>
+        </a>
+
+        <a href="{% url 'da_admin_directions' %}" class="group bg-white rounded-2xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover p-6 transition">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                <svg class="w-6 h-6 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Directions</h3>
+            <p class="text-sm text-slate-500">Gérer les directions et leurs directeurs</p>
+        </a>
+
+        <a href="{% url 'da_admin_services' %}" class="group bg-white rounded-2xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover p-6 transition">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
+                <svg class="w-6 h-6 text-emerald-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Services</h3>
+            <p class="text-sm text-slate-500">Gérer les services et leurs chefs</p>
+        </a>
+
+        <a href="{% url 'da_admin_items_import' %}" class="group bg-white rounded-2xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover p-6 transition">
+            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-white transition">
+                <svg class="w-6 h-6 text-amber-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Importer CSV</h3>
+            <p class="text-sm text-slate-500">Import en masse d'articles via fichier CSV</p>
+        </a>
+
+        <a href="{% url 'stock_dashboard' %}" class="group bg-white rounded-2xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover p-6 transition">
+            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-4 group-hover:bg-slate-800 group-hover:text-white transition">
+                <svg class="w-6 h-6 text-slate-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">Mouvements stock</h3>
+            <p class="text-sm text-slate-500">Voir l'historique des mouvements de stock</p>
+        </a>
+
+    </div>
+</div>
+{% endblock %}

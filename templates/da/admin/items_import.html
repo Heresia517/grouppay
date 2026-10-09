@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Import CSV articles — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'da_admin_items' %}" class="text-sm text-slate-600 hover:text-brand-600">← Articles</a>
+    </div>
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg bg-gradient-to-br from-amber-500 to-amber-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Importer des articles</h1>
+            <p class="text-slate-500 text-sm">Ajouter plusieurs articles en une seule fois</p>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% elif message.tags == 'warning' %}bg-amber-50 border border-amber-200 text-amber-900{% else %}bg-emerald-50 border border-emerald-200 text-emerald-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="flex justify-end mb-4">
+        <a href="{% url 'da_admin_items_import_template' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Telecharger le modele CSV
+        </a>
+    </div>
+
+    <form method="post" action="{% url 'da_admin_items_import_upload' %}" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+        {% csrf_token %}
+
+        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:border-brand-400 transition">
+            <svg class="w-12 h-12 mx-auto text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Selectionner un fichier CSV</label>
+            <input type="file" name="csv_file" accept=".csv" required
+                   class="block mx-auto text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-600 file:text-white file:font-semibold hover:file:bg-brand-700">
+            <p class="text-xs text-slate-500 mt-3">
+                Colonnes requises : <strong>name</strong>, <strong>category</strong><br>
+                Colonnes optionnelles : reference, unit, unit_price, stock_quantity, reorder_level
+            </p>
+        </div>
+
+        <div class="flex justify-end mt-6 pt-6 border-t border-slate-100">
+            <button type="submit" class="px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm">
+                Importer les articles
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
