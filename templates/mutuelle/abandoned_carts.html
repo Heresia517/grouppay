@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Paniers abandonnes — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'rh_dashboard' %}" class="text-sm text-slate-600 hover:text-brand-600">← Dashboard RH</a>
+    </div>
+
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, #f59e0b, #dc2626);">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Paniers abandonnes</h1>
+                <p class="text-slate-500 text-sm">Relancez les membres pour finaliser leur commande</p>
+            </div>
+        </div>
+        {% if carts_data %}
+        <form method="post" action="{% url 'cart_recovery_send_all' %}">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('Envoyer une relance a tous ?')"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Tout relancer
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% else %}bg-emerald-50 border border-emerald-200 text-emerald-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Paniers actifs</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.active_carts }}</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+            <p class="text-xs font-semibold text-amber-700 uppercase mb-1">Abandonnes</p>
+            <p class="text-2xl font-extrabold text-amber-700">{{ stats.abandoned_carts }}</p>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+            <p class="text-xs font-semibold text-emerald-700 uppercase mb-1">Convertis</p>
+            <p class="text-2xl font-extrabold text-emerald-700">{{ stats.converted_carts }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl shadow-card p-5 text-white">
+            <p class="text-xs font-semibold uppercase mb-1 opacity-90">Taux conversion</p>
+            <p class="text-2xl font-extrabold">{{ stats.conversion_rate }}%</p>
+        </div>
+    </div>
+
+    <!-- Filtre -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 mb-6">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Abandonnes depuis</label>
+                <select name="hours" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="1" {% if hours_min == 1 %}selected{% endif %}>1 heure</option>
+                    <option value="6" {% if hours_min == 6 %}selected{% endif %}>6 heures</option>
+                    <option value="24" {% if hours_min == 24 %}selected{% endif %}>24 heures</option>
+                    <option value="72" {% if hours_min == 72 %}selected{% endif %}>3 jours</option>
+                    <option value="168" {% if hours_min == 168 %}selected{% endif %}>7 jours</option>
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold">Filtrer</button>
+        </form>
+    </div>
+
+    <!-- Liste -->
+    {% if carts_data %}
+    <div class="space-y-3">
+        {% for item in carts_data %}
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center font-bold shadow-sm">
+                        {{ item.user.email|slice:":1"|upper }}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-semibold text-slate-900">{{ item.user.email|truncatechars:30 }}</p>
+                        {% if item.user.internal_id %}<p class="text-xs text-slate-500">{{ item.user.internal_id }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="flex-1 grid grid-cols-3 gap-4 text-center sm:text-left">
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase">Articles</p>
+                        <p class="font-bold text-slate-900">{{ item.items_count }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase">Montant</p>
+                        <p class="font-bold text-slate-900 tabular-nums">{{ item.total|floatformat:0 }} {{ item.currency }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase">Abandonne</p>
+                        <p class="font-bold text-amber-600">
+                            {% if item.hours_ago < 24 %}il y a {{ item.hours_ago }}h{% else %}il y a {{ item.hours_ago|divisibleby:24 }}j{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <form method="post" action="{% url 'cart_recovery_send' item.cart.id %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="channel" value="EMAIL">
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 whitespace-nowrap">
+                            📧 Relancer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-5">
+            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucun panier abandonne</h3>
+        <p class="text-slate-500">Tous les paniers sont frais ou convertis ✨</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

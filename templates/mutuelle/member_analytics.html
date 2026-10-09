@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Mes analytics — {{ organization.name }}{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Mes analytics</h1>
+                <p class="text-slate-500 text-sm">Vos statistiques d'achat personnel</p>
+            </div>
+        </div>
+        <div class="inline-flex items-center bg-white rounded-xl border border-slate-200 shadow-sm p-1">
+            <a href="?period=30" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg {% if period == 30 %}bg-brand-600 text-white{% else %}text-slate-600{% endif %}">30j</a>
+            <a href="?period=90" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg {% if period == 90 %}bg-brand-600 text-white{% else %}text-slate-600{% endif %}">90j</a>
+            <a href="?period=365" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg {% if period == 365 %}bg-brand-600 text-white{% else %}text-slate-600{% endif %}">1 an</a>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Total depense</p>
+            <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ kpis.total_spent|floatformat:0 }}</p>
+            <p class="text-xs text-slate-500 mt-0.5">{{ organization.currency_code }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-card p-5 text-white">
+            <p class="text-xs font-semibold uppercase tracking-wide mb-1 opacity-90">Economies estimees</p>
+            <p class="text-2xl font-extrabold tabular-nums">{{ kpis.savings|floatformat:0 }}</p>
+            <p class="text-xs opacity-90">~15% vs prix normal</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Commandes</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ kpis.total_orders }}</p>
+            <p class="text-xs text-slate-500 mt-0.5">{{ kpis.delivered }} livrees</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Panier moyen</p>
+            <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ kpis.avg_basket|floatformat:0 }}</p>
+            <p class="text-xs text-slate-500 mt-0.5">{{ organization.currency_code }}</p>
+        </div>
+    </div>
+
+    <!-- Panier actuel -->
+    {% if kpis.cart_items_count > 0 %}
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17"/></svg>
+            </div>
+            <div>
+                <p class="font-bold text-amber-900">Panier en cours</p>
+                <p class="text-sm text-amber-700">{{ kpis.cart_items_count }} article(s) — {{ kpis.cart_amount|floatformat:0 }} {{ organization.currency_code }}</p>
+            </div>
+        </div>
+        <a href="{% url 'view_cart' %}" class="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 whitespace-nowrap">
+            Voir mon panier
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <h2 class="font-bold text-slate-900 mb-4">Evolution de mes achats</h2>
+            <div class="h-64">
+                <canvas id="chartMonthly"></canvas>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+            <h2 class="font-bold text-slate-900 mb-4">Par categorie</h2>
+            <div class="h-64">
+                <canvas id="chartCategories"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top produits -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="font-bold text-slate-900">Produits preferes</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Vos 5 produits les plus commandes</p>
+            </div>
+            {% if products_data %}
+            <div class="divide-y divide-slate-100">
+                {% for p in products_data %}
+                <a href="{% url 'product_detail' p.id %}" class="block p-4 hover:bg-slate-50">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <span class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center text-sm font-bold flex-shrink-0">{{ forloop.counter }}</span>
+                            <span class="font-medium text-slate-900 truncate">{{ p.name|truncatechars:35 }}</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-slate-900">{{ p.qty }}</p>
+                            <p class="text-xs text-slate-500">{{ p.amount|floatformat:0 }} {{ organization.currency_code }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-12 text-center text-slate-500 text-sm">Aucun achat</div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="font-bold text-slate-900">Commandes recentes</h2>
+            </div>
+            {% if recent_orders %}
+            <div class="divide-y divide-slate-100">
+                {% for order in recent_orders %}
+                <a href="{% url 'order_detail' order.id %}" class="block p-4 hover:bg-slate-50">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold text-slate-900">{{ order.order_number }}</p>
+                            <p class="text-xs text-slate-500">{{ order.created_at|date:"d/m/Y" }} · {{ order.get_status_display }}</p>
+                        </div>
+                        <p class="font-bold text-slate-900 tabular-nums">{{ order.total_amount|floatformat:0 }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-12 text-center text-slate-500 text-sm">Aucune commande</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {{ monthly_data|json_script:"monthly" }}
+    {{ categories_data|json_script:"categories" }}
+
+    <script>
+    (function() {
+        const monthly = JSON.parse(document.getElementById('monthly').textContent);
+        const categories = JSON.parse(document.getElementById('categories').textContent);
+
+        Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+        Chart.defaults.font.size = 11;
+        Chart.defaults.color = '#64748b';
+
+        const ctxM = document.getElementById('chartMonthly');
+        if (ctxM && monthly.length) {
+            const ctx = ctxM.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 0, 240);
+            grad.addColorStop(0, 'rgba(37, 99, 235, 0.25)');
+            grad.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthly.map(m => m.month),
+                    datasets: [{
+                        label: 'Achats',
+                        data: monthly.map(m => m.amount),
+                        borderColor: '#2563eb',
+                        backgroundColor: grad,
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#2563eb',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        } else if (ctxM) {
+            ctxM.parentElement.innerHTML = '<div class="text-center text-sm text-slate-400 py-16">Aucune donnee</div>';
+        }
+
+        const ctxC = document.getElementById('chartCategories');
+        if (ctxC && categories.length) {
+            new Chart(ctxC, {
+                type: 'doughnut',
+                data: {
+                    labels: categories.map(c => c.name),
+                    datasets: [{
+                        data: categories.map(c => c.amount),
+                        backgroundColor: ['#2563eb','#10b981','#f59e0b','#8b5cf6','#ec4899'],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 10 } } } }
+                }
+            });
+        } else if (ctxC) {
+            ctxC.parentElement.innerHTML = '<div class="text-center text-sm text-slate-400 py-16">Aucune donnee</div>';
+        }
+    })();
+    </script>
+</div>
+{% endblock %}

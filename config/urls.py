@@ -29,6 +29,10 @@ from apps.documents.views import (
 )
 from apps.deliveries.views import courier_deliveries, delivery_detail, update_delivery_status
 from apps.orders.dashboard_views import rh_dashboard, bulk_validate_orders, bulk_reject_orders
+from apps.orders.analytics_view import member_analytics
+from apps.orders.admin_recovery_view import (
+    abandoned_carts_list, cart_recovery_send, cart_recovery_send_all,
+)
 from apps.deductions.views import (
     deductions_dashboard, preview_export, generate_export, download_batch, mark_batch_sent,
 )
@@ -137,6 +141,12 @@ urlpatterns = [
     path('rh/dashboard/export-pdf/', export_dashboard_pdf, name='export_dashboard_pdf'),
 
     # Retenue salariale
+    # Analytics + relances
+    path("analytics/", member_analytics, name="member_analytics"),
+    path("rh/abandoned-carts/", abandoned_carts_list, name="abandoned_carts_list"),
+    path("rh/abandoned-carts/<uuid:cart_id>/recover/", cart_recovery_send, name="cart_recovery_send"),
+    path("rh/abandoned-carts/recover-all/", cart_recovery_send_all, name="cart_recovery_send_all"),
+
     path('rh/deductions/', deductions_dashboard, name='deductions_dashboard'),
     path('rh/deductions/preview/', preview_export, name='preview_export'),
     path('rh/deductions/generate/', generate_export, name='generate_export'),

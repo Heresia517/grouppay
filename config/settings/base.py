@@ -184,6 +184,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "orders.cleanup_expired_carts",
         "schedule": crontab(hour=3, minute=0),
     },
+    "send-abandoned-cart-reminders": {
+        "task": "orders.send_abandoned_cart_reminders",
+        "schedule": crontab(hour=10, minute=0),
+    },
     "check-low-stock-alerts": {
         "task": "catalog.check_low_stock_alerts",
         "schedule": crontab(hour=8, minute=0),
