@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}{{ da.number }} — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'da_dashboard' %}" class="text-sm text-slate-600 hover:text-brand-600">← Mes DA</a>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% elif message.tags == 'warning' %}bg-amber-50 border border-amber-200 text-amber-900{% else %}bg-blue-50 border border-blue-200 text-blue-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">{{ da.number }}</h1>
+                <p class="text-slate-500 mt-1">Creee le {{ da.created_at|date:"d/m/Y à H:i" }} par {{ da.requester.email }}</p>
+            </div>
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold self-start
+                {% if da.status == 'CLOTUREE' %}bg-emerald-100 text-emerald-800
+                {% elif da.status == 'REFUSEE' or da.status == 'ANNULEE' %}bg-red-100 text-red-800
+                {% elif da.status == 'SOUMISE' or da.status == 'VISEE_DIRECTEUR' or da.status == 'STOCK_VERIFIE' %}bg-amber-100 text-amber-800
+                {% elif da.status == 'COMMANDEE' or da.status == 'RECUE' %}bg-blue-100 text-blue-800
+                {% else %}bg-slate-100 text-slate-700{% endif %}">
+                {{ da.get_status_display }}
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Service</p>
+                <p class="font-medium text-slate-900">{{ da.service.name|default:"—" }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Priorite</p>
+                <p class="font-medium text-slate-900">{{ da.get_priority_display }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Articles</p>
+                <p class="font-medium text-slate-900">{{ lines|length }} article(s)</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Montant total</p>
+                <p class="font-extrabold text-slate-900">{{ da.total_amount|floatformat:0 }} {{ da.currency_code }}</p>
+            </div>
+        </div>
+
+        {% if da.purpose %}
+        <div class="mt-4 pt-4 border-t border-slate-100">
+            <p class="text-xs text-slate-500 uppercase mb-1">Motif</p>
+            <p class="text-slate-700">{{ da.purpose }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Lignes -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900">Articles demandes</h2>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Article</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Qte</th>
+                    <th class="p-3 text-right font-semibold text-slate-600">P.U.</th>
+                    <th class="p-3 text-right font-semibold text-slate-600">Sous-total</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Notes</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for line in lines %}
+                <tr>
+                    <td class="p-3">
+                        <p class="font-medium text-slate-900">{{ line.item.name }}</p>
+                        <p class="text-xs text-slate-400">{{ line.item.get_unit_display }}</p>
+                    </td>
+                    <td class="p-3 text-center font-semibold">{{ line.quantity }}</td>
+                    <td class="p-3 text-right tabular-nums">{{ line.unit_price|floatformat:0 }}</td>
+                    <td class="p-3 text-right font-bold tabular-nums">{{ line.subtotal|floatformat:0 }}</td>
+                    <td class="p-3 text-xs text-slate-500">{{ line.notes|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="bg-slate-900 text-white">
+                <tr>
+                    <td colspan="3" class="p-3 text-right font-bold">TOTAL</td>
+                    <td colspan="2" class="p-3 text-right font-extrabold">{{ da.total_amount|floatformat:0 }} {{ da.currency_code }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="font-bold text-slate-900">Actions disponibles</h2>
+            <div class="flex gap-2">
+                <a href="{% url 'da_preview_pdf' da.id %}" target="_blank" class="px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50">
+                    Apercu PDF
+                </a>
+                <a href="{% url 'da_download_pdf' da.id %}" class="px-3 py-2 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700">
+                    Telecharger PDF
+                </a>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            {% if can_submit %}
+            <form method="post" action="{% url 'da_submit' da.id %}" class="inline">
+                {% csrf_token %}
+                <button class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">
+                    Soumettre au visa
+                </button>
+            </form>
+            {% endif %}
+
+            {% if can_visa %}
+            <form method="post" action="{% url 'da_visa' da.id %}" class="inline-flex items-center gap-2">
+                {% csrf_token %}
+                <input type="text" name="comment" placeholder="Commentaire..." class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                <button name="approved" value="yes" class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold">Viser</button>
+                <button name="approved" value="no" class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold">Refuser</button>
+            </form>
+            {% endif %}
+
+            {% if can_verify_stock %}
+            <a href="{% url 'da_verify_stock' da.id %}" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">Verifier stock</a>
+            {% endif %}
+
+            {% if can_sign_dg %}
+            <a href="{% url 'da_sign_page' da.id %}" class="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-semibold">Signer (DG)</a>
+            {% endif %}
+
+            {% if can_receive %}
+            <a href="{% url 'da_receive_page' da.id %}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                Receptionner les articles
+            </a>
+            {% endif %}
+
+            {% if can_order %}
+            <form method="post" action="{% url 'da_order' da.id %}" class="inline-flex items-center gap-2">
+                {% csrf_token %}
+                <input type="text" name="supplier_name" placeholder="Fournisseur" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">Commander</button>
+            </form>
+            {% endif %}
+
+            {% if can_close %}
+            <a href="{% url 'da_close_page' da.id %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Cloturer
+            </a>
+            {% endif %}
+
+            {% if not can_submit and not can_visa and not can_verify_stock and not can_sign_dg and not can_order and not can_close %}
+            <p class="text-sm text-slate-500 italic">Aucune action disponible pour vous sur cette DA.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Signatures -->
+    {% if signatures %}
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-6">
+        <h2 class="font-bold text-slate-900 mb-4">Signatures numeriques ({{ signatures|length }})</h2>
+        <div class="space-y-3">
+            {% for sig in signatures %}
+            <div class="flex items-center gap-4 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                {% if sig.visual_image %}
+                <img src="{{ sig.visual_image.url }}" alt="Signature" class="w-24 h-auto rounded border border-slate-200">
+                {% endif %}
+                <div class="flex-1">
+                    <p class="font-medium text-slate-900">{{ sig.get_signer_role_display }} — {{ sig.signer.email }}</p>
+                    <p class="text-xs text-slate-500">Signee le {{ sig.signed_at|date:"d/m/Y à H:i:s" }}</p>
+                    <p class="text-xs text-slate-400 font-mono mt-1">{{ sig.signature_hash|slice:":32" }}...</p>
+                    <a href="{% url 'da_verify_public' sig.signature_hash %}" target="_blank" class="text-xs text-brand-600 hover:underline mt-1 inline-block">Verifier publiquement →</a>
+                </div>
+                {% if sig.qr_code_image %}
+                <img src="{{ sig.qr_code_image.url }}" alt="QR" class="w-16 h-16">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Historique -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+        <h2 class="font-bold text-slate-900 mb-4">Historique</h2>
+        <ol class="relative border-l-2 border-slate-200 ml-2">
+            {% for h in history %}
+            <li class="mb-4 ml-6 relative">
+                <span class="absolute -left-[31px] top-1.5 flex items-center justify-center w-3 h-3 rounded-full bg-brand-600 ring-4 ring-white"></span>
+                <p class="text-sm font-semibold text-slate-900">{{ h.to_status }}</p>
+                <p class="text-xs text-slate-500">{{ h.created_at|date:"d/m/Y à H:i" }} — {{ h.actor.email|default:"Systeme" }}</p>
+                {% if h.comment %}<p class="text-xs text-slate-600 mt-1 italic">{{ h.comment }}</p>{% endif %}
+            </li>
+            {% empty %}
+            <li class="text-sm text-slate-500 ml-6">Aucun historique</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+{% endblock %}

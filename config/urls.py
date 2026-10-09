@@ -64,6 +64,7 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path('admin/', admin.site.urls),
+    path('da/', include('apps.da.urls')),
     
     # Catalogue
     path('', catalog, name='catalog'),

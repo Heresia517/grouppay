@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Verification stock DA {{ da.number }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'da_detail' da.id %}" class="text-sm text-slate-600 hover:text-brand-600">← Retour a la DA</a>
+    </div>
+
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Verification du stock</h1>
+    <p class="text-slate-500 text-sm mb-8">DA {{ da.number }} — {{ da.requester.email }}</p>
+
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Article</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Demande</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Stock actuel</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">A acheter</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for line in lines %}
+                <tr>
+                    <td class="p-3 font-medium text-slate-900">{{ line.item.name }}</td>
+                    <td class="p-3 text-center font-semibold">{{ line.quantity }}</td>
+                    <td class="p-3 text-center">
+                        <span class="{% if line.item.stock_quantity == 0 %}text-red-600 font-bold{% elif line.item.stock_quantity < line.quantity %}text-amber-600 font-semibold{% else %}text-emerald-600{% endif %}">
+                            {{ line.item.stock_quantity }}
+                        </span>
+                    </td>
+                    <td class="p-3 text-center font-bold text-red-600">
+                        {% if line.item.stock_quantity < line.quantity %}
+                            {{ line.quantity|add:"-"|add:line.item.stock_quantity|default:0 }}
+                        {% else %}
+                            <span class="text-emerald-600">0</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form method="post" class="bg-white rounded-2xl shadow-card border border-slate-100 p-6">
+        {% csrf_token %}
+        <p class="text-sm text-slate-600 mb-4">
+            En confirmant, la DA passe en statut <strong>STOCK_VERIFIE</strong>.
+            Si tout est en stock, elle sera automatiquement marquee comme COMMANDEE.
+            Sinon, elle sera transmise au DG pour signature.
+        </p>
+        <div class="flex justify-end gap-2">
+            <a href="{% url 'da_detail' da.id %}" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold">Annuler</a>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">
+                Confirmer la verification
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.notifications",
     "channels",
     "apps.audit",
+    "apps.da",
     "django_otp",
     "django_otp.plugins.otp_totp",
 ]
@@ -266,3 +267,14 @@ AFRICASTALKING_API_KEY = env("AFRICASTALKING_API_KEY", default="")
 # ============================================================
 OTP_TOTP_ISSUER = env("OTP_TOTP_ISSUER", default="GroupPay")
 OTP_LOGIN_URL = "/accounts/2fa/verify/"
+
+
+# ============================================================
+# SIGNATURE NUMERIQUE DA
+# ============================================================
+DA_OTP_EXPIRY_MINUTES = env.int("DA_OTP_EXPIRY_MINUTES", default=10)
+DA_OTP_MAX_ATTEMPTS = env.int("DA_OTP_MAX_ATTEMPTS", default=3)
+DA_SIGNATURE_LEVEL_DEFAULT = env("DA_SIGNATURE_LEVEL_DEFAULT", default="PIN_OTP")
+
+DA_THRESHOLD_DIRECTOR = env.int("DA_THRESHOLD_DIRECTOR", default=500_000)
+DA_THRESHOLD_DG = env.int("DA_THRESHOLD_DG", default=2_000_000)

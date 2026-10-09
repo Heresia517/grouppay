@@ -41,6 +41,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=100, blank=True)
     internal_id = models.CharField(max_length=50, blank=True)
     phone = models.CharField(max_length=20, blank=True)
+
+    # Rattachement organisationnel
+    service = models.ForeignKey(
+        "organizations.Service", on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="members",
+        help_text="Service auquel appartient l'utilisateur",
+    )
+    is_service_chief = models.BooleanField(
+        default=False,
+        help_text="Chef de service (peut soumettre des DA)",
+    )
+    is_director = models.BooleanField(
+        default=False,
+        help_text="Directeur de direction (peut viser les DA)",
+    )
+    is_dg = models.BooleanField(
+        default=False,
+        help_text="Directeur General (signature finale des DA)",
+    )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="MEMBRE")
     is_active = models.BooleanField(default=True)
     is_blocked = models.BooleanField(default=False)

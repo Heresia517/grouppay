@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Catalogue articles — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Catalogue articles internes</h1>
+    <p class="text-slate-500 text-sm mb-8">Articles disponibles pour vos demandes d'achat</p>
+
+    {% for category in categories %}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-4">{{ category.name }}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for item in items %}
+            {% if item.category_id == category.id %}
+            <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
+                <h3 class="font-semibold text-slate-900">{{ item.name }}</h3>
+                <p class="text-xs text-slate-500 mt-1">{{ item.get_unit_display }}</p>
+                <div class="flex items-center justify-between mt-3">
+                    <span class="text-lg font-bold text-slate-900">{{ item.unit_price|floatformat:0 }}</span>
+                    <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold
+                        {% if item.is_out_of_stock %}bg-red-100 text-red-800
+                        {% elif item.is_low_stock %}bg-amber-100 text-amber-800
+                        {% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                        Stock: {{ item.stock_quantity }}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100">
+        <p class="text-slate-500">Aucun article dans le catalogue</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

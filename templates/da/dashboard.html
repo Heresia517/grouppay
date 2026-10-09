@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Demandes d'Achat — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                 style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900">Demandes d'Achat</h1>
+                <p class="text-slate-500 text-sm">Gestion des DA fournitures</p>
+            </div>
+        </div>
+        <a href="{% url 'da_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Nouvelle DA
+        </a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Total</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.total }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Mes DA</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.my_total }}</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-amber-700 uppercase mb-1">A signer</p>
+            <p class="text-2xl font-extrabold text-amber-700">{{ stats.pending_me }}</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-blue-700 uppercase mb-1">En cours</p>
+            <p class="text-2xl font-extrabold text-blue-700">{{ stats.in_progress }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-card p-4 text-white">
+            <p class="text-xs font-semibold uppercase mb-1 opacity-90">Cloturees (30j)</p>
+            <p class="text-2xl font-extrabold">{{ stats.completed_this_month }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Mes DA -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <h2 class="font-bold text-slate-900">Mes demandes recentes</h2>
+                <a href="{% url 'da_list' %}?scope=mine" class="text-sm text-brand-600 hover:underline">Tout voir →</a>
+            </div>
+            {% if my_requests %}
+            <div class="divide-y divide-slate-100">
+                {% for da in my_requests %}
+                <a href="{% url 'da_detail' da.id %}" class="block p-4 hover:bg-slate-50 transition">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold text-slate-900">{{ da.number }}</p>
+                            <p class="text-xs text-slate-500 truncate">{{ da.purpose|truncatechars:60 }}</p>
+                        </div>
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap
+                            {% if da.status == 'CLOTUREE' %}bg-emerald-100 text-emerald-800
+                            {% elif da.status == 'REFUSEE' or da.status == 'ANNULEE' %}bg-red-100 text-red-800
+                            {% elif da.status == 'SOUMISE' or da.status == 'VISEE_DIRECTEUR' %}bg-amber-100 text-amber-800
+                            {% elif da.status == 'COMMANDEE' or da.status == 'RECUE' %}bg-blue-100 text-blue-800
+                            {% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {{ da.get_status_display }}
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-12 text-center">
+                <p class="text-slate-500 text-sm">Aucune DA pour le moment</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- A signer par moi -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="font-bold text-slate-900">DA en attente de ma signature ({{ pending_signatures|length }})</h2>
+            </div>
+            {% if pending_signatures %}
+            <div class="divide-y divide-slate-100">
+                {% for flow in pending_signatures %}
+                <a href="{% url 'da_detail' flow.purchase_request.id %}" class="block p-4 hover:bg-slate-50 transition">
+                    <p class="font-semibold text-slate-900">{{ flow.purchase_request.number }}</p>
+                    <p class="text-xs text-slate-500">Etape {{ flow.step_order }} · {{ flow.get_role_required_display }}</p>
+                    <p class="text-xs text-slate-400 mt-1">Par {{ flow.purchase_request.requester.email }}</p>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-12 text-center">
+                <p class="text-slate-500 text-sm">Aucune signature en attente</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

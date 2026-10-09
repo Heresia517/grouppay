@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Toutes les DA — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center justify-between gap-4 mb-6">
+        <h1 class="text-3xl font-extrabold text-slate-900">Demandes d'Achat</h1>
+        <a href="{% url 'da_create' %}" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">+ Nouvelle DA</a>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 mb-6">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Portee</label>
+                <select name="scope" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="all" {% if scope == 'all' %}selected{% endif %}>Toutes</option>
+                    <option value="mine" {% if scope == 'mine' %}selected{% endif %}>Mes DA</option>
+                    <option value="pending" {% if scope == 'pending' %}selected{% endif %}>En attente</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Statut</label>
+                <select name="status" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for val, label in statuses %}
+                    <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">Filtrer</button>
+            <a href="{% url 'da_list' %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold">Reset</a>
+        </form>
+    </div>
+
+    <!-- Liste -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Numero</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Demandeur</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Service</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Statut</th>
+                    <th class="p-3 text-right font-semibold text-slate-600">Montant</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Date</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for da in requests %}
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3">
+                        <a href="{% url 'da_detail' da.id %}" class="font-semibold text-brand-600 hover:underline">
+                            {{ da.number }}
+                        </a>
+                    </td>
+                    <td class="p-3 text-slate-700">{{ da.requester.email }}</td>
+                    <td class="p-3 text-slate-500">{{ da.service.name|default:"—" }}</td>
+                    <td class="p-3 text-center">
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold
+                            {% if da.status == 'CLOTUREE' %}bg-emerald-100 text-emerald-800
+                            {% elif da.status == 'REFUSEE' or da.status == 'ANNULEE' %}bg-red-100 text-red-800
+                            {% elif da.status == 'SOUMISE' or da.status == 'VISEE_DIRECTEUR' %}bg-amber-100 text-amber-800
+                            {% elif da.status == 'COMMANDEE' or da.status == 'RECUE' %}bg-blue-100 text-blue-800
+                            {% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {{ da.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right font-semibold tabular-nums">{{ da.total_amount|floatformat:0 }} {{ da.currency_code }}</td>
+                    <td class="p-3 text-slate-500 text-xs">{{ da.created_at|date:"d/m/Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="p-12 text-center text-slate-500">Aucune DA trouvee</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

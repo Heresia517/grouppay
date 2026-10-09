@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Cloture DA {{ da.number }} — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'da_detail' da.id %}" class="text-sm text-slate-600 hover:text-brand-600">← Retour a la DA</a>
+    </div>
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Cloture de la DA</h1>
+            <p class="text-slate-500 text-sm">Verification finale avant cloture</p>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% else %}bg-blue-50 border border-blue-200 text-blue-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Checklist -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 mb-6">
+        <h2 class="font-bold text-slate-900 mb-4">Verifications avant cloture</h2>
+
+        <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 rounded-lg {% if all_received %}bg-emerald-50 border border-emerald-200{% else %}bg-red-50 border border-red-200{% endif %}">
+                {% if all_received %}
+                <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span class="text-sm font-medium text-emerald-900">Tous les articles ont ete receptionnes</span>
+                {% else %}
+                <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                <span class="text-sm font-medium text-red-900">Attention : certains articles ne sont pas completement receptionnes</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recap des articles receptionnes -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900">Articles receptionnes</h2>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Article</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Commandé</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Reçu</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for line in lines %}
+                <tr>
+                    <td class="p-3 font-medium text-slate-900">{{ line.item.name }}</td>
+                    <td class="p-3 text-center">{{ line.quantity }}</td>
+                    <td class="p-3 text-center font-bold">{{ line.quantity_received }}</td>
+                    <td class="p-3 text-center">
+                        {% if line.is_fully_received %}
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">✓ Complet</span>
+                        {% else %}
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Partiel</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mouvements de stock crees -->
+    {% if movements %}
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
+        <div class="p-5 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900">Mouvements de stock generes</h2>
+        </div>
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Date</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Article</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Qte</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Stock</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for mv in movements %}
+                <tr>
+                    <td class="p-3 text-xs text-slate-500">{{ mv.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="p-3">{{ mv.item.name }}</td>
+                    <td class="p-3 text-center font-bold text-emerald-600">+{{ mv.quantity }}</td>
+                    <td class="p-3 text-center text-xs tabular-nums">{{ mv.stock_before }} → {{ mv.stock_after }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Info historique -->
+    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6 text-sm text-slate-600">
+        <p>
+            <strong>Une fois cloturee</strong>, cette DA sera archivee et ne pourra plus etre modifiee.
+            L'historique complet reste consultable.
+        </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-2">
+        <a href="{% url 'da_detail' da.id %}" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200">
+            Annuler
+        </a>
+        <form method="post" action="{% url 'da_close' da.id %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 shadow-sm">
+                Confirmer la cloture
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
