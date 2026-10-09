@@ -116,3 +116,41 @@ class Service(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name}"
+
+
+
+class Currency(models.Model):
+    """Devise supportee."""
+    code = models.CharField(max_length=3, unique=True, primary_key=True)
+    name = models.CharField(max_length=50)
+    symbol = models.CharField(max_length=10, blank=True)
+    decimal_places = models.PositiveSmallIntegerField(default=2)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Devise"
+        verbose_name_plural = "Devises"
+        ordering = ["code"]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class ExchangeRate(models.Model):
+    """Taux de change entre 2 devises."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    from_currency = models.CharField(max_length=3)
+    to_currency = models.CharField(max_length=3)
+    rate = models.DecimalField(max_digits=18, decimal_places=8, help_text="1 from = X to")
+    fetched_at = models.DateTimeField(auto_now=True)
+    source = models.CharField(max_length=50, blank=True, help_text="API, manual, etc.")
+
+    class Meta:
+        ordering = ["-fetched_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["from_currency", "to_currency"], name="unique_exchange_pair"),
+        ]
+        verbose_name = "Taux de change"
+
+    def __str__(self):
+        return f"1 {self.from_currency} = {self.rate} {self.to_currency}"

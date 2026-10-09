@@ -18,3 +18,19 @@ class ServiceAdmin(admin.ModelAdmin):
     list_filter = ("organization", "direction", "is_active")
     search_fields = ("code", "name")
     list_editable = ("is_active",)
+
+
+
+from .models import Currency, ExchangeRate
+
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "symbol", "is_active")
+    list_filter = ("is_active",)
+
+
+@admin.register(ExchangeRate)
+class ExchangeRateAdmin(admin.ModelAdmin):
+    list_display = ("from_currency", "to_currency", "rate", "source", "fetched_at")
+    list_filter = ("from_currency", "to_currency")

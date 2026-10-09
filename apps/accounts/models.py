@@ -60,6 +60,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text="Directeur General (signature finale des DA)",
     )
+
+    referred_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referred_users",
+    )
+    referral_reward_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="MEMBRE")
     is_active = models.BooleanField(default=True)
     is_blocked = models.BooleanField(default=False)
@@ -86,3 +91,62 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.email} ({self.organization.name})"
+
+
+
+class Referral(models.Model):
+    """Parrainage entre membres."""
+    STATUS_CHOICES = [
+        ("PENDING", "En attente"),
+        ("ACTIVE", "Actif"),
+        ("REWARDED", "Recompense"),
+        ("EXPIRED", "Expire"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="referrals",
+    )
+    referrer = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="referrals_made",
+    )
+    referred = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="referrals_received",
+    )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
+    reward_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    rewarded_at = models.DateTimeField(null=True, blank=True)
+    notes = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["referrer", "referred"], name="unique_referral_pair"),
+        ]
+        verbose_name = "Parrainage"
+
+    def __str__(self):
+        return f"{self.referrer.email} -> {self.referred.email}"
+
+
+class ReferralCode(models.Model):
+    """Code de parrainage personnel."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="referral_code")
+    code = models.CharField(max_length=20, unique=True, db_index=True)
+    uses_count = models.PositiveIntegerField(default=0)
+    max_uses = models.PositiveIntegerField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.code
+
+    @property
+    def can_be_used(self):
+        if not self.is_active:
+            return False
+        if self.max_uses is not None and self.uses_count >= self.max_uses:
+            return False
+        return True

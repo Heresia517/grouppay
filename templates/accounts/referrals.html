@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Mon parrainage — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'profile' %}" class="text-sm text-slate-600 hover:text-brand-600">← Mon profil</a>
+    </div>
+
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+             style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857"/></svg>
+        </div>
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Mon parrainage</h1>
+            <p class="text-slate-500 text-sm">Invitez vos collegues et gagnez des recompenses</p>
+        </div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% else %}bg-emerald-50 border border-emerald-200 text-emerald-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Filleuls</p>
+            <p class="text-2xl font-extrabold text-slate-900">{{ stats.total_referrals }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Confirmes</p>
+            <p class="text-2xl font-extrabold text-emerald-600">{{ stats.rewarded_referrals }}</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-1">Total gagne</p>
+            <p class="text-2xl font-extrabold text-slate-900 tabular-nums">{{ stats.total_earned|floatformat:0 }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl shadow-card p-5 text-white">
+            <p class="text-xs font-semibold uppercase mb-1 opacity-90">Solde</p>
+            <p class="text-2xl font-extrabold tabular-nums">{{ stats.balance|floatformat:0 }}</p>
+            <p class="text-xs opacity-90">{{ organization.currency_code }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 mb-6">
+        <h2 class="font-bold text-slate-900 mb-4">Mon code de parrainage</h2>
+
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 text-center mb-4">
+            <p class="text-xs font-semibold text-amber-700 uppercase mb-2">Code personnel</p>
+            <p class="text-4xl font-extrabold text-amber-900 tracking-widest font-mono mb-4">{{ code.code }}</p>
+            <button onclick="copyToClipboard('{{ code.code }}')"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700">
+                Copier le code
+            </button>
+        </div>
+
+        <div class="mt-4">
+            <p class="text-xs font-semibold text-slate-500 uppercase mb-2">Lien de partage</p>
+            <div class="flex gap-2">
+                <input type="text" readonly value="{{ share_url }}"
+                       class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs bg-slate-50">
+                <button onclick="copyToClipboard('{{ share_url }}')"
+                        class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">
+                    Copier
+                </button>
+            </div>
+        </div>
+
+        {% if code.uses_count == 0 %}
+        <form method="post" action="{% url 'regenerate_code' %}" class="mt-4">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('Regenerer ?')" class="text-xs text-slate-500 hover:text-brand-600">
+                Regenerer mon code
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <div class="p-5 border-b border-slate-100">
+            <h2 class="font-bold text-slate-900">Mes filleuls ({{ referrals|length }})</h2>
+        </div>
+        {% if referrals %}
+        <div class="divide-y divide-slate-100">
+            {% for r in referrals %}
+            <div class="p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center font-bold">
+                    {{ r.referred.email|slice:":1"|upper }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-slate-900 truncate">{{ r.referred.email|truncatechars:35 }}</p>
+                    <p class="text-xs text-slate-500">{{ r.created_at|date:"d/m/Y" }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-bold {% if r.status == 'REWARDED' %}text-emerald-600{% else %}text-amber-600{% endif %}">
+                        {{ r.get_status_display }}
+                    </p>
+                    <p class="text-xs text-slate-500">{{ r.reward_amount|floatformat:0 }} {{ organization.currency_code }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-12 text-center text-slate-500 text-sm">Aucun filleul pour le moment.</div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg z-50';
+        toast.textContent = 'Copie !';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    });
+}
+</script>
+{% endblock %}

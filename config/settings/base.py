@@ -282,3 +282,9 @@ DA_SIGNATURE_LEVEL_DEFAULT = env("DA_SIGNATURE_LEVEL_DEFAULT", default="PIN_OTP"
 
 DA_THRESHOLD_DIRECTOR = env.int("DA_THRESHOLD_DIRECTOR", default=500_000)
 DA_THRESHOLD_DG = env.int("DA_THRESHOLD_DG", default=2_000_000)
+
+
+# ============================================================
+# PARRAINAGE
+# ============================================================
+REFERRAL_REWARD_AMOUNT = env.int("REFERRAL_REWARD_AMOUNT", default=5000)

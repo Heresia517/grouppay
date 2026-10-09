@@ -40,6 +40,8 @@ from apps.orders.export_views import export_dashboard_excel, export_dashboard_pd
 from apps.accounts.two_factor_views import (
     two_factor_setup, two_factor_verify, two_factor_disable, two_factor_status,
 )
+from apps.accounts.referral_views import my_referrals, regenerate_code
+from apps.organizations.currency_views import currency_converter, api_convert
 from apps.accounts.views import (
     profile, save_theme, import_members_page, import_members_csv, import_members_template,
 )
@@ -166,6 +168,10 @@ urlpatterns = [
 
     # Profil
     path('profile/', profile, name='profile'),
+    path('referrals/', my_referrals, name='my_referrals'),
+    path('currencies/', currency_converter, name='currency_converter'),
+    path('api/convert/', api_convert, name='api_convert'),
+    path('referrals/regenerate/', regenerate_code, name='regenerate_code'),
     path('api/theme/', save_theme, name='save_theme'),
 
     # Notifications
