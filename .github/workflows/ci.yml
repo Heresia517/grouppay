@@ -54,3 +54,24 @@ jobs:
         env:
           SECRET_KEY: test-key
         run: python audit_grouppay.py || true
+
+      - name: GroupPay PRD compliance audit
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.dev
+        run: |
+          python audit_grouppay_v2.py | tee audit_output.txt
+          if ! grep -q "SCORE GLOBAL : 100.0%" audit_output.txt; then
+            echo "❌ Régression de conformité PRD détectée"
+            grep "XX" audit_output.txt || true
+            exit 1
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: |
+            INVENTAIRE.md
+            audit_inventaire.json
+            audit_output.txt
