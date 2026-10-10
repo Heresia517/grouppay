@@ -1,0 +1,4103 @@
+{
+  "totals": {
+    "py_files": 188,
+    "lines": 21322,
+    "functions": 432,
+    "classes": 133
+  },
+  "apps": [
+    {
+      "label": "daphne",
+      "name": "daphne",
+      "models": 0
+    },
+    {
+      "label": "admin",
+      "name": "django.contrib.admin",
+      "models": 1
+    },
+    {
+      "label": "auth",
+      "name": "django.contrib.auth",
+      "models": 2
+    },
+    {
+      "label": "contenttypes",
+      "name": "django.contrib.contenttypes",
+      "models": 1
+    },
+    {
+      "label": "sessions",
+      "name": "django.contrib.sessions",
+      "models": 1
+    },
+    {
+      "label": "messages",
+      "name": "django.contrib.messages",
+      "models": 0
+    },
+    {
+      "label": "staticfiles",
+      "name": "django.contrib.staticfiles",
+      "models": 0
+    },
+    {
+      "label": "rest_framework",
+      "name": "rest_framework",
+      "models": 0
+    },
+    {
+      "label": "drf_spectacular",
+      "name": "drf_spectacular",
+      "models": 0
+    },
+    {
+      "label": "rest_framework_simplejwt",
+      "name": "rest_framework_simplejwt",
+      "models": 0
+    },
+    {
+      "label": "core",
+      "name": "apps.core",
+      "models": 0
+    },
+    {
+      "label": "organizations",
+      "name": "apps.organizations",
+      "models": 5
+    },
+    {
+      "label": "accounts",
+      "name": "apps.accounts",
+      "models": 3
+    },
+    {
+      "label": "catalog",
+      "name": "apps.catalog",
+      "models": 10
+    },
+    {
+      "label": "orders",
+      "name": "apps.orders",
+      "models": 6
+    },
+    {
+      "label": "deductions",
+      "name": "apps.deductions",
+      "models": 2
+    },
+    {
+      "label": "documents",
+      "name": "apps.documents",
+      "models": 2
+    },
+    {
+      "label": "deliveries",
+      "name": "apps.deliveries",
+      "models": 2
+    },
+    {
+      "label": "notifications",
+      "name": "apps.notifications",
+      "models": 2
+    },
+    {
+      "label": "channels",
+      "name": "channels",
+      "models": 0
+    },
+    {
+      "label": "audit",
+      "name": "apps.audit",
+      "models": 1
+    },
+    {
+      "label": "da",
+      "name": "apps.da",
+      "models": 9
+    },
+    {
+      "label": "inventory",
+      "name": "apps.inventory",
+      "models": 5
+    },
+    {
+      "label": "django_otp",
+      "name": "django_otp",
+      "models": 0
+    },
+    {
+      "label": "otp_totp",
+      "name": "django_otp.plugins.otp_totp",
+      "models": 1
+    }
+  ],
+  "models": {
+    "admin.LogEntry": {
+      "verbose_name": "log entry",
+      "db_table": "django_admin_log",
+      "n_fields": 8,
+      "fields": [
+        {
+          "name": "id",
+          "type": "AutoField"
+        },
+        {
+          "name": "action_time",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "content_type",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "object_id",
+          "type": "TextField"
+        },
+        {
+          "name": "object_repr",
+          "type": "CharField"
+        },
+        {
+          "name": "action_flag",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "change_message",
+          "type": "TextField"
+        }
+      ]
+    },
+    "auth.Permission": {
+      "verbose_name": "permission",
+      "db_table": "auth_permission",
+      "n_fields": 6,
+      "fields": [
+        {
+          "name": "group",
+          "type": "ManyToManyField"
+        },
+        {
+          "name": "user",
+          "type": "ManyToManyField"
+        },
+        {
+          "name": "id",
+          "type": "AutoField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "content_type",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "codename",
+          "type": "CharField"
+        }
+      ]
+    },
+    "auth.Group": {
+      "verbose_name": "group",
+      "db_table": "auth_group",
+      "n_fields": 4,
+      "fields": [
+        {
+          "name": "user",
+          "type": "ManyToManyField"
+        },
+        {
+          "name": "id",
+          "type": "AutoField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "permissions",
+          "type": "ManyToManyField"
+        }
+      ]
+    },
+    "contenttypes.ContentType": {
+      "verbose_name": "content type",
+      "db_table": "django_content_type",
+      "n_fields": 5,
+      "fields": [
+        {
+          "name": "logentry",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "permission",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "AutoField"
+        },
+        {
+          "name": "app_label",
+          "type": "CharField"
+        },
+        {
+          "name": "model",
+          "type": "CharField"
+        }
+      ]
+    },
+    "sessions.Session": {
+      "verbose_name": "session",
+      "db_table": "django_session",
+      "n_fields": 3,
+      "fields": [
+        {
+          "name": "session_key",
+          "type": "CharField"
+        },
+        {
+          "name": "session_data",
+          "type": "TextField"
+        },
+        {
+          "name": "expire_date",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "organizations.Organization": {
+      "verbose_name": "organization",
+      "db_table": "organizations_organization",
+      "n_fields": 46,
+      "fields": [
+        {
+          "name": "directions",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "services",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "users",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referrals",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "categories",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "products",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product_variants",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "coupons",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "wishlist_items",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reviews",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "stock_movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "stock_alerts",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product_request_votes",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "orders",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "monthly_reports",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "export_batches",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "deduction_transmissions",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "notifications",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "audit_logs",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "da_categories",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "da_items",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "purchase_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "da_stock_movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "da_signatures",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "asset_categories",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assets",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "slug",
+          "type": "SlugField"
+        },
+        {
+          "name": "logo",
+          "type": "FileField"
+        },
+        {
+          "name": "color_primary",
+          "type": "CharField"
+        },
+        {
+          "name": "color_secondary",
+          "type": "CharField"
+        },
+        {
+          "name": "country_code",
+          "type": "CharField"
+        },
+        {
+          "name": "currency_code",
+          "type": "CharField"
+        },
+        {
+          "name": "timezone",
+          "type": "CharField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "modules_enabled",
+          "type": "JSONField"
+        },
+        {
+          "name": "website",
+          "type": "CharField"
+        },
+        {
+          "name": "contact_email",
+          "type": "CharField"
+        },
+        {
+          "name": "contact_phone",
+          "type": "CharField"
+        },
+        {
+          "name": "max_users",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "storage_gb",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "deleted_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "organizations.Direction": {
+      "verbose_name": "Direction",
+      "db_table": "organizations_direction",
+      "n_fields": 11,
+      "fields": [
+        {
+          "name": "services",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "code",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "director",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "is_achats",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "display_order",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "organizations.Service": {
+      "verbose_name": "Service",
+      "db_table": "organizations_service",
+      "n_fields": 12,
+      "fields": [
+        {
+          "name": "members",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "purchase_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "direction",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "code",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "chief",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "display_order",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "organizations.Currency": {
+      "verbose_name": "Devise",
+      "db_table": "organizations_currency",
+      "n_fields": 5,
+      "fields": [
+        {
+          "name": "code",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "symbol",
+          "type": "CharField"
+        },
+        {
+          "name": "decimal_places",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        }
+      ]
+    },
+    "organizations.ExchangeRate": {
+      "verbose_name": "Taux de change",
+      "db_table": "organizations_exchangerate",
+      "n_fields": 6,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "from_currency",
+          "type": "CharField"
+        },
+        {
+          "name": "to_currency",
+          "type": "CharField"
+        },
+        {
+          "name": "rate",
+          "type": "DecimalField"
+        },
+        {
+          "name": "fetched_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "source",
+          "type": "CharField"
+        }
+      ]
+    },
+    "accounts.User": {
+      "verbose_name": "user",
+      "db_table": "accounts_user",
+      "n_fields": 63,
+      "fields": [
+        {
+          "name": "logentry",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "directed_directions",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "led_services",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referred_users",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referrals_made",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referrals_received",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referral_code",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "products",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "wishlist",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reviews",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "stock_movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reviewed_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product_request_votes",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "cart",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "orders",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "orderstatushistory",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "deductionexportbatch",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "deliveries",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "notifications",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "push_subscriptions",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "audit_logs",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "purchase_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "validated_purchase_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "ordered_purchase_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "received_purchase_requests",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "purchaserequesthistory",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "dastockmovement",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "da_signatures",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "pending_signatures",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "da_otp_codes",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assigned_assets",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assetassignment",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assignments_made",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "maintenancerecord",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assetmovement",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "totpdevice",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "password",
+          "type": "CharField"
+        },
+        {
+          "name": "last_login",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "is_superuser",
+          "type": "BooleanField"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "email",
+          "type": "CharField"
+        },
+        {
+          "name": "first_name",
+          "type": "CharField"
+        },
+        {
+          "name": "last_name",
+          "type": "CharField"
+        },
+        {
+          "name": "internal_id",
+          "type": "CharField"
+        },
+        {
+          "name": "phone",
+          "type": "CharField"
+        },
+        {
+          "name": "service",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "is_service_chief",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_director",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_dg",
+          "type": "BooleanField"
+        },
+        {
+          "name": "referred_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referral_reward_balance",
+          "type": "DecimalField"
+        },
+        {
+          "name": "role",
+          "type": "CharField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_blocked",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_verified",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_staff",
+          "type": "BooleanField"
+        },
+        {
+          "name": "failed_login_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "theme_preference",
+          "type": "CharField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "groups",
+          "type": "ManyToManyField"
+        },
+        {
+          "name": "user_permissions",
+          "type": "ManyToManyField"
+        }
+      ]
+    },
+    "accounts.Referral": {
+      "verbose_name": "Parrainage",
+      "db_table": "accounts_referral",
+      "n_fields": 9,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referrer",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "referred",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "reward_amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "rewarded_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "notes",
+          "type": "CharField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "accounts.ReferralCode": {
+      "verbose_name": "referral code",
+      "db_table": "accounts_referralcode",
+      "n_fields": 7,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "user",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "code",
+          "type": "CharField"
+        },
+        {
+          "name": "uses_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "max_uses",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.Category": {
+      "verbose_name": "category",
+      "db_table": "catalog_category",
+      "n_fields": 10,
+      "fields": [
+        {
+          "name": "children",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "products",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "slug",
+          "type": "SlugField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "display_order",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "parent",
+          "type": "ForeignKey"
+        }
+      ]
+    },
+    "catalog.Product": {
+      "verbose_name": "product",
+      "db_table": "catalog_product",
+      "n_fields": 29,
+      "fields": [
+        {
+          "name": "variants",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "wishlisted_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reviews",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "alerts",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "cartitem",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "orderitem",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "category",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "supplier",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "sku",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "is_supplier_private",
+          "type": "BooleanField"
+        },
+        {
+          "name": "supplier_reference",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "tags",
+          "type": "CharField"
+        },
+        {
+          "name": "price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "compare_at_price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "discount_percent",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "cost_price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "stock_quantity",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "reorder_level",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "max_per_member",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "weight_kg",
+          "type": "DecimalField"
+        },
+        {
+          "name": "lead_time_days",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.ProductVariant": {
+      "verbose_name": "product variant",
+      "db_table": "catalog_productvariant",
+      "n_fields": 8,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "sku",
+          "type": "CharField"
+        },
+        {
+          "name": "price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "stock_quantity",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "attributes",
+          "type": "JSONField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        }
+      ]
+    },
+    "catalog.Coupon": {
+      "verbose_name": "coupon",
+      "db_table": "catalog_coupon",
+      "n_fields": 13,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "code",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "CharField"
+        },
+        {
+          "name": "discount_type",
+          "type": "CharField"
+        },
+        {
+          "name": "discount_value",
+          "type": "DecimalField"
+        },
+        {
+          "name": "min_order_amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "max_uses",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "used_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "valid_from",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "valid_to",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.WishlistItem": {
+      "verbose_name": "wishlist item",
+      "db_table": "catalog_wishlistitem",
+      "n_fields": 5,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "added_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.Review": {
+      "verbose_name": "review",
+      "db_table": "catalog_review",
+      "n_fields": 12,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "member",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "order",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "rating",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "title",
+          "type": "CharField"
+        },
+        {
+          "name": "comment",
+          "type": "TextField"
+        },
+        {
+          "name": "is_verified_purchase",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_published",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.StockMovement": {
+      "verbose_name": "stock movement",
+      "db_table": "catalog_stockmovement",
+      "n_fields": 11,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "movement_type",
+          "type": "CharField"
+        },
+        {
+          "name": "quantity",
+          "type": "IntegerField"
+        },
+        {
+          "name": "stock_before",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "stock_after",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "reason",
+          "type": "CharField"
+        },
+        {
+          "name": "order",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "actor",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.StockAlert": {
+      "verbose_name": "stock alert",
+      "db_table": "catalog_stockalert",
+      "n_fields": 8,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "stock_at_alert",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "reorder_level",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_resolved",
+          "type": "BooleanField"
+        },
+        {
+          "name": "resolved_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.ProductRequest": {
+      "verbose_name": "product request",
+      "db_table": "catalog_productrequest",
+      "n_fields": 13,
+      "fields": [
+        {
+          "name": "votes",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "title",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "category_hint",
+          "type": "CharField"
+        },
+        {
+          "name": "target_price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "proposed_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "reviewed_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "review_note",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "catalog.ProductRequestVote": {
+      "verbose_name": "product request vote",
+      "db_table": "catalog_productrequestvote",
+      "n_fields": 5,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "request",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "member",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "orders.Cart": {
+      "verbose_name": "cart",
+      "db_table": "orders_cart",
+      "n_fields": 7,
+      "fields": [
+        {
+          "name": "items",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "user",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "coupon_code",
+          "type": "CharField"
+        },
+        {
+          "name": "coupon_discount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "orders.CartItem": {
+      "verbose_name": "cart item",
+      "db_table": "orders_cartitem",
+      "n_fields": 4,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "cart",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "quantity",
+          "type": "PositiveIntegerField"
+        }
+      ]
+    },
+    "orders.Order": {
+      "verbose_name": "order",
+      "db_table": "orders_order",
+      "n_fields": 18,
+      "fields": [
+        {
+          "name": "product_reviews",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "stock_movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "items",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "status_history",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "deduction_transmission",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "purchase_order_document",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "invoice_document",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "delivery",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "order_number",
+          "type": "CharField"
+        },
+        {
+          "name": "member",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "total_amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "currency_code",
+          "type": "CharField"
+        },
+        {
+          "name": "delivery_address",
+          "type": "TextField"
+        },
+        {
+          "name": "rejection_reason",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "orders.OrderItem": {
+      "verbose_name": "order item",
+      "db_table": "orders_orderitem",
+      "n_fields": 5,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "order",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "product",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "quantity",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "unit_price",
+          "type": "DecimalField"
+        }
+      ]
+    },
+    "orders.OrderStatusHistory": {
+      "verbose_name": "order status history",
+      "db_table": "orders_orderstatushistory",
+      "n_fields": 7,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "order",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "from_status",
+          "type": "CharField"
+        },
+        {
+          "name": "to_status",
+          "type": "CharField"
+        },
+        {
+          "name": "actor",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "comment",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "orders.MonthlyReport": {
+      "verbose_name": "Rapport mensuel",
+      "db_table": "orders_monthlyreport",
+      "n_fields": 17,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "year",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "month",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "pdf_file",
+          "type": "FileField"
+        },
+        {
+          "name": "excel_file",
+          "type": "FileField"
+        },
+        {
+          "name": "orders_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "orders_amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "da_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "da_amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "members_active",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "generated_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "sent_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "sent_to",
+          "type": "JSONField"
+        },
+        {
+          "name": "error_message",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "deductions.DeductionExportBatch": {
+      "verbose_name": "deduction export batch",
+      "db_table": "deductions_deductionexportbatch",
+      "n_fields": 12,
+      "fields": [
+        {
+          "name": "transmissions",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "period_start",
+          "type": "DateField"
+        },
+        {
+          "name": "period_end",
+          "type": "DateField"
+        },
+        {
+          "name": "file",
+          "type": "FileField"
+        },
+        {
+          "name": "file_hash",
+          "type": "CharField"
+        },
+        {
+          "name": "row_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "generated_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "downloaded_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "deductions.DeductionTransmission": {
+      "verbose_name": "deduction transmission",
+      "db_table": "deductions_deductiontransmission",
+      "n_fields": 17,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "order",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reference",
+          "type": "CharField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "member_email",
+          "type": "CharField"
+        },
+        {
+          "name": "member_internal_id",
+          "type": "CharField"
+        },
+        {
+          "name": "amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "currency_code",
+          "type": "CharField"
+        },
+        {
+          "name": "export_batch",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "transmission_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "last_transmission_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "confirmation_reference",
+          "type": "CharField"
+        },
+        {
+          "name": "error_message",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "confirmed_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "expires_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "documents.PurchaseOrderDocument": {
+      "verbose_name": "purchase order document",
+      "db_table": "documents_purchaseorderdocument",
+      "n_fields": 4,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "order",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "file",
+          "type": "FileField"
+        },
+        {
+          "name": "generated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "documents.InvoiceDocument": {
+      "verbose_name": "invoice document",
+      "db_table": "documents_invoicedocument",
+      "n_fields": 8,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "order",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "invoice_number",
+          "type": "CharField"
+        },
+        {
+          "name": "file",
+          "type": "FileField"
+        },
+        {
+          "name": "file_hash",
+          "type": "CharField"
+        },
+        {
+          "name": "generated_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "downloaded_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "download_count",
+          "type": "PositiveIntegerField"
+        }
+      ]
+    },
+    "deliveries.Delivery": {
+      "verbose_name": "delivery",
+      "db_table": "deliveries_delivery",
+      "n_fields": 16,
+      "fields": [
+        {
+          "name": "document",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "order",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "courier",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "tracking_number",
+          "type": "CharField"
+        },
+        {
+          "name": "carrier_name",
+          "type": "CharField"
+        },
+        {
+          "name": "estimated_delivery_date",
+          "type": "DateField"
+        },
+        {
+          "name": "recipient_notes",
+          "type": "TextField"
+        },
+        {
+          "name": "attempts",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "last_attempt_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "failure_reason",
+          "type": "CharField"
+        },
+        {
+          "name": "signature_image",
+          "type": "FileField"
+        },
+        {
+          "name": "delivery_photo",
+          "type": "FileField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "delivered_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "deliveries.DeliveryNoteDocument": {
+      "verbose_name": "delivery note document",
+      "db_table": "deliveries_deliverynotedocument",
+      "n_fields": 5,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "delivery",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "file",
+          "type": "FileField"
+        },
+        {
+          "name": "file_hash",
+          "type": "CharField"
+        },
+        {
+          "name": "generated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "notifications.Notification": {
+      "verbose_name": "notification",
+      "db_table": "notifications_notification",
+      "n_fields": 8,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "recipient",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "channel",
+          "type": "CharField"
+        },
+        {
+          "name": "title",
+          "type": "CharField"
+        },
+        {
+          "name": "body",
+          "type": "TextField"
+        },
+        {
+          "name": "is_read",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "notifications.PushSubscription": {
+      "verbose_name": "Abonnement Push",
+      "db_table": "notifications_pushsubscription",
+      "n_fields": 9,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "endpoint",
+          "type": "CharField"
+        },
+        {
+          "name": "p256dh",
+          "type": "CharField"
+        },
+        {
+          "name": "auth",
+          "type": "CharField"
+        },
+        {
+          "name": "user_agent",
+          "type": "CharField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "last_used_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "audit.AuditLog": {
+      "verbose_name": "audit log",
+      "db_table": "audit_auditlog",
+      "n_fields": 14,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "action",
+          "type": "CharField"
+        },
+        {
+          "name": "resource_type",
+          "type": "CharField"
+        },
+        {
+          "name": "resource_id",
+          "type": "CharField"
+        },
+        {
+          "name": "old_values",
+          "type": "JSONField"
+        },
+        {
+          "name": "new_values",
+          "type": "JSONField"
+        },
+        {
+          "name": "ip_address",
+          "type": "GenericIPAddressField"
+        },
+        {
+          "name": "user_agent",
+          "type": "TextField"
+        },
+        {
+          "name": "status_code",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "error_message",
+          "type": "TextField"
+        },
+        {
+          "name": "metadata",
+          "type": "JSONField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "da.DACategory": {
+      "verbose_name": "Categorie DA",
+      "db_table": "da_dacategory",
+      "n_fields": 8,
+      "fields": [
+        {
+          "name": "items",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "icon",
+          "type": "CharField"
+        },
+        {
+          "name": "display_order",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        }
+      ]
+    },
+    "da.DAItem": {
+      "verbose_name": "Article DA",
+      "db_table": "da_daitem",
+      "n_fields": 17,
+      "fields": [
+        {
+          "name": "request_lines",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "category",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reference",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "unit",
+          "type": "CharField"
+        },
+        {
+          "name": "unit_price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "stock_quantity",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "reorder_level",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "max_per_request",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "is_available_to_all",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "da.PurchaseRequest": {
+      "verbose_name": "Demande d'achat",
+      "db_table": "da_purchaserequest",
+      "n_fields": 28,
+      "fields": [
+        {
+          "name": "items",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "history",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "stock_movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "signatures",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "signature_flow",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "number",
+          "type": "CharField"
+        },
+        {
+          "name": "requester",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "service",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "department",
+          "type": "CharField"
+        },
+        {
+          "name": "purpose",
+          "type": "TextField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "priority",
+          "type": "CharField"
+        },
+        {
+          "name": "validated_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "validated_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "rejection_reason",
+          "type": "TextField"
+        },
+        {
+          "name": "ordered_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "ordered_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "supplier_name",
+          "type": "CharField"
+        },
+        {
+          "name": "expected_delivery",
+          "type": "DateField"
+        },
+        {
+          "name": "received_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "received_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "total_amount",
+          "type": "DecimalField"
+        },
+        {
+          "name": "currency_code",
+          "type": "CharField"
+        },
+        {
+          "name": "notes",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "da.PurchaseRequestItem": {
+      "verbose_name": "purchase request item",
+      "db_table": "da_purchaserequestitem",
+      "n_fields": 7,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "request",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "item",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "quantity",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "unit_price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "notes",
+          "type": "CharField"
+        },
+        {
+          "name": "quantity_received",
+          "type": "PositiveIntegerField"
+        }
+      ]
+    },
+    "da.PurchaseRequestHistory": {
+      "verbose_name": "purchase request history",
+      "db_table": "da_purchaserequesthistory",
+      "n_fields": 7,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "request",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "from_status",
+          "type": "CharField"
+        },
+        {
+          "name": "to_status",
+          "type": "CharField"
+        },
+        {
+          "name": "actor",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "comment",
+          "type": "TextField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "da.DAStockMovement": {
+      "verbose_name": "Mouvement stock DA",
+      "db_table": "da_dastockmovement",
+      "n_fields": 11,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "item",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "movement_type",
+          "type": "CharField"
+        },
+        {
+          "name": "quantity",
+          "type": "IntegerField"
+        },
+        {
+          "name": "stock_before",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "stock_after",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "reason",
+          "type": "CharField"
+        },
+        {
+          "name": "purchase_request",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "actor",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "da.DASignature": {
+      "verbose_name": "Signature DA",
+      "db_table": "da_dasignature",
+      "n_fields": 20,
+      "fields": [
+        {
+          "name": "flow_step",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "purchase_request",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "signer",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "signer_role",
+          "type": "CharField"
+        },
+        {
+          "name": "signature_level",
+          "type": "CharField"
+        },
+        {
+          "name": "signature_hash",
+          "type": "CharField"
+        },
+        {
+          "name": "document_hash",
+          "type": "CharField"
+        },
+        {
+          "name": "otp_verified",
+          "type": "BooleanField"
+        },
+        {
+          "name": "otp_verified_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "signed_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "signed_ip",
+          "type": "GenericIPAddressField"
+        },
+        {
+          "name": "signed_user_agent",
+          "type": "TextField"
+        },
+        {
+          "name": "visual_image",
+          "type": "FileField"
+        },
+        {
+          "name": "qr_code_image",
+          "type": "FileField"
+        },
+        {
+          "name": "comment",
+          "type": "CharField"
+        },
+        {
+          "name": "is_revoked",
+          "type": "BooleanField"
+        },
+        {
+          "name": "revoked_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "revoked_reason",
+          "type": "CharField"
+        }
+      ]
+    },
+    "da.DASignatureFlow": {
+      "verbose_name": "Etape de signature",
+      "db_table": "da_dasignatureflow",
+      "n_fields": 13,
+      "fields": [
+        {
+          "name": "otp_codes",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "purchase_request",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "step_order",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "role_required",
+          "type": "CharField"
+        },
+        {
+          "name": "assigned_to",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "signature",
+          "type": "OneToOneField"
+        },
+        {
+          "name": "rejected_reason",
+          "type": "TextField"
+        },
+        {
+          "name": "rejected_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "comment",
+          "type": "CharField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "da.DAOtpCode": {
+      "verbose_name": "Code OTP DA",
+      "db_table": "da_daotpcode",
+      "n_fields": 11,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "signature_flow",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "code_hash",
+          "type": "CharField"
+        },
+        {
+          "name": "sent_to",
+          "type": "CharField"
+        },
+        {
+          "name": "attempts",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "max_attempts",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "is_used",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "expires_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "used_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "inventory.AssetCategory": {
+      "verbose_name": "Categorie d'actif",
+      "db_table": "inventory_assetcategory",
+      "n_fields": 9,
+      "fields": [
+        {
+          "name": "assets",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "code",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "depreciation_years",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "display_order",
+          "type": "PositiveIntegerField"
+        }
+      ]
+    },
+    "inventory.Asset": {
+      "verbose_name": "Actif",
+      "db_table": "inventory_asset",
+      "n_fields": 33,
+      "fields": [
+        {
+          "name": "assignments",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "maintenance_records",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "movements",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "organization",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "category",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reference",
+          "type": "CharField"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "serial_number",
+          "type": "CharField"
+        },
+        {
+          "name": "barcode",
+          "type": "CharField"
+        },
+        {
+          "name": "brand",
+          "type": "CharField"
+        },
+        {
+          "name": "model_name",
+          "type": "CharField"
+        },
+        {
+          "name": "purchase_date",
+          "type": "DateField"
+        },
+        {
+          "name": "purchase_price",
+          "type": "DecimalField"
+        },
+        {
+          "name": "supplier",
+          "type": "CharField"
+        },
+        {
+          "name": "invoice_reference",
+          "type": "CharField"
+        },
+        {
+          "name": "warranty_end_date",
+          "type": "DateField"
+        },
+        {
+          "name": "location",
+          "type": "CharField"
+        },
+        {
+          "name": "assigned_to",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assigned_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "status",
+          "type": "CharField"
+        },
+        {
+          "name": "condition",
+          "type": "CharField"
+        },
+        {
+          "name": "last_maintenance",
+          "type": "DateField"
+        },
+        {
+          "name": "next_maintenance",
+          "type": "DateField"
+        },
+        {
+          "name": "maintenance_interval_months",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "current_value",
+          "type": "DecimalField"
+        },
+        {
+          "name": "depreciation_rate",
+          "type": "DecimalField"
+        },
+        {
+          "name": "notes",
+          "type": "TextField"
+        },
+        {
+          "name": "image",
+          "type": "FileField"
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "inventory.AssetAssignment": {
+      "verbose_name": "Attribution d'actif",
+      "db_table": "inventory_assetassignment",
+      "n_fields": 9,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "asset",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assigned_to",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assigned_by",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "assigned_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "returned_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "condition_at_assignment",
+          "type": "CharField"
+        },
+        {
+          "name": "condition_at_return",
+          "type": "CharField"
+        },
+        {
+          "name": "notes",
+          "type": "TextField"
+        }
+      ]
+    },
+    "inventory.MaintenanceRecord": {
+      "verbose_name": "Maintenance",
+      "db_table": "inventory_maintenancerecord",
+      "n_fields": 10,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "asset",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "type",
+          "type": "CharField"
+        },
+        {
+          "name": "date",
+          "type": "DateField"
+        },
+        {
+          "name": "performed_by",
+          "type": "CharField"
+        },
+        {
+          "name": "cost",
+          "type": "DecimalField"
+        },
+        {
+          "name": "description",
+          "type": "TextField"
+        },
+        {
+          "name": "next_maintenance_date",
+          "type": "DateField"
+        },
+        {
+          "name": "performed_by_user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "inventory.AssetMovement": {
+      "verbose_name": "Mouvement d'actif",
+      "db_table": "inventory_assetmovement",
+      "n_fields": 9,
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUIDField"
+        },
+        {
+          "name": "asset",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "from_location",
+          "type": "CharField"
+        },
+        {
+          "name": "to_location",
+          "type": "CharField"
+        },
+        {
+          "name": "from_status",
+          "type": "CharField"
+        },
+        {
+          "name": "to_status",
+          "type": "CharField"
+        },
+        {
+          "name": "actor",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "reason",
+          "type": "CharField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        }
+      ]
+    },
+    "otp_totp.TOTPDevice": {
+      "verbose_name": "TOTP device",
+      "db_table": "otp_totp_totpdevice",
+      "n_fields": 15,
+      "fields": [
+        {
+          "name": "id",
+          "type": "AutoField"
+        },
+        {
+          "name": "user",
+          "type": "ForeignKey"
+        },
+        {
+          "name": "name",
+          "type": "CharField"
+        },
+        {
+          "name": "confirmed",
+          "type": "BooleanField"
+        },
+        {
+          "name": "throttling_failure_timestamp",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "throttling_failure_count",
+          "type": "PositiveIntegerField"
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "last_used_at",
+          "type": "DateTimeField"
+        },
+        {
+          "name": "key",
+          "type": "CharField"
+        },
+        {
+          "name": "step",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "t0",
+          "type": "BigIntegerField"
+        },
+        {
+          "name": "digits",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "tolerance",
+          "type": "PositiveSmallIntegerField"
+        },
+        {
+          "name": "drift",
+          "type": "SmallIntegerField"
+        },
+        {
+          "name": "last_t",
+          "type": "BigIntegerField"
+        }
+      ]
+    }
+  },
+  "files_by_app": {
+    "__init__.py": [
+      "apps\\__init__.py"
+    ],
+    "accounts": [
+      "apps\\accounts\\__init__.py",
+      "apps\\accounts\\admin.py",
+      "apps\\accounts\\apps.py",
+      "apps\\accounts\\management\\__init__.py",
+      "apps\\accounts\\management\\commands\\__init__.py",
+      "apps\\accounts\\management\\commands\\seed_users.py",
+      "apps\\accounts\\models.py",
+      "apps\\accounts\\permissions.py",
+      "apps\\accounts\\referral_service.py",
+      "apps\\accounts\\referral_views.py",
+      "apps\\accounts\\tests.py",
+      "apps\\accounts\\two_factor_views.py",
+      "apps\\accounts\\views.py"
+    ],
+    "audit": [
+      "apps\\audit\\__init__.py",
+      "apps\\audit\\admin.py",
+      "apps\\audit\\apps.py",
+      "apps\\audit\\middleware.py",
+      "apps\\audit\\models.py",
+      "apps\\audit\\signals.py"
+    ],
+    "catalog": [
+      "apps\\catalog\\__init__.py",
+      "apps\\catalog\\admin.py",
+      "apps\\catalog\\apps.py",
+      "apps\\catalog\\models.py",
+      "apps\\catalog\\request_views.py",
+      "apps\\catalog\\review_views.py",
+      "apps\\catalog\\serializers.py",
+      "apps\\catalog\\services.py",
+      "apps\\catalog\\stock_views.py",
+      "apps\\catalog\\supplier_product_views.py",
+      "apps\\catalog\\supplier_views.py",
+      "apps\\catalog\\tasks.py",
+      "apps\\catalog\\tests.py",
+      "apps\\catalog\\views.py",
+      "apps\\catalog\\viewsets.py"
+    ],
+    "core": [
+      "apps\\core\\__init__.py",
+      "apps\\core\\access_middleware.py",
+      "apps\\core\\admin.py",
+      "apps\\core\\apps.py",
+      "apps\\core\\auth_views.py",
+      "apps\\core\\context_processors.py",
+      "apps\\core\\helpers.py",
+      "apps\\core\\landing_views.py",
+      "apps\\core\\models.py",
+      "apps\\core\\sw_view.py",
+      "apps\\core\\tests.py",
+      "apps\\core\\views.py"
+    ],
+    "da": [
+      "apps\\da\\__init__.py",
+      "apps\\da\\admin.py",
+      "apps\\da\\admin_views.py",
+      "apps\\da\\apps.py",
+      "apps\\da\\dashboard_view.py",
+      "apps\\da\\excel_service.py",
+      "apps\\da\\management\\__init__.py",
+      "apps\\da\\management\\commands\\__init__.py",
+      "apps\\da\\management\\commands\\seed_da.py",
+      "apps\\da\\models.py",
+      "apps\\da\\notification_service.py",
+      "apps\\da\\pdf_service.py",
+      "apps\\da\\services.py",
+      "apps\\da\\stats_view.py",
+      "apps\\da\\urls.py",
+      "apps\\da\\views.py",
+      "apps\\da\\workflow.py"
+    ],
+    "deductions": [
+      "apps\\deductions\\__init__.py",
+      "apps\\deductions\\admin.py",
+      "apps\\deductions\\apps.py",
+      "apps\\deductions\\models.py",
+      "apps\\deductions\\services.py",
+      "apps\\deductions\\tasks.py",
+      "apps\\deductions\\tests.py",
+      "apps\\deductions\\views.py",
+      "apps\\deductions\\webhooks.py"
+    ],
+    "deliveries": [
+      "apps\\deliveries\\__init__.py",
+      "apps\\deliveries\\admin.py",
+      "apps\\deliveries\\apps.py",
+      "apps\\deliveries\\models.py",
+      "apps\\deliveries\\services.py",
+      "apps\\deliveries\\tests.py",
+      "apps\\deliveries\\views.py"
+    ],
+    "documents": [
+      "apps\\documents\\__init__.py",
+      "apps\\documents\\admin.py",
+      "apps\\documents\\apps.py",
+      "apps\\documents\\invoice_service.py",
+      "apps\\documents\\models.py",
+      "apps\\documents\\services.py",
+      "apps\\documents\\tests.py",
+      "apps\\documents\\views.py"
+    ],
+    "inventory": [
+      "apps\\inventory\\__init__.py",
+      "apps\\inventory\\admin.py",
+      "apps\\inventory\\apps.py",
+      "apps\\inventory\\management\\__init__.py",
+      "apps\\inventory\\management\\commands\\__init__.py",
+      "apps\\inventory\\management\\commands\\seed_inventory.py",
+      "apps\\inventory\\models.py",
+      "apps\\inventory\\services.py",
+      "apps\\inventory\\urls.py",
+      "apps\\inventory\\views.py"
+    ],
+    "notifications": [
+      "apps\\notifications\\__init__.py",
+      "apps\\notifications\\admin.py",
+      "apps\\notifications\\apps.py",
+      "apps\\notifications\\consumers.py",
+      "apps\\notifications\\email_service.py",
+      "apps\\notifications\\models.py",
+      "apps\\notifications\\push_service.py",
+      "apps\\notifications\\push_views.py",
+      "apps\\notifications\\routing.py",
+      "apps\\notifications\\signals.py",
+      "apps\\notifications\\sms_service.py",
+      "apps\\notifications\\tasks.py",
+      "apps\\notifications\\tests.py",
+      "apps\\notifications\\views.py"
+    ],
+    "orders": [
+      "apps\\orders\\__init__.py",
+      "apps\\orders\\admin.py",
+      "apps\\orders\\admin_recovery_view.py",
+      "apps\\orders\\analytics_view.py",
+      "apps\\orders\\apps.py",
+      "apps\\orders\\cart_recovery.py",
+      "apps\\orders\\context_processors.py",
+      "apps\\orders\\dashboard_views.py",
+      "apps\\orders\\export_views.py",
+      "apps\\orders\\models.py",
+      "apps\\orders\\report_service.py",
+      "apps\\orders\\report_views.py",
+      "apps\\orders\\serializers.py",
+      "apps\\orders\\services.py",
+      "apps\\orders\\tasks.py",
+      "apps\\orders\\tests.py",
+      "apps\\orders\\views.py",
+      "apps\\orders\\viewsets.py"
+    ],
+    "organizations": [
+      "apps\\organizations\\__init__.py",
+      "apps\\organizations\\admin.py",
+      "apps\\organizations\\apps.py",
+      "apps\\organizations\\currency_service.py",
+      "apps\\organizations\\currency_views.py",
+      "apps\\organizations\\models.py",
+      "apps\\organizations\\tests.py",
+      "apps\\organizations\\views.py"
+    ],
+    "config": [
+      "config\\__init__.py",
+      "config\\asgi.py",
+      "config\\celery.py",
+      "config\\settings\\__init__.py",
+      "config\\settings\\base.py",
+      "config\\settings\\dev.py",
+      "config\\urls.py",
+      "config\\wsgi.py"
+    ],
+    "_root": [
+      "conftest.py",
+      "gp_pack_a1.py",
+      "gp_pack_a2.py",
+      "gp_pack_a3.py",
+      "gp_pack_b1.py",
+      "gp_pack_b2.py",
+      "gp_pack_b3.py",
+      "gp_priority1_b.py",
+      "gp_priority1_b_templates.py",
+      "manage.py",
+      "patch_audit.py",
+      "run_e2e_simple.py",
+      "scripts\\seed_da.py",
+      "test_access_by_role.py",
+      "test_pack_a1.py",
+      "test_pack_a2.py",
+      "test_pack_a3.py",
+      "test_pack_b1.py",
+      "test_pack_b2.py",
+      "test_pack_b3.py",
+      "test_pack_b4.py",
+      "test_pack_c123.py",
+      "test_priority1_a.py",
+      "test_vapid_conversion.py"
+    ],
+    "tests": [
+      "tests\\__init__.py",
+      "tests\\conftest.py",
+      "tests\\e2e\\__init__.py",
+      "tests\\e2e\\conftest.py",
+      "tests\\e2e\\test_auth.py",
+      "tests\\e2e\\test_da.py",
+      "tests\\e2e\\test_inventory.py",
+      "tests\\e2e\\test_mutuelle.py",
+      "tests\\e2e\\test_navigation.py",
+      "tests\\e2e\\test_rh.py",
+      "tests\\e2e\\test_rh_flow.py",
+      "tests\\e2e\\test_user_journey.py",
+      "tests\\test_deduction_export.py",
+      "tests\\test_delivery.py",
+      "tests\\test_order_creation.py",
+      "tests\\test_order_validation.py",
+      "tests\\test_stock.py",
+      "tests\\test_tenant_isolation.py"
+    ]
+  },
+  "domains": {
+    "Auth & Permissions": {
+      "found": [
+        "IsRH",
+        "IsAdmin",
+        "IsRHOrAdmin",
+        "TenantModel"
+      ],
+      "missing": [
+        "IsSupplier",
+        "IsOwner"
+      ]
+    },
+    "Panier & Commandes": {
+      "found": [
+        "create_order_from_cart",
+        "validate_order",
+        "reject_order",
+        "add_to_cart",
+        "remove_from_cart",
+        "update_cart_item_qty",
+        "apply_coupon",
+        "cleanup_expired_carts"
+      ],
+      "missing": []
+    },
+    "Stock": {
+      "found": [
+        "decrement_stock",
+        "increment_stock",
+        "adjust_stock",
+        "check_low_stock",
+        "resolve_alert"
+      ],
+      "missing": [
+        "restore_stock"
+      ]
+    },
+    "Retenue": {
+      "found": [
+        "generate_export_batch",
+        "confirm_deduction",
+        "deduction_webhook"
+      ],
+      "missing": [
+        "create_deduction"
+      ]
+    },
+    "Livraisons": {
+      "found": [
+        "create_delivery_for_order",
+        "assign_courier",
+        "mark_delivered",
+        "attempt_delivery"
+      ],
+      "missing": []
+    },
+    "Documents PDF": {
+      "found": [
+        "generate_purchase_order_pdf",
+        "generate_invoice_pdf",
+        "generate_invoice_number",
+        "get_or_create_invoice"
+      ],
+      "missing": []
+    },
+    "Notifications": {
+      "found": [
+        "send_email",
+        "send_sms",
+        "send_order_validated_email",
+        "send_order_delivered_email",
+        "send_order_rejected_email",
+        "send_order_validated_sms",
+        "send_order_delivered_sms"
+      ],
+      "missing": []
+    },
+    "Avis produits": {
+      "found": [
+        "submit_review",
+        "delete_review",
+        "average_rating"
+      ],
+      "missing": [
+        "is_verified_purchase",
+        "is_published"
+      ]
+    },
+    "Wishlist collab": {
+      "found": [
+        "toggle_wishlist",
+        "vote_request",
+        "request_create",
+        "update_request_status",
+        "delete_request"
+      ],
+      "missing": []
+    },
+    "2FA TOTP": {
+      "found": [
+        "two_factor_setup",
+        "two_factor_verify",
+        "two_factor_disable",
+        "two_factor_status"
+      ],
+      "missing": []
+    },
+    "Import CSV": {
+      "found": [
+        "import_members_page",
+        "import_members_csv",
+        "import_members_template"
+      ],
+      "missing": []
+    },
+    "Fournisseurs": {
+      "found": [
+        "supplier_dashboard",
+        "my_products",
+        "product_form",
+        "toggle_product_active",
+        "suppliers_overview"
+      ],
+      "missing": []
+    }
+  },
+  "all_functions": [
+    "__call__",
+    "__init__",
+    "__str__",
+    "_add_history",
+    "_auto_width",
+    "_can_validate_da",
+    "_can_view",
+    "_check_permission",
+    "_create_signature_flow",
+    "_get_achats_director",
+    "_get_client_ip",
+    "_get_default_context",
+    "_get_dg",
+    "_get_director_for_service",
+    "_get_ip",
+    "_get_open_cart",
+    "_get_or_create_pdf",
+    "_get_vapid_claims",
+    "_is_achats",
+    "_is_owner",
+    "_normalize_vapid_key",
+    "_notify",
+    "_notify_in_app",
+    "_pct_delta",
+    "_render_cart_badge",
+    "_render_cart_page",
+    "_require_admin_da",
+    "_require_manager",
+    "_require_rh",
+    "_require_supplier",
+    "_send_email",
+    "_send_sms",
+    "_serve_sw",
+    "_style_header",
+    "_style_title",
+    "abandoned_carts_list",
+    "add_arguments",
+    "add_item_to_request",
+    "add_to_cart",
+    "adjust_stock",
+    "admin_categories",
+    "admin_category_delete",
+    "admin_category_form",
+    "admin_credentials",
+    "admin_direction_delete",
+    "admin_direction_form",
+    "admin_directions",
+    "admin_home",
+    "admin_item_delete",
+    "admin_item_form",
+    "admin_item_stock_adjust",
+    "admin_item_toggle",
+    "admin_items",
+    "admin_items_import",
+    "admin_items_import_template",
+    "admin_items_import_upload",
+    "admin_service_delete",
+    "admin_service_form",
+    "admin_services",
+    "age_months",
+    "api_convert",
+    "apply_coupon",
+    "apply_referral_code",
+    "asset_assign",
+    "asset_change_status",
+    "asset_detail",
+    "asset_form",
+    "asset_list",
+    "asset_return",
+    "assign_asset",
+    "assign_courier",
+    "attempt_delivery",
+    "audit_order",
+    "average_rating",
+    "base_url",
+    "browser_context_args",
+    "build_cart_recovery_email_context",
+    "bulk_reject_orders",
+    "bulk_validate_orders",
+    "can_be_used",
+    "can_validate",
+    "cart_context",
+    "cart_recovery_send",
+    "cart_recovery_send_all",
+    "catalog",
+    "category",
+    "check_low_stock",
+    "check_low_stock_alerts",
+    "check_max_per_member",
+    "cleanup_expired_carts",
+    "cleanup_expired_transmissions",
+    "cleanup_invalid_subscriptions",
+    "close_request",
+    "collect_monthly_data",
+    "compute_discount",
+    "compute_document_hash",
+    "compute_signature_hash",
+    "compute_total",
+    "computed_value",
+    "confirm_deduction",
+    "connect",
+    "convert_amount",
+    "courier",
+    "courier_deliveries",
+    "create_delivery_for_order",
+    "create_from_cart",
+    "create_order_from_cart",
+    "create_order_view",
+    "create_purchase_request",
+    "create_signature",
+    "create_superuser",
+    "create_user",
+    "currency_converter",
+    "da_cancel_confirm",
+    "da_cancel_page",
+    "da_close",
+    "da_close_page",
+    "da_create",
+    "da_dashboard",
+    "da_dashboard_old",
+    "da_detail",
+    "da_download_pdf",
+    "da_export_excel_list",
+    "da_export_single_excel",
+    "da_items_catalog",
+    "da_list",
+    "da_order",
+    "da_preview_pdf",
+    "da_receive",
+    "da_receive_page",
+    "da_reject_confirm",
+    "da_reject_page",
+    "da_sign_page",
+    "da_sign_refuse",
+    "da_sign_verify",
+    "da_stats",
+    "da_submit",
+    "da_verify_stock",
+    "da_visa",
+    "decrement_stock",
+    "deduction_webhook",
+    "deductions_dashboard",
+    "delete",
+    "delete_product",
+    "delete_request",
+    "delete_review",
+    "delivery",
+    "delivery_detail",
+    "disconnect",
+    "download_batch",
+    "download_invoice_pdf",
+    "download_purchase_order_pdf",
+    "export_da_list_excel",
+    "export_dashboard_excel",
+    "export_dashboard_pdf",
+    "export_setup",
+    "export_single_da_excel",
+    "for_organization",
+    "format_currency",
+    "generate_asset_reference",
+    "generate_da_number",
+    "generate_da_pdf",
+    "generate_export",
+    "generate_export_batch",
+    "generate_invoice_number",
+    "generate_invoice_pdf",
+    "generate_monthly_report_excel",
+    "generate_monthly_report_pdf",
+    "generate_monthly_reports",
+    "generate_order_number",
+    "generate_otp_code",
+    "generate_purchase_order_pdf",
+    "generate_referral_code",
+    "generate_report",
+    "generate_verification_qr",
+    "generate_visual_signature",
+    "get_abandoned_carts",
+    "get_cart_recovery_stats",
+    "get_category_stats",
+    "get_da_document_hash",
+    "get_exchange_rate",
+    "get_inventory_stats",
+    "get_month_range",
+    "get_or_create_invoice",
+    "get_or_create_referral_code",
+    "get_queryset",
+    "get_referral_stats",
+    "get_session",
+    "get_user_totp_device",
+    "grouppay_context",
+    "h1",
+    "h2",
+    "handle",
+    "has_add_permission",
+    "has_change_permission",
+    "has_delete_permission",
+    "has_module",
+    "has_object_permission",
+    "has_permission",
+    "has_voted",
+    "hash_otp_code",
+    "health",
+    "import_members_csv",
+    "import_members_page",
+    "import_members_template",
+    "increment_stock",
+    "info",
+    "inventory_dashboard",
+    "is_active",
+    "is_available",
+    "is_editable",
+    "is_expired",
+    "is_fully_received",
+    "is_internal_staff",
+    "is_inventory_manager",
+    "is_low_stock",
+    "is_member",
+    "is_out_of_stock",
+    "is_pending",
+    "is_valid",
+    "item_count",
+    "ko",
+    "landing",
+    "log_err",
+    "log_ok",
+    "logged_page",
+    "login",
+    "main",
+    "maintenance_form",
+    "mark_accepted",
+    "mark_all_read",
+    "mark_as_ordered",
+    "mark_batch_sent",
+    "mark_delivered",
+    "mark_notification_read",
+    "mark_rejected",
+    "mark_returned",
+    "mark_reviewing",
+    "member",
+    "member_analytics",
+    "my_cart",
+    "my_orders",
+    "my_products",
+    "my_referrals",
+    "needs_maintenance",
+    "notification_list",
+    "notifications_page",
+    "notify",
+    "notify_da_closed",
+    "notify_da_ordered",
+    "notify_da_received",
+    "notify_da_rejected",
+    "notify_da_stock_verified",
+    "notify_da_submitted",
+    "notify_da_validated",
+    "notify_da_visa_approved",
+    "notify_on_status_change",
+    "ok",
+    "order_detail",
+    "order_setup",
+    "org",
+    "patch",
+    "period_label",
+    "post_login_redirect",
+    "preview_export",
+    "preview_invoice_html",
+    "preview_invoice_pdf",
+    "preview_order_html",
+    "preview_purchase_order_pdf",
+    "product",
+    "product_detail",
+    "product_form",
+    "product_reviews",
+    "product_stock_history",
+    "profile",
+    "publish",
+    "push_test_page",
+    "push_test_v5_page",
+    "ready",
+    "receive",
+    "receive_items",
+    "record_maintenance",
+    "regenerate_code",
+    "reject_order",
+    "remove_coupon",
+    "remove_from_cart",
+    "report_download_excel",
+    "report_download_pdf",
+    "report_generate",
+    "report_regenerate",
+    "report_send",
+    "reports_list",
+    "request_create",
+    "requests_list",
+    "resolve_alert",
+    "resolve_alerts",
+    "return_asset",
+    "review_count",
+    "rh",
+    "rh_dashboard",
+    "save",
+    "save_theme",
+    "seed",
+    "seed_default_currencies",
+    "send_abandoned_cart_reminders",
+    "send_cart_recovery",
+    "send_email",
+    "send_email_notification",
+    "send_email_on_status_change",
+    "send_extra_emails",
+    "send_order_delivered_email",
+    "send_order_delivered_sms",
+    "send_order_rejected_email",
+    "send_order_rejected_sms",
+    "send_order_shipping_email",
+    "send_order_validated_email",
+    "send_order_validated_sms",
+    "send_otp_sms",
+    "send_push_to_org_admins",
+    "send_push_to_user",
+    "send_report_email",
+    "send_sms",
+    "send_sms_notification",
+    "send_sms_on_status_change",
+    "sentry_test",
+    "service_worker",
+    "service_worker_v4",
+    "setup_data",
+    "sign_by_dg",
+    "stock_dashboard",
+    "submit_request",
+    "submit_review",
+    "subscribe",
+    "subscription_info",
+    "subtotal",
+    "supplier",
+    "supplier_dashboard",
+    "suppliers_overview",
+    "test_404_page",
+    "test_abandoned_carts",
+    "test_add_to_cart",
+    "test_admin_page",
+    "test_analytics_page",
+    "test_asset_create_form",
+    "test_asset_list",
+    "test_cannot_validate_already_validated_order",
+    "test_cart_page_loads",
+    "test_catalog_search",
+    "test_catalogue_has_products",
+    "test_catalogue_loads",
+    "test_categories_admin",
+    "test_create_da_form",
+    "test_currency_converter",
+    "test_da_export_excel",
+    "test_da_list",
+    "test_dashboard",
+    "test_dashboard_loads",
+    "test_decrement_increment_roundtrip",
+    "test_deductions_page",
+    "test_delivered_closes_order",
+    "test_delivery_created_on_validation",
+    "test_delivery_retry_limit_3",
+    "test_directions_admin",
+    "test_export_batch_creates_csv_and_updates_status",
+    "test_export_dashboard_excel",
+    "test_export_dashboard_pdf",
+    "test_export_returns_none_when_nothing_pending",
+    "test_health_endpoint",
+    "test_homepage_loads",
+    "test_import_members",
+    "test_items_catalog",
+    "test_login_page",
+    "test_login_required_redirects",
+    "test_login_works",
+    "test_logout_redirects",
+    "test_low_stock_alert_triggered",
+    "test_manifest_accessible",
+    "test_navbar_exists",
+    "test_negative_stock_forbidden",
+    "test_order_creation_decreases_stock",
+    "test_order_creation_fails_if_stock_insufficient",
+    "test_page",
+    "test_page_accessible",
+    "test_profile_page",
+    "test_proof_of_delivery_required",
+    "test_push",
+    "test_referrals_page",
+    "test_reject_order_restores_stock",
+    "test_reports_list",
+    "test_responsive_mobile",
+    "test_rh_dashboard",
+    "test_same_email_allowed_across_different_organizations",
+    "test_seeded_assets_visible",
+    "test_services_admin",
+    "test_stats_page",
+    "test_stock_dashboard",
+    "test_suppliers_overview",
+    "test_sw_js_accessible",
+    "test_sw_v4_js_accessible",
+    "test_theme_toggle_exists",
+    "test_unit_price_frozen_after_product_price_change",
+    "test_users_are_isolated_by_organization",
+    "test_validate_order_creates_deduction_transmission",
+    "test_vapid_key_public",
+    "to_dict",
+    "toggle_product_active",
+    "toggle_wishlist",
+    "two_factor_disable",
+    "two_factor_setup",
+    "two_factor_status",
+    "two_factor_verify",
+    "unpublish",
+    "unread_count",
+    "unsubscribe",
+    "update_cart_item_qty",
+    "update_delivery_status",
+    "update_request_status",
+    "validate",
+    "validate_order",
+    "validated_order",
+    "vapid_public_key",
+    "verify_signature",
+    "verify_signature_public",
+    "verify_stock",
+    "view_cart",
+    "visa_by_director",
+    "vote_count",
+    "vote_request",
+    "warn",
+    "warranty_active",
+    "wishlist_page",
+    "write"
+  ],
+  "all_classes": [
+    "AccessControlMiddleware",
+    "AccountsConfig",
+    "Asset",
+    "AssetAdmin",
+    "AssetAssignment",
+    "AssetAssignmentAdmin",
+    "AssetAssignmentInline",
+    "AssetCategory",
+    "AssetCategoryAdmin",
+    "AssetMovement",
+    "AssetMovementAdmin",
+    "AuditConfig",
+    "AuditContextMiddleware",
+    "AuditLog",
+    "AuditLogAdmin",
+    "Cart",
+    "CartItem",
+    "CartItemSerializer",
+    "CartSerializer",
+    "CartViewSet",
+    "CatalogConfig",
+    "Category",
+    "CategorySerializer",
+    "CategoryViewSet",
+    "Command",
+    "CoreConfig",
+    "Coupon",
+    "CouponAdmin",
+    "Currency",
+    "CurrencyAdmin",
+    "DACategory",
+    "DACategoryAdmin",
+    "DAConfig",
+    "DAItem",
+    "DAItemAdmin",
+    "DAOtpCode",
+    "DAOtpCodeAdmin",
+    "DASignature",
+    "DASignatureAdmin",
+    "DASignatureFlow",
+    "DASignatureFlowAdmin",
+    "DAStockMovement",
+    "DAStockMovementAdmin",
+    "DeductionExportBatch",
+    "DeductionTransmission",
+    "DeductionsConfig",
+    "DeliveriesConfig",
+    "Delivery",
+    "DeliveryError",
+    "DeliveryNoteDocument",
+    "Direction",
+    "DirectionAdmin",
+    "DocumentsConfig",
+    "EmptyCartError",
+    "ExchangeRate",
+    "ExchangeRateAdmin",
+    "InsufficientStockError",
+    "InvalidDeliveryStatusError",
+    "InvalidOrderStatusError",
+    "InventoryConfig",
+    "InvoiceDocument",
+    "IsAdmin",
+    "IsCourier",
+    "IsMember",
+    "IsRH",
+    "IsRHOrAdmin",
+    "MaintenanceInline",
+    "MaintenanceRecord",
+    "MaintenanceRecordAdmin",
+    "MaxAttemptsReachedError",
+    "MaxPerMemberExceededError",
+    "Meta",
+    "MonthlyReport",
+    "Notification",
+    "NotificationConsumer",
+    "NotificationsConfig",
+    "Order",
+    "OrderItem",
+    "OrderItemSerializer",
+    "OrderSerializer",
+    "OrderStatusHistory",
+    "OrderViewSet",
+    "OrdersConfig",
+    "Organization",
+    "OrganizationsConfig",
+    "Product",
+    "ProductRequest",
+    "ProductRequestAdmin",
+    "ProductRequestVote",
+    "ProductRequestVoteAdmin",
+    "ProductSerializer",
+    "ProductVariant",
+    "ProductViewSet",
+    "PurchaseOrderDocument",
+    "PurchaseRequest",
+    "PurchaseRequestAdmin",
+    "PurchaseRequestHistory",
+    "PurchaseRequestHistoryAdmin",
+    "PurchaseRequestHistoryInline",
+    "PurchaseRequestItem",
+    "PurchaseRequestItemInline",
+    "PushSubscription",
+    "PushSubscriptionAdmin",
+    "Referral",
+    "ReferralAdmin",
+    "ReferralCode",
+    "ReferralCodeAdmin",
+    "Review",
+    "ReviewAdmin",
+    "SameOrganization",
+    "Service",
+    "ServiceAdmin",
+    "StockAlert",
+    "StockAlertAdmin",
+    "StockError",
+    "StockMovement",
+    "StockMovementAdmin",
+    "TenantManager",
+    "TenantModel",
+    "TestAuth",
+    "TestCart",
+    "TestCatalogue",
+    "TestDADashboard",
+    "TestDAWorkflow",
+    "TestInventory",
+    "TestProfile",
+    "TestRHDashboard",
+    "TestRHExport",
+    "TestSecurity",
+    "User",
+    "UserManager",
+    "WishlistItem",
+    "WishlistItemAdmin"
+  ],
+  "timestamp": "2026-10-10T17:54:52",
+  "audit_summary": {
+    "passed": 167,
+    "failed": 0,
+    "warned": 2,
+    "global_score": 100.0,
+    "sections": {
+      "MODELES": {
+        "p": 25,
+        "f": 0,
+        "w": 0
+      },
+      "RG": {
+        "p": 45,
+        "f": 0,
+        "w": 0
+      },
+      "PACK_A": {
+        "p": 27,
+        "f": 0,
+        "w": 0
+      },
+      "PACK_B": {
+        "p": 20,
+        "f": 0,
+        "w": 0
+      },
+      "PACK_C": {
+        "p": 18,
+        "f": 0,
+        "w": 2
+      },
+      "TESTS": {
+        "p": 15,
+        "f": 0,
+        "w": 0
+      },
+      "INFRA": {
+        "p": 17,
+        "f": 0,
+        "w": 0
+      }
+    }
+  },
+  "failures": [],
+  "warnings": [
+    "SENTRY_DSN absent (opt-in)",
+    "SENTRY_ENVIRONMENT absent (opt-in)"
+  ]
+}
