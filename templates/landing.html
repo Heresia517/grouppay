@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr" class="{% if user.is_authenticated and user.theme_preference == 'dark' %}dark{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ organization.name|default:"GroupPay" }} — Accueil</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50:'#eff6ff',100:'#dbeafe',300:'#93c5fd',400:'#60a5fa',
+                            500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a',
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        html.dark body { background: #0f172a; color: #f1f5f9; }
+        html.dark .bg-white { background-color: #1e293b !important; }
+        html.dark .text-slate-900 { color: #f1f5f9 !important; }
+        html.dark .text-slate-500 { color: #94a3b8 !important; }
+        html.dark .border-slate-100 { border-color: #334155 !important; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-white to-slate-100 min-h-screen">
+
+    <!-- Header minimal -->
+    <header class="py-6 px-4 sm:px-8">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                {% if organization.logo %}
+                    <img src="{{ organization.logo.url }}" alt="{{ organization.name }}" class="w-10 h-10 rounded-xl object-cover">
+                {% else %}
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-sm"
+                         style="background: linear-gradient(135deg, {{ organization.color_primary|default:'#2563eb' }}, {{ organization.color_secondary|default:'#1e40af' }});">
+                        {{ organization.name|default:"G"|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <p class="font-bold text-slate-900 leading-tight">{{ organization.name|default:"GroupPay" }}</p>
+                    <p class="text-xs text-slate-500">Plateforme interne</p>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-slate-500 hidden sm:block">{{ user.email }}</span>
+                <a href="/admin/logout/" class="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200">
+                    Déconnexion
+                </a>
+            </div>
+            {% else %}
+            <a href="/admin/login/" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+                Se connecter
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
+
+        <!-- Hero -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4">
+                {% if is_public %}Bienvenue sur {{ organization.name|default:"GroupPay" }}{% else %}Choisissez votre espace{% endif %}
+            </h1>
+            <p class="text-slate-500 max-w-2xl mx-auto text-lg">
+                {% if is_public %}
+                    Plateforme de gestion des achats groupés et des demandes d'achat internes.
+                {% else %}
+                    Vous avez accès à plusieurs espaces. Sélectionnez celui que vous voulez utiliser.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Cards espaces -->
+        <div class="grid grid-cols-1 {% if is_internal %}lg:grid-cols-2{% else %}max-w-md mx-auto{% endif %} gap-6">
+
+            <!-- Mutuelle (visible pour tous) -->
+            <a href="{% url 'catalog' %}" class="group bg-white rounded-3xl shadow-card border border-slate-100 hover:border-brand-300 hover:shadow-card-hover overflow-hidden transition-all">
+                <div class="h-40 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                    <svg class="w-20 h-20 text-white/80 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <div class="p-6">
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Espace Mutuelle</h2>
+                    <p class="text-slate-500 text-sm mb-4">
+                        Achetez vos produits au meilleur prix grâce à l'achat groupé. Paiement par retenue salariale automatique.
+                    </p>
+                    <div class="flex items-center gap-2 text-brand-600 font-semibold text-sm">
+                        Accéder au catalogue
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- DA (visible pour staff uniquement) -->
+            {% if is_internal %}
+            <a href="{% url 'da_dashboard' %}" class="group bg-white rounded-3xl shadow-card border border-slate-100 hover:border-purple-300 hover:shadow-card-hover overflow-hidden transition-all">
+                <div class="h-40 bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+                    <svg class="w-20 h-20 text-white/80 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div class="p-6">
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Demandes d'Achat</h2>
+                    <p class="text-slate-500 text-sm mb-4">
+                        Émettez, visez et signez des demandes d'achat. Suivez les commandes fournisseurs et les réceptions.
+                    </p>
+                    <div class="flex items-center gap-2 text-purple-600 font-semibold text-sm">
+                        Accéder à l'espace DA
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+
+        {% if is_public %}
+        <div class="mt-12 text-center">
+            <p class="text-sm text-slate-500">
+                Vous n'avez pas encore de compte ?
+                <a href="/admin/" class="text-brand-600 hover:underline font-medium">Contactez votre RH</a>
+            </p>
+        </div>
+        {% endif %}
+    </main>
+
+    <footer class="py-8 text-center text-xs text-slate-400">
+        © {% now "Y" %} {{ organization.name|default:"GroupPay" }} — Tous droits réservés
+    </footer>
+</body>
+</html>

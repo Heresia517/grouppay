@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 
 from apps.catalog.views import catalog, product_detail
 from apps.core.views import health, sentry_test
+from apps.core.landing_views import landing
 from apps.core.sw_view import service_worker, service_worker_v4
 from apps.notifications.push_views import (
     vapid_public_key, subscribe as push_subscribe,
@@ -86,7 +87,8 @@ urlpatterns = [
     path('inventory/', include('apps.inventory.urls')),
     
     # Catalogue
-    path('', catalog, name='catalog'),
+    path('', landing, name='home'),
+    path('catalog/', catalog, name='catalog'),
     path('product/<uuid:product_id>/', product_detail, name='product_detail'),
     
     # Panier

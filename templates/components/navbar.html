@@ -1,11 +1,12 @@
+{% load static %}
 <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-slate-200 shadow-sm"
      x-data="{ mobileOpen: false, userMenuOpen: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
 
-            <!-- Logo + Nom -->
+            <!-- Logo + Nom + Badge espace -->
             <div class="flex items-center gap-3 flex-shrink-0">
-                <a href="{% url 'catalog' %}" class="flex items-center gap-3 group">
+                <a href="{% url 'home' %}" class="flex items-center gap-3 group" title="Retour a l'accueil">
                     {% if organization.logo %}
                         <img src="{{ organization.logo.url }}" alt="{{ organization.name }}"
                              class="w-10 h-10 rounded-xl object-cover shadow-sm">
@@ -17,7 +18,15 @@
                     {% endif %}
                     <div class="hidden sm:block">
                         <div class="font-bold text-slate-900 text-base leading-tight">{{ organization.name }}</div>
-                        <div class="text-xs text-slate-500 leading-tight">GroupPay</div>
+                        <div class="text-xs text-slate-500 leading-tight">
+                            {% if current_space == "da" %}
+                                Espace DA
+                            {% elif current_space == "inventory" %}
+                                Espace Inventaire
+                            {% else %}
+                                Espace Mutuelle
+                            {% endif %}
+                        </div>
                     </div>
                 </a>
             </div>
@@ -25,91 +34,104 @@
             <!-- Navigation desktop -->
             {% if user.is_authenticated %}
             <div class="hidden md:flex items-center gap-1">
-                {% if user.role == 'ADMIN' or user.role == 'GESTIONNAIRE' %}
-                <a href="{% url 'import_members' %}" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                        Import
-                    </span>
-                </a>
-                            <a href="{% url 'deductions_dashboard' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
-                                Retenue salariale
-                            </a>
-                <a href="{% url 'rh_dashboard' %}"
-                   class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        Dashboard
-                    </span>
-                </a>
+
+                {% if current_space == "mutuelle" %}
+                    <!-- Liens Mutuelle -->
+                    <a href="{% url 'catalog' %}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            Catalogue
+                        </span>
+                    </a>
+                    <a href="{% url 'my_orders' %}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Mes commandes
+                        </span>
+                    </a>
+                    <a href="{% url 'requests_list' %}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                            Demandes produits
+                        </span>
+                    </a>
+                {% elif current_space == "da" or current_space == "inventory" %}
+                    <!-- Liens DA / Inventaire -->
+                    {% if can_access_da %}
+                    <a href="{% url 'da_dashboard' %}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Dashboard DA
+                        </span>
+                    </a>
+                    {% endif %}
+                    {% if user.role == "ADMIN" or user.role == "GESTIONNAIRE" or user.is_dg %}
+                    <a href="{% url 'asset_list' %}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            Inventaire
+                        </span>
+                    </a>
+                    {% endif %}
+                    {% if user.role == "ADMIN" or user.role == "GESTIONNAIRE" %}
+                    <a href="{% url 'rh_dashboard' %}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            Dashboard RH
+                        </span>
+                    </a>
+                    {% endif %}
                 {% endif %}
-                <a href="{% url 'catalog' %}"
-                   class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition
-                          {% if request.resolver_match.url_name == 'catalog' %}bg-slate-100 text-slate-900{% endif %}">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                        Catalogue
-                    </span>
-                </a>
-                <a href="{% url 'my_orders' %}"
-                   class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition
-                          {% if request.resolver_match.url_name == 'my_orders' %}bg-slate-100 text-slate-900{% endif %}">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        Mes commandes
-                    </span>
-                </a>
             </div>
             {% endif %}
 
-            <!-- Right side: cart + user -->
+            <!-- Right side -->
             <div class="flex items-center gap-2">
                 {% if user.is_authenticated %}
-                    <!-- Cart icon with live badge -->
+
+                    <!-- Switch espace (staff uniquement) -->
+                    {% if can_access_da and current_space == "mutuelle" %}
+                    <a href="{% url 'da_dashboard' %}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 text-purple-700 text-xs font-semibold hover:bg-purple-100 border border-purple-200 transition" title="Basculer vers l'espace DA">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                        <span class="hidden md:inline">Espace DA</span>
+                    </a>
+                    {% endif %}
+                    {% if current_space == "da" or current_space == "inventory" %}
+                    <a href="{% url 'catalog' %}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 border border-blue-200 transition" title="Basculer vers la Mutuelle">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                        <span class="hidden md:inline">Mutuelle</span>
+                    </a>
+                    {% endif %}
+
                     <!-- Theme toggle -->
-                    <button onclick="toggleTheme()" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Basculer le thème">
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Theme">
                         <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                     </button>
 
-                    <!-- Lien DA (Demandes d'Achat) -->
-                    {% if user.organization.has_module|default:False %}
-                    {% endif %}
-                    <a href="{% url 'da_dashboard' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Demandes d'Achat">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <!-- Cart (Mutuelle uniquement) -->
+                    {% if current_space == "mutuelle" %}
+                    <a href="{% url 'view_cart' %}" class="relative p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span id="cart-badge-container" class="absolute -top-0.5 -right-0.5">
+                            {% include "orders/cart_badge.html" with count=cart_count|default:0 %}
+                        </span>
                     </a>
 
-                    <!-- Wishlist heart -->
                     <a href="{% url 'wishlist' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Mes favoris">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </a>
-
-                    <!-- Demandes produits -->
-                    <a href="{% url 'requests_list' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Demandes produits">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-                    </a>
-
-                    <!-- Inventaire -->
-                    <a href="{% url 'inventory_dashboard' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Inventaire">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    </a>
-
-                    <!-- Fournisseur link (si applicable) -->
-                    {% if user.role == 'FOURNISSEUR' or user.role == 'ADMIN' %}
-                    <a href="{% url 'supplier_dashboard' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Espace fournisseur">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    </a>
                     {% endif %}
 
-                    <!-- Stock link (RH/Fournisseur) -->
-                    {% if user.role == 'ADMIN' or user.role == 'GESTIONNAIRE' or user.role == 'FOURNISSEUR' %}
-                    <a href="{% url 'stock_dashboard' %}" class="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition" title="Stock">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    </a>
-                    {% endif %}
-
-                    <!-- Notifications bell -->
+                    <!-- Notifications (toujours) -->
                     <div class="relative" x-data="notifBell()">
                         <button @click="open = !open; if (open) refresh()"
                                 class="relative p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
@@ -117,8 +139,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
-                            <span x-show="count > 0"
-                                  x-text="count > 9 ? '9+' : count"
+                            <span x-show="count > 0" x-text="count > 9 ? '9+' : count"
                                   class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm"
                                   style="display:none"></span>
                         </button>
@@ -131,19 +152,13 @@
                              style="display:none">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                                 <p class="text-sm font-bold text-slate-900">Notifications</p>
-                                <div class="flex items-center gap-3">
-                                    <a href="{% url 'notifications_page' %}" class="text-xs text-slate-500 hover:text-brand-600 font-medium">Voir tout</a>
-                                    <button @click="markAllRead()" class="text-xs text-brand-600 hover:text-brand-700 font-medium">
-                                        Tout marquer lu
-                                    </button>
-                                </div>
+                                <button @click="markAllRead()" class="text-xs text-brand-600 hover:text-brand-700 font-medium">
+                                    Tout marquer lu
+                                </button>
                             </div>
                             <div class="max-h-96 overflow-y-auto">
                                 <template x-if="items.length === 0">
                                     <div class="p-8 text-center">
-                                        <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                        </svg>
                                         <p class="text-sm text-slate-500">Aucune notification</p>
                                     </div>
                                 </template>
@@ -164,19 +179,6 @@
                         </div>
                     </div>
 
-                    <!-- Cart -->
-                    <a href="{% url 'view_cart' %}"
-                    <a href="{% url 'view_cart' %}"
-                       class="relative p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition"
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        <span id="cart-badge-container" class="absolute -top-0.5 -right-0.5">
-                            {% include "orders/cart_badge.html" with count=cart_count|default:0 %}
-                        </span>
-                    </a>
-
                     <!-- User dropdown -->
                     <div class="relative" @click.away="userMenuOpen = false">
                         <button @click="userMenuOpen = !userMenuOpen"
@@ -184,9 +186,6 @@
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center text-sm font-bold shadow-sm">
                                 {{ user.email|slice:":1"|upper }}
                             </div>
-                            <svg class="w-4 h-4 text-slate-500 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
                         </button>
 
                         <div x-show="userMenuOpen"
@@ -199,67 +198,90 @@
                                 <p class="text-sm font-semibold text-slate-900 truncate">{{ user.email }}</p>
                                 <p class="text-xs text-slate-500 mt-0.5">
                                     {{ user.get_role_display }}
-                                    {% if user.internal_id %} · {{ user.internal_id }}{% endif %}
+                                    {% if user.is_dg %} · DG{% endif %}
+                                    {% if user.is_director %} · Directeur{% endif %}
+                                    {% if user.is_service_chief %} · Chef{% endif %}
                                 </p>
                             </div>
-                            {% if user.role == 'FOURNISSEUR' or user.role == 'ADMIN' or user.role == 'GESTIONNAIRE' %}
-                            <a href="{% url 'supplier_my_products' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                Mes produits
+
+                            <!-- Lien retour accueil (pour tous) -->
+                            <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                Accueil
                             </a>
-                            {% endif %}
-                            {% if user.role == 'ADMIN' or user.role == 'GESTIONNAIRE' %}
-                            <a href="{% url 'suppliers_overview' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857"/></svg>
-                                Fournisseurs
-                            </a>
-                            {% endif %}
+
                             <a href="{% url 'profile' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                 Mon profil
                             </a>
-                            <a href="{% url 'my_orders' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
-                                Mes commandes
+
+                            {% if current_space == "mutuelle" %}
+                            <a href="{% url 'member_analytics' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                Mes analytics
                             </a>
+                            <a href="{% url 'my_referrals' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857"/></svg>
+                                Mon parrainage
+                            </a>
+                            {% endif %}
+
+                            {% if user.is_staff or can_access_da %}
+                            <a href="{% url 'two_factor_setup' %}" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Securite 2FA
+                            </a>
+                            {% endif %}
+
                             {% if user.is_staff %}
                             <a href="/admin/" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                                 Admin Django
                             </a>
                             {% endif %}
+
                             <div class="border-t border-slate-100 mt-1 pt-1">
                                 <a href="/admin/logout/" class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                    Déconnexion
+                                    Deconnexion
                                 </a>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Mobile menu button -->
+                    <button @click="mobileOpen = !mobileOpen" class="md:hidden p-2 rounded-lg hover:bg-slate-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
                 {% else %}
-                    <a href="/admin/" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition shadow-sm">
+                    <a href="/admin/login/" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition shadow-sm">
                         Se connecter
                     </a>
-                {% endif %}
-
-                <!-- Mobile menu button -->
-                {% if user.is_authenticated %}
-                <button @click="mobileOpen = !mobileOpen" class="md:hidden p-2 rounded-lg hover:bg-slate-100">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        <path x-show="mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
                 {% endif %}
             </div>
         </div>
 
         <!-- Mobile menu -->
         {% if user.is_authenticated %}
-        <div x-show="mobileOpen" x-collapse class="md:hidden border-t border-slate-200 py-3" style="display:none">
+        <div x-show="mobileOpen" class="md:hidden border-t border-slate-200 py-3" style="display:none">
+            {% if current_space == "mutuelle" %}
             <a href="{% url 'catalog' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Catalogue</a>
             <a href="{% url 'my_orders' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Mes commandes</a>
             <a href="{% url 'view_cart' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Panier</a>
+            {% else %}
+            {% if can_access_da %}
+            <a href="{% url 'da_dashboard' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Dashboard DA</a>
+            {% endif %}
+            {% if user.role == "ADMIN" or user.role == "GESTIONNAIRE" or user.is_dg %}
+            <a href="{% url 'asset_list' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Inventaire</a>
+            {% endif %}
+            {% if user.role == "ADMIN" or user.role == "GESTIONNAIRE" %}
+            <a href="{% url 'rh_dashboard' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Dashboard RH</a>
+            {% endif %}
+            {% endif %}
+            <a href="{% url 'home' %}" class="block px-4 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium">Accueil</a>
         </div>
         {% endif %}
     </div>
