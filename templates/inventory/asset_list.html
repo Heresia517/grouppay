@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Actifs — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'inventory_dashboard' %}" class="text-sm text-slate-600 hover:text-brand-600">← Inventaire</a>
+    </div>
+
+    <div class="flex items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900">Actifs</h1>
+            <p class="text-slate-500 text-sm">{{ assets|length }} actif(s)</p>
+        </div>
+        <a href="{% url 'asset_create' %}" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+            + Nouvel actif
+        </a>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 mb-6">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Recherche</label>
+                <input type="text" name="q" value="{{ filters.q }}" placeholder="Nom, reference, serial..."
+                       class="block w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Categorie</label>
+                <select name="category" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Toutes</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if filters.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Statut</label>
+                <select name="status" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for val, label in statuses %}
+                    <option value="{{ val }}" {% if filters.status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Etat</label>
+                <select name="condition" class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Tous</option>
+                    {% for val, label in conditions %}
+                    <option value="{{ val }}" {% if filters.condition == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold">Filtrer</button>
+            <a href="{% url 'asset_list' %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold">Reset</a>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="p-3 text-left font-semibold text-slate-600">Reference</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Actif</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Categorie</th>
+                    <th class="p-3 text-left font-semibold text-slate-600">Assigne a</th>
+                    <th class="p-3 text-center font-semibold text-slate-600">Statut</th>
+                    <th class="p-3 text-right font-semibold text-slate-600">Valeur</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for asset in assets %}
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-mono text-xs text-slate-500">{{ asset.reference }}</td>
+                    <td class="p-3">
+                        <a href="{% url 'asset_detail' asset.id %}" class="font-medium text-brand-600 hover:underline">
+                            {{ asset.name|truncatechars:40 }}
+                        </a>
+                        {% if asset.brand %}<p class="text-xs text-slate-400">{{ asset.brand }} {{ asset.model_name }}</p>{% endif %}
+                    </td>
+                    <td class="p-3 text-slate-600">{{ asset.category.name }}</td>
+                    <td class="p-3 text-slate-600">{{ asset.assigned_to.email|default:"—"|truncatechars:25 }}</td>
+                    <td class="p-3 text-center">
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold
+                            {% if asset.status == 'AVAILABLE' %}bg-emerald-100 text-emerald-800
+                            {% elif asset.status == 'ASSIGNED' %}bg-blue-100 text-blue-800
+                            {% elif asset.status == 'MAINTENANCE' %}bg-amber-100 text-amber-800
+                            {% else %}bg-slate-100 text-slate-700{% endif %}">
+                            {{ asset.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right font-semibold tabular-nums">{{ asset.computed_value|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="p-12 text-center text-slate-500">Aucun actif trouve</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

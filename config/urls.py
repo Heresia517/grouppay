@@ -36,6 +36,10 @@ from apps.documents.views import (
 from apps.deliveries.views import courier_deliveries, delivery_detail, update_delivery_status
 from apps.orders.dashboard_views import rh_dashboard, bulk_validate_orders, bulk_reject_orders
 from apps.orders.analytics_view import member_analytics
+from apps.orders.report_views import (
+    reports_list, report_generate, report_regenerate,
+    report_download_pdf, report_download_excel, report_send,
+)
 from apps.orders.admin_recovery_view import (
     abandoned_carts_list, cart_recovery_send, cart_recovery_send_all,
 )
@@ -79,6 +83,7 @@ urlpatterns = [
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path('admin/', admin.site.urls),
     path('da/', include('apps.da.urls')),
+    path('inventory/', include('apps.inventory.urls')),
     
     # Catalogue
     path('', catalog, name='catalog'),
@@ -162,6 +167,14 @@ urlpatterns = [
     path('rh/deductions/generate/', generate_export, name='generate_export'),
     path('rh/deductions/batch/<uuid:batch_id>/download/', download_batch, name='download_batch'),
     path('rh/deductions/batch/<uuid:batch_id>/sent/', mark_batch_sent, name='mark_batch_sent'),
+
+    # Rapports mensuels
+    path('rh/reports/', reports_list, name='reports_list'),
+    path('rh/reports/generate/', report_generate, name='report_generate'),
+    path('rh/reports/<uuid:report_id>/regenerate/', report_regenerate, name='report_regenerate'),
+    path('rh/reports/<uuid:report_id>/pdf/', report_download_pdf, name='report_download_pdf'),
+    path('rh/reports/<uuid:report_id>/excel/', report_download_excel, name='report_download_excel'),
+    path('rh/reports/<uuid:report_id>/send/', report_send, name='report_send'),
 
     # 2FA
     path('accounts/2fa/', two_factor_setup, name='two_factor_setup'),

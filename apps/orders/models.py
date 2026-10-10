@@ -67,3 +67,60 @@ class OrderStatusHistory(models.Model):
     actor = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True)
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class MonthlyReport(models.Model):
+    """Rapport mensuel genere automatiquement."""
+    STATUS_CHOICES = [
+        ("PENDING", "En attente"),
+        ("GENERATING", "Generation en cours"),
+        ("READY", "Pret"),
+        ("FAILED", "Echec"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE,
+        related_name="monthly_reports",
+    )
+    year = models.PositiveIntegerField()
+    month = models.PositiveIntegerField()
+
+    # Fichiers generes
+    pdf_file = models.FileField(upload_to="reports/", null=True, blank=True)
+    excel_file = models.FileField(upload_to="reports/", null=True, blank=True)
+
+    # Metriques snapshot
+    orders_count = models.PositiveIntegerField(default=0)
+    orders_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    da_count = models.PositiveIntegerField(default=0)
+    da_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    members_active = models.PositiveIntegerField(default=0)
+
+    # Meta
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="PENDING")
+    generated_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_to = models.JSONField(default=list, blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-year", "-month"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "year", "month"],
+                name="unique_monthly_report_per_org",
+            ),
+        ]
+        verbose_name = "Rapport mensuel"
+
+    def __str__(self):
+        return f"Rapport {self.month:02d}/{self.year} - {self.organization.name}"
+
+    @property
+    def period_label(self):
+        months = ["", "Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin",
+                  "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"]
+        return f"{months[self.month]} {self.year}"

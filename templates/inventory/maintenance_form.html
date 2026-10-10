@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Maintenance {{ asset.reference }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'asset_detail' asset.id %}" class="text-sm text-slate-600 hover:text-brand-600">← {{ asset.name }}</a>
+    </div>
+
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Maintenance</h1>
+    <p class="text-slate-500 text-sm mb-8">{{ asset.reference }} — {{ asset.name }}</p>
+
+    <form method="post" class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 space-y-5">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Type *</label>
+            <select name="type" required class="block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+                {% for val, label in types %}
+                <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Description *</label>
+            <textarea name="description" required rows="3" class="block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Prestataire</label>
+                <input type="text" name="performed_by" class="block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Cout ({{ organization.currency_code }})</label>
+                <input type="number" name="cost" step="0.01" value="0" class="block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Prochaine maintenance</label>
+            <input type="date" name="next_maintenance_date" class="block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            <a href="{% url 'asset_detail' asset.id %}" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold">Annuler</a>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm">
+                Enregistrer
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

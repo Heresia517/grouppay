@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+    @page { size: A4; margin: 18mm; }
+    body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #0f172a; }
+    h1 { color: #1e3a8a; font-size: 22pt; margin: 0; }
+    h2 { color: #1e3a8a; font-size: 13pt; margin: 18pt 0 8pt 0; border-bottom: 2pt solid #2563eb; padding-bottom: 4pt; }
+    .header { border-bottom: 2pt solid #2563eb; padding-bottom: 10pt; margin-bottom: 15pt; }
+    .header td { vertical-align: top; }
+    .subtitle { color: #64748b; font-size: 9pt; }
+    .kpi-grid { width: 100%; border-collapse: separate; border-spacing: 6pt 0; margin: 12pt 0; }
+    .kpi-grid td { padding: 10pt; border: 1pt solid #e2e8f0; width: 25%; }
+    .kpi-label { font-size: 8pt; color: #64748b; text-transform: uppercase; }
+    .kpi-value { font-size: 16pt; font-weight: bold; color: #0f172a; margin-top: 4pt; }
+    table.data { width: 100%; border-collapse: collapse; margin-top: 8pt; }
+    table.data th { background: #2563eb; color: white; padding: 6pt; text-align: left; font-size: 8pt; }
+    table.data td { padding: 5pt; border-bottom: 0.5pt solid #e2e8f0; font-size: 9pt; }
+    .footer { margin-top: 25pt; padding-top: 8pt; border-top: 0.5pt solid #e2e8f0; text-align: center; font-size: 8pt; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <table width="100%">
+        <tr>
+            <td>
+                <h1>{{ organization.name }}</h1>
+                <div class="subtitle">Rapport d'activite mensuel</div>
+            </td>
+            <td style="text-align: right;">
+                <div style="font-size: 13pt; font-weight: bold; color: #1e3a8a;">{{ data.period_label }}</div>
+                <div class="subtitle">Genere le {{ generated_at|date:"d/m/Y a H:i" }}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<h2>Indicateurs cles</h2>
+<table class="kpi-grid">
+    <tr>
+        <td>
+            <div class="kpi-label">Commandes</div>
+            <div class="kpi-value">{{ data.orders.total }}</div>
+        </td>
+        <td>
+            <div class="kpi-label">Montant total</div>
+            <div class="kpi-value">{{ data.orders.amount|floatformat:0 }}</div>
+            <div class="subtitle">{{ organization.currency_code }}</div>
+        </td>
+        <td>
+            <div class="kpi-label">Panier moyen</div>
+            <div class="kpi-value">{{ data.orders.avg_amount|floatformat:0 }}</div>
+            <div class="subtitle">{{ organization.currency_code }}</div>
+        </td>
+        <td>
+            <div class="kpi-label">Membres actifs</div>
+            <div class="kpi-value">{{ data.members.active }}</div>
+        </td>
+    </tr>
+</table>
+
+<h2>Detail des commandes</h2>
+<table class="data">
+    <tr>
+        <th>Statut</th>
+        <th style="text-align: right">Nombre</th>
+    </tr>
+    <tr><td>Total creees</td><td style="text-align: right">{{ data.orders.total }}</td></tr>
+    <tr><td>Validees</td><td style="text-align: right">{{ data.orders.validated }}</td></tr>
+    <tr><td>Livrees</td><td style="text-align: right">{{ data.orders.delivered }}</td></tr>
+    <tr><td>Refusees</td><td style="text-align: right">{{ data.orders.rejected }}</td></tr>
+    <tr><td>En attente</td><td style="text-align: right">{{ data.orders.pending }}</td></tr>
+</table>
+
+{% if data.top_products %}
+<h2>Top 10 produits</h2>
+<table class="data">
+    <tr>
+        <th>Produit</th>
+        <th style="text-align: center">Qte</th>
+        <th style="text-align: right">CA ({{ organization.currency_code }})</th>
+    </tr>
+    {% for p in data.top_products %}
+    <tr>
+        <td>{{ p.name }}</td>
+        <td style="text-align: center">{{ p.qty }}</td>
+        <td style="text-align: right">{{ p.revenue|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if data.top_members %}
+<h2>Top 10 membres</h2>
+<table class="data">
+    <tr>
+        <th>Membre</th>
+        <th style="text-align: center">Commandes</th>
+        <th style="text-align: right">Total ({{ organization.currency_code }})</th>
+    </tr>
+    {% for m in data.top_members %}
+    <tr>
+        <td>{{ m.email|truncatechars:35 }}</td>
+        <td style="text-align: center">{{ m.count }}</td>
+        <td style="text-align: right">{{ m.total|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% if data.da.count %}
+<h2>Demandes d'achat</h2>
+<table class="data">
+    <tr>
+        <th>Total</th>
+        <th>Validees</th>
+        <th>Cloturees</th>
+        <th style="text-align: right">Montant</th>
+    </tr>
+    <tr>
+        <td>{{ data.da.count }}</td>
+        <td>{{ data.da.validated }}</td>
+        <td>{{ data.da.closed }}</td>
+        <td style="text-align: right">{{ data.da.amount|floatformat:0 }} {{ organization.currency_code }}</td>
+    </tr>
+</table>
+{% endif %}
+
+<h2>Membres</h2>
+<table class="data">
+    <tr>
+        <th>Indicateur</th>
+        <th style="text-align: right">Valeur</th>
+    </tr>
+    <tr><td>Membres totaux</td><td style="text-align: right">{{ data.members.total }}</td></tr>
+    <tr><td>Nouveaux ce mois</td><td style="text-align: right">{{ data.members.new }}</td></tr>
+    <tr><td>Actifs (au moins 1 commande)</td><td style="text-align: right">{{ data.members.active }}</td></tr>
+</table>
+
+<div class="footer">
+    Rapport genere automatiquement par GroupPay le {{ generated_at|date:"d/m/Y" }}<br>
+    {{ organization.name }} — {{ organization.country_code }}
+</div>
+
+</body></html>

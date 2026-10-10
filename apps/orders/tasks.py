@@ -31,3 +31,23 @@ def send_abandoned_cart_reminders():
             sent += 1
 
     return {"sent": sent, "total": carts.count()}
+
+
+
+@shared_task(name="orders.generate_monthly_reports")
+def generate_monthly_reports():
+    """Genere automatiquement les rapports du mois precedent (le 1er du mois)."""
+    from .report_service import generate_report, send_report_email
+    from .models import MonthlyReport
+
+    results = generate_report()
+
+    # Envoyer les rapports par email
+    reports = MonthlyReport.objects.filter(
+        status="READY",
+        sent_at__isnull=True,
+    )
+    for report in reports:
+        send_report_email(report)
+
+    return {"generated": len(results), "sent": reports.count()}

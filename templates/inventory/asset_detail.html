@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }} — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'asset_list' %}" class="text-sm text-slate-600 hover:text-brand-600">← Actifs</a>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-900{% else %}bg-emerald-50 border border-emerald-200 text-emerald-900{% endif %}">
+        <p class="text-sm font-medium">{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="font-mono text-xs text-slate-500">{{ asset.reference }}</span>
+                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold
+                        {% if asset.status == 'AVAILABLE' %}bg-emerald-100 text-emerald-800
+                        {% elif asset.status == 'ASSIGNED' %}bg-blue-100 text-blue-800
+                        {% elif asset.status == 'MAINTENANCE' %}bg-amber-100 text-amber-800
+                        {% else %}bg-slate-100 text-slate-700{% endif %}">
+                        {{ asset.get_status_display }}
+                    </span>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-900">{{ asset.name }}</h1>
+                <p class="text-slate-500 mt-1">{{ asset.category.name }}{% if asset.brand %} · {{ asset.brand }} {{ asset.model_name }}{% endif %}</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'asset_edit' asset.id %}" class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200">
+                    Modifier
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Etat</p>
+                <p class="font-medium text-slate-900">{{ asset.get_condition_display }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Valeur actuelle</p>
+                <p class="font-bold text-slate-900 tabular-nums">{{ asset.computed_value|floatformat:0 }} {{ organization.currency_code }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Duree</p>
+                <p class="font-medium text-slate-900">{{ asset.age_months }} mois</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase mb-1">Garantie</p>
+                <p class="font-medium {% if asset.warranty_active %}text-emerald-600{% else %}text-slate-500{% endif %}">
+                    {% if asset.warranty_end_date %}
+                        {{ asset.warranty_end_date|date:"d/m/Y" }}
+                        {% if asset.warranty_active %}✓{% else %}Expiree{% endif %}
+                    {% else %}—{% endif %}
+                </p>
+            </div>
+        </div>
+
+        {% if asset.assigned_to %}
+        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-medium text-slate-900">Attribue a {{ asset.assigned_to.email }}</p>
+                <p class="text-xs text-slate-500">Depuis le {{ asset.assigned_at|date:"d/m/Y" }}</p>
+            </div>
+            <form method="post" action="{% url 'asset_return' asset.id %}">
+                {% csrf_token %}
+                <button type="submit" class="px-3 py-2 rounded-lg bg-amber-50 text-amber-700 text-xs font-semibold hover:bg-amber-100 border border-amber-200">
+                    Retourner
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-5 mb-6">
+        <h2 class="font-bold text-slate-900 mb-3">Actions</h2>
+        <div class="flex flex-wrap gap-2">
+            {% if asset.status == "AVAILABLE" %}
+            <form method="post" action="{% url 'asset_assign' asset.id %}" class="inline-flex gap-2 items-center">
+                {% csrf_token %}
+                <select name="user_id" required class="rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Attribuer a...</option>
+                </select>
+                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">
+                    Attribuer
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'asset_maintenance' asset.id %}" class="px-4 py-2 rounded-lg bg-amber-50 text-amber-700 text-sm font-semibold hover:bg-amber-100 border border-amber-200">
+                Maintenance
+            </a>
+        </div>
+    </div>
+
+    <!-- Historique -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="font-bold text-slate-900">Historique attribution</h2>
+            </div>
+            {% if assignments %}
+            <div class="divide-y divide-slate-100">
+                {% for a in assignments %}
+                <div class="p-3 text-xs">
+                    <p class="font-medium text-slate-900">{{ a.assigned_to.email }}</p>
+                    <p class="text-slate-500">{{ a.assigned_at|date:"d/m/Y" }}{% if a.returned_at %} → {{ a.returned_at|date:"d/m/Y" }}{% else %} (en cours){% endif %}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-8 text-center text-slate-500 text-sm">Aucune attribution</div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="font-bold text-slate-900">Maintenances</h2>
+            </div>
+            {% if maintenances %}
+            <div class="divide-y divide-slate-100">
+                {% for m in maintenances %}
+                <div class="p-3 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium text-slate-900">{{ m.get_type_display }}</span>
+                        <span class="text-slate-500">{{ m.date|date:"d/m/Y" }}</span>
+                    </div>
+                    {% if m.description %}<p class="text-slate-600 mt-1">{{ m.description|truncatechars:80 }}</p>{% endif %}
+                    {% if m.cost %}<p class="text-slate-500 mt-1">Cout : {{ m.cost|floatformat:0 }} {{ organization.currency_code }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-8 text-center text-slate-500 text-sm">Aucune maintenance</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

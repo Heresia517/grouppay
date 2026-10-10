@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "channels",
     "apps.audit",
     "apps.da",
+    "apps.inventory",
     "django_otp",
     "django_otp.plugins.otp_totp",
 ]
@@ -183,6 +184,10 @@ CELERY_BEAT_SCHEDULE = {
     "cleanup-expired-carts": {
         "task": "orders.cleanup_expired_carts",
         "schedule": crontab(hour=3, minute=0),
+    },
+    "generate-monthly-reports": {
+        "task": "orders.generate_monthly_reports",
+        "schedule": crontab(day_of_month=1, hour=6, minute=0),
     },
     "send-abandoned-cart-reminders": {
         "task": "orders.send_abandoned_cart_reminders",
