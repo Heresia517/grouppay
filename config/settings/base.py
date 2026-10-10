@@ -288,3 +288,13 @@ DA_THRESHOLD_DG = env.int("DA_THRESHOLD_DG", default=2_000_000)
 # PARRAINAGE
 # ============================================================
 REFERRAL_REWARD_AMOUNT = env.int("REFERRAL_REWARD_AMOUNT", default=5000)
+
+
+# ============================================================
+# WEB PUSH (VAPID)
+# ============================================================
+# ATTENTION : en production, generer les cles avec :
+#   python -c "from py_vapid import Vapid; v = Vapid(); v.generate_keys(); print(v.private_pem().decode()); print(v.public_key_urlsafe_base64())"
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+PUSH_CONTACT_EMAIL = env("PUSH_CONTACT_EMAIL", default="admin@grouppay.app")

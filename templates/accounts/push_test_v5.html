@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Push Test v5.1{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-8">
+        <h1 class="text-2xl font-extrabold text-slate-900 mb-2">Push Test v5.1</h1>
+        <p class="text-red-600 font-bold mb-6">Si tu vois "v5.1", la page est fraiche ✅</p>
+
+        <div id="status" class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm font-mono">
+            <p>Initialisation...</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+            <button onclick="doCleanup()" class="px-4 py-3 rounded-lg bg-red-700 text-white text-sm font-bold hover:bg-red-800">
+                🔥 1. CLEANUP TOTAL (F12 ouvert)
+            </button>
+            <button onclick="doSubscribe()" class="px-4 py-3 rounded-lg bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700">
+                ✅ 2. ACTIVER PUSH
+            </button>
+            <button onclick="doTest()" class="px-4 py-3 rounded-lg bg-brand-600 text-white text-sm font-bold hover:bg-brand-700">
+                📨 3. Envoyer test
+            </button>
+            <button onclick="doRefresh()" class="px-4 py-3 rounded-lg bg-slate-600 text-white text-sm font-bold hover:bg-slate-700">
+                🔄 4. Voir etat
+            </button>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <h2 class="font-bold text-slate-900 text-sm mb-2">Service Worker</h2>
+                <div id="sw-status" class="p-3 rounded-lg bg-slate-50 text-xs font-mono whitespace-pre-wrap">-</div>
+            </div>
+            <div>
+                <h2 class="font-bold text-slate-900 text-sm mb-2">Abonnement</h2>
+                <div id="sub-status" class="p-3 rounded-lg bg-slate-50 text-xs font-mono whitespace-pre-wrap">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setStatus(msg, type) {
+    const el = document.getElementById('status');
+    const colors = {
+        info: 'bg-blue-50 border-blue-200 text-blue-900',
+        success: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+        error: 'bg-red-50 border-red-200 text-red-900',
+        warn: 'bg-amber-50 border-amber-200 text-amber-900',
+    };
+    el.className = 'mb-6 p-4 rounded-xl border text-sm font-mono ' + (colors[type] || colors.info);
+    el.textContent = msg;
+}
+
+async function refresh() {
+    // SW
+    const el = document.getElementById('sw-status');
+    const regs = await navigator.serviceWorker.getRegistrations();
+    let html = 'SW count: ' + regs.length + '\n';
+    for (const reg of regs) {
+        html += 'scope: ' + reg.scope + '\n';
+        html += '  state: ' + (reg.active ? reg.active.state : 'inactive') + '\n';
+    }
+    el.textContent = html;
+
+    // Sub
+    const elSub = document.getElementById('sub-status');
+    try {
+        if (regs.length === 0) {
+            elSub.textContent = 'Aucun SW enregistre';
+            return;
+        }
+        const sub = await regs[0].pushManager.getSubscription();
+        elSub.textContent = sub ? 'ABONNE\n' + sub.endpoint.substring(0, 70) + '...' : 'NON ABONNE';
+    } catch (e) {
+        elSub.textContent = 'Erreur: ' + e.message;
+    }
+}
+
+async function doCleanup() {
+    console.log('=== CLEANUP TOTAL ===');
+    setStatus('Cleanup en cours...', 'info');
+
+    if (!('serviceWorker' in navigator)) {
+        setStatus('Service Worker non supporte', 'error');
+        return;
+    }
+
+    try {
+        // 1. Desinscrire tous les SW
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) {
+            console.log('Unregister:', reg.scope);
+            await reg.unregister();
+        }
+
+        // 2. Vider les caches
+        const keys = await caches.keys();
+        for (const k of keys) {
+            await caches.delete(k);
+        }
+
+        // 3. Enregistrer le nouveau SW v4
+        console.log('Register /sw-v4.js');
+        const newReg = await navigator.serviceWorker.register('/sw-v4.js', { scope: '/' });
+        console.log('SW v4 enregistre, scope:', newReg.scope);
+
+        // 4. Attendre active
+        await navigator.serviceWorker.ready;
+        console.log('SW ready');
+
+        setStatus('✓ CLEANUP OK\nScope: ' + newReg.scope + '\nTu peux cliquer 2 maintenant', 'success');
+        await refresh();
+    } catch (e) {
+        console.error(e);
+        setStatus('XX ' + e.message, 'error');
+    }
+}
+
+async function doSubscribe() {
+    console.log('=== SUBSCRIBE ===');
+    setStatus('Abonnement...', 'info');
+
+    try {
+        // Permission
+        if (Notification.permission !== 'granted') {
+            const p = await Notification.requestPermission();
+            if (p !== 'granted') {
+                setStatus('Permission refusee', 'error');
+                return;
+            }
+        }
+
+        // Recuperer la cle VAPID
+        const vr = await fetch('/api/push/vapid-key/');
+        const { publicKey } = await vr.json();
+        if (!publicKey) {
+            setStatus('VAPID vide', 'error');
+            return;
+        }
+
+        // Subscribe
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+        console.log('Sub cree');
+
+        // Envoi serveur
+        const r = await fetch('/api/push/subscribe/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(sub.toJSON()),
+        });
+
+        console.log('HTTP', r.status);
+        if (!r.ok) {
+            const err = await r.text();
+            setStatus('XX Serveur ' + r.status + '\n' + err, 'error');
+            return;
+        }
+
+        setStatus('✓✓✓ ABONNE AVEC SUCCES\nTu peux cliquer 3 maintenant', 'success');
+        await refresh();
+    } catch (e) {
+        console.error(e);
+        setStatus('XX ' + e.message, 'error');
+    }
+}
+
+async function doTest() {
+    console.log('=== TEST ===');
+    const r = await fetch('/api/push/test/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+    });
+    const d = await r.json();
+    if (d.sent > 0) {
+        setStatus('✓ ' + d.sent + ' notification envoyee\nRegarde en bas a droite', 'success');
+    } else {
+        setStatus('!! 0 abonnement - refais 1 puis 2', 'warn');
+    }
+}
+
+function doRefresh() {
+    refresh();
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const arr = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; i++) arr[i] = rawData.charCodeAt(i);
+    return arr;
+}
+
+function getCookie(name) {
+    const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return m ? m[2] : '';
+}
+
+window.addEventListener('load', () => {
+    console.log('=== PAGE v5.1 CHARGE ===');
+    setStatus('PAGE FRAICHE v5.1\nClique sur 1 (CLEANUP TOTAL)', 'info');
+    refresh();
+});
+</script>
+{% endblock %}

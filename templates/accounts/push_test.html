@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Test Push — {{ organization.name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-8">
+        <h1 class="text-2xl font-extrabold text-slate-900 mb-2">Test Notifications Push</h1>
+        <p class="text-slate-600 mb-6 text-sm">Ouvre F12 (Console) AVANT de cliquer</p>
+
+        <div id="global-status" class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-sm">
+            <p class="font-semibold text-blue-900">Chargement...</p>
+        </div>
+
+        <div class="flex gap-2 mb-6 flex-wrap">
+            <button onclick="step1_checkSupport()" class="px-4 py-2.5 rounded-lg bg-slate-700 text-white text-xs font-semibold hover:bg-slate-800">
+                1. Verifier support
+            </button>
+            <button onclick="step2_fixSW()" class="px-4 py-2.5 rounded-lg bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700">
+                2. Reset SW (mauvais scope)
+            </button>
+            <button onclick="step3_subscribe()" class="px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
+                3. Activer push
+            </button>
+            <button onclick="step4_test()" class="px-4 py-2.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700">
+                4. Envoyer test
+            </button>
+        </div>
+
+        <div class="border-t border-slate-200 pt-6">
+            <h2 class="font-bold text-slate-900 mb-3 text-sm">Etat Service Worker</h2>
+            <div id="sw-status" class="p-3 rounded-lg bg-slate-50 text-xs font-mono text-slate-600 whitespace-pre-wrap">Chargement...</div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-6 mt-6">
+            <h2 class="font-bold text-slate-900 mb-3 text-sm">Etat abonnement</h2>
+            <div id="sub-status" class="p-3 rounded-lg bg-slate-50 text-xs font-mono text-slate-600 whitespace-pre-wrap">Chargement...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setStatus(msg, type) {
+    const el = document.getElementById('global-status');
+    const colors = {
+        info: 'bg-blue-50 border-blue-200 text-blue-900',
+        success: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+        error: 'bg-red-50 border-red-200 text-red-900',
+        warn: 'bg-amber-50 border-amber-200 text-amber-900',
+    };
+    el.className = 'mb-6 p-4 rounded-xl border text-sm ' + (colors[type] || colors.info);
+    el.innerHTML = '<p class="font-semibold">' + msg + '</p>';
+}
+
+async function refreshSW() {
+    const el = document.getElementById('sw-status');
+    const regs = await navigator.serviceWorker.getRegistrations();
+    let html = 'Registrations : ' + regs.length + '\n';
+    for (const reg of regs) {
+        html += '- scope: ' + reg.scope + '\n';
+        html += '  active: ' + (reg.active ? reg.active.state : 'null') + '\n';
+    }
+    el.textContent = html;
+}
+
+async function refreshSub() {
+    const el = document.getElementById('sub-status');
+    try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+            el.textContent = 'ABONNE\nEndpoint: ' + sub.endpoint.substring(0, 60) + '...';
+        } else {
+            el.textContent = 'NON ABONNE';
+        }
+    } catch (e) {
+        el.textContent = 'Erreur: ' + e.message;
+    }
+}
+
+async function step1_checkSupport() {
+    console.log('=== STEP 1: SUPPORT ===');
+    const r = await GroupPayPush.checkSupport();
+    setStatus(r.ok ? '✓ Navigateur compatible' : 'XX Non supporte', r.ok ? 'success' : 'error');
+    console.log(r);
+}
+
+async function step2_fixSW() {
+    console.log('=== STEP 2: RESET SW ===');
+    setStatus('Reset en cours...', 'info');
+    try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) {
+            console.log('Unregister:', reg.scope);
+            await reg.unregister();
+        }
+        const caches_keys = await caches.keys();
+        for (const k of caches_keys) {
+            await caches.delete(k);
+        }
+        const result = await GroupPayPush.ensureServiceWorker();
+        if (result.ok) {
+            setStatus('✓ SW reset OK - scope: ' + result.registration.scope, 'success');
+        } else {
+            setStatus('XX ' + result.error, 'error');
+        }
+        await refreshSW();
+    } catch (e) {
+        setStatus('XX ' + e.message, 'error');
+    }
+}
+
+async function step3_subscribe() {
+    console.log('=== STEP 3: SUBSCRIBE ===');
+    setStatus('Abonnement en cours...', 'info');
+    const r = await GroupPayPush.subscribe();
+    console.log('Result:', r);
+    if (r.ok) {
+        setStatus('✓ ABONNE avec succes !', 'success');
+        await refreshSub();
+        await refreshSW();
+    } else {
+        setStatus('XX ' + r.error, 'error');
+    }
+}
+
+async function step4_test() {
+    console.log('=== STEP 4: TEST ===');
+    try {
+        const r = await fetch('/api/push/test/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        });
+        const data = await r.json();
+        if (data.sent > 0) {
+            setStatus('✓ ' + data.sent + ' notification(s) envoyee(s)', 'success');
+        } else {
+            setStatus('!! 0 abonnement actif - fais etape 3 d abord', 'warn');
+        }
+    } catch (e) {
+        setStatus('XX ' + e.message, 'error');
+    }
+}
+
+function getCookie(name) {
+    const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return m ? m[2] : '';
+}
+
+window.addEventListener('load', async () => {
+    console.log('=== /push/ CHARGE ===');
+    if (typeof GroupPayPush === 'undefined') {
+        setStatus('XX GroupPayPush non charge - Ctrl+Shift+R', 'error');
+    } else {
+        setStatus('Page chargee - clique sur 2 (Reset SW)', 'info');
+    }
+    await refreshSW();
+    await refreshSub();
+});
+</script>
+{% endblock %}

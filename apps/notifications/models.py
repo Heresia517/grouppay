@@ -22,3 +22,35 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.title} → {self.recipient.email}"
+
+
+
+class PushSubscription(models.Model):
+    """Abonnement push d'un utilisateur (PWA)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="push_subscriptions",
+    )
+    endpoint = models.URLField(max_length=500, unique=True)
+    p256dh = models.CharField(max_length=200)
+    auth = models.CharField(max_length=100)
+    user_agent = models.CharField(max_length=255, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Abonnement Push"
+
+    def __str__(self):
+        return f"{self.user.email} - {self.endpoint[:50]}..."
+
+    def to_dict(self):
+        return {
+            "endpoint": self.endpoint,
+            "keys": {
+                "p256dh": self.p256dh,
+                "auth": self.auth,
+            },
+        }

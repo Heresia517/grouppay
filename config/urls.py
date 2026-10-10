@@ -6,6 +6,12 @@ from rest_framework.routers import DefaultRouter
 
 from apps.catalog.views import catalog, product_detail
 from apps.core.views import health, sentry_test
+from apps.core.sw_view import service_worker, service_worker_v4
+from apps.notifications.push_views import (
+    vapid_public_key, subscribe as push_subscribe,
+    unsubscribe as push_unsubscribe, test_push,
+    push_test_page, push_test_v5_page, subscription_info,
+)
 from apps.catalog.supplier_views import supplier_dashboard
 from apps.catalog.review_views import product_reviews, submit_review, delete_review
 from apps.catalog.request_views import (
@@ -63,6 +69,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 urlpatterns = [
     # Monitoring
     path("health/", health, name="health_check"),
+    path("sw.js", service_worker, name="service_worker"),
+    path("sw-v4.js", service_worker_v4, name="service_worker_v4"),
     path("notifications/", notifications_page, name="notifications_page"),
     path("sentry-test/", sentry_test, name="sentry_test"),
 
@@ -179,6 +187,15 @@ urlpatterns = [
     path('api/notifications/list/', notification_list, name='notif_list'),
     path('api/notifications/<uuid:notif_id>/read/', mark_notification_read, name='notif_mark_read'),
     path('api/notifications/mark-all-read/', mark_all_read, name='notif_mark_all_read'),
+
+    # Push notifications
+    path('api/push/vapid-key/', vapid_public_key, name='vapid_public_key'),
+    path('api/push/subscribe/', push_subscribe, name='push_subscribe'),
+    path('api/push/unsubscribe/', push_unsubscribe, name='push_unsubscribe'),
+    path('api/push/test/', test_push, name='push_test'),
+    path('api/push/info/', subscription_info, name='push_subscription_info'),
+    path('push/', push_test_page, name='push_test_page'),
+    path('push-v5/', push_test_v5_page, name='push_test_v5_page'),
 
     # API REST
     path('api/v1/', include(router.urls)),
