@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <h1>{{ scope_label }}</h1>
+    <p class="text-muted">Bienvenue {{ user.first_name|default:user.email }}</p>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="card"><div class="card-body">
+      <small class="text-muted">À livrer</small>
+      <h3 class="text-warning">{{ deliveries_todo }}</h3>
+    </div></div></div>
+    <div class="col-md-6"><div class="card"><div class="card-body">
+      <small class="text-muted">Livrées</small>
+      <h3 class="text-success">{{ deliveries_done }}</h3>
+    </div></div></div>
+  </div>
+
+  <a href="{% url 'courier_deliveries' %}" class="btn btn-primary mb-3">Mes livraisons</a>
+
+  <h4>Livraisons récentes</h4>
+  <table class="table table-sm">
+    <thead><tr><th>N°</th><th>Commande</th><th>Statut</th></tr></thead>
+    <tbody>
+    {% for d in recent_deliveries %}
+      <tr><td>{{ d.id|truncatechars:10 }}</td><td>{{ d.order.number|default:d.order.id }}</td>
+          <td>{{ d.status }}</td></tr>
+    {% empty %}
+      <tr><td colspan="3" class="text-muted">Aucune livraison</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

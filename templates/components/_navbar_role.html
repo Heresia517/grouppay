@@ -1,0 +1,44 @@
+{# Menu contextuel par rôle — version Tailwind #}
+{% if user.is_authenticated %}
+<div class="hidden md:flex items-center gap-1 ml-4">
+
+  <a href="{% url 'dashboard' %}"
+     class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+    Mon espace
+  </a>
+
+  {% if user.is_dg or user.role == 'ADMIN' %}
+    <a href="{% url 'rh_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">RH</a>
+    <a href="/admin/" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Admin</a>
+    <a href="/da/" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">DA</a>
+    <a href="/inventory/" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Inventaire</a>
+
+  {% elif user.is_director %}
+    <a href="{% url 'rh_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Ma direction</a>
+    <a href="/da/" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">DA</a>
+
+  {% elif user.is_service_chief %}
+    <a href="{% url 'catalog' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Catalogue</a>
+    <a href="{% url 'my_orders' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Mes commandes</a>
+
+  {% elif user.role == 'GESTIONNAIRE' %}
+    <a href="{% url 'rh_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">RH</a>
+    <a href="{% url 'import_members' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Import</a>
+    <a href="{% url 'deductions_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Retenues</a>
+
+  {% elif user.role == 'LIVREUR' %}
+    <a href="{% url 'courier_deliveries' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Mes livraisons</a>
+
+  {% elif user.role == 'FOURNISSEUR' %}
+    <a href="{% url 'supplier_my_products' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Mes produits</a>
+    <a href="{% url 'stock_dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Stock</a>
+
+  {% else %}
+    <a href="{% url 'catalog' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Catalogue</a>
+    <a href="{% url 'view_cart' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Panier</a>
+    <a href="{% url 'my_orders' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Mes commandes</a>
+    <a href="{% url 'wishlist' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Wishlist</a>
+  {% endif %}
+
+</div>
+{% endif %}

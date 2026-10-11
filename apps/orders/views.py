@@ -206,9 +206,19 @@ def create_order_view(request):
 
 @login_required
 def my_orders(request):
-    orders = Order.objects.filter(
-        member=request.user, organization=request.user.organization
-    ).order_by("-created_at")
+    orders_qs = qs.order_by("-created_at")
+    # ─── Filtrage par périmètre ───
+    qs = Order.objects.filter(organization=request.user.organization)
+    if request.user.is_dg or request.user.role == "ADMIN":
+        pass
+    elif request.user.is_director:
+        dir_ids = list(request.user.directed_directions.values_list("id", flat=True))
+        qs = qs.filter(member__service__direction_id__in=dir_ids)
+    elif request.user.is_service_chief and request.user.service_id:
+        qs = qs.filter(member__service_id=request.user.service_id)
+    else:
+        qs = qs.filter(member=request.user)
+
     return render(request, "orders/my_orders.html", {"orders": orders})
 
 

@@ -61,6 +61,7 @@ from apps.notifications.views import (
 
 from apps.catalog.viewsets import CategoryViewSet, ProductViewSet
 from apps.orders.viewsets import CartViewSet, OrderViewSet
+from apps.core.dashboard_views import dashboard
 
 # DRF Router
 router = DefaultRouter()
@@ -152,6 +153,7 @@ urlpatterns = [
 
     # RH Dashboard
     path('rh/dashboard/', rh_dashboard, name='rh_dashboard'),
+    path('dashboard/', dashboard, name='dashboard'),
     path('rh/orders/bulk-validate/', bulk_validate_orders, name='bulk_validate'),
     path('rh/orders/bulk-reject/', bulk_reject_orders, name='bulk_reject'),
     path('rh/dashboard/export/', export_dashboard_excel, name='export_dashboard_excel'),
@@ -214,6 +216,8 @@ urlpatterns = [
 
     # API REST
     path('api/v1/', include(router.urls)),
+
+    path("api/sync/", include("apps.sync.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

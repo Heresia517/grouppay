@@ -1,6 +1,9 @@
 {% load static %}
 <html lang="fr" class="{% if user.is_authenticated and user.theme_preference == 'dark' %}dark{% endif %}">
 <head>
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/icon-192.svg' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/icon-192.svg' %}">
+
     <script>
         (function() {
             try {

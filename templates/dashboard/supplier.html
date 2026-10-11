@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <h1>{{ scope_label }}</h1>
+    <p class="text-muted">Bienvenue {{ user.first_name|default:user.email }}</p>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="card"><div class="card-body">
+      <small class="text-muted">Mes produits</small>
+      <h3>{{ my_products }}</h3>
+    </div></div></div>
+    <div class="col-md-6"><div class="card"><div class="card-body">
+      <small class="text-muted">Privés / brouillons</small>
+      <h3>{{ private_products }}</h3>
+    </div></div></div>
+  </div>
+
+  <a href="{% url 'supplier_my_products' %}" class="btn btn-primary mb-3">Gérer mes produits</a>
+
+  <h4>Produits récents</h4>
+  <table class="table table-sm">
+    <thead><tr><th>Nom</th><th>Prix</th><th>Privé</th></tr></thead>
+    <tbody>
+    {% for p in recent_products %}
+      <tr><td>{{ p.name }}</td><td>{{ p.price }}</td><td>{{ p.is_supplier_private|yesno:"oui,non" }}</td></tr>
+    {% empty %}
+      <tr><td colspan="3" class="text-muted">Aucun produit</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

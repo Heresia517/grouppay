@@ -3,8 +3,24 @@ import environ
 env = environ.Env()
 environ.Env.read_env(Path(__file__).resolve().parent.parent.parent / '.env')
 
+# ═══════════════════════════════════════════════════════════════
+# Mode hybride : desktop (SQLite + offline) vs server (PostgreSQL)
+# ═══════════════════════════════════════════════════════════════
+IS_DESKTOP = (
+    getattr(__import__("sys"), "frozen", False)
+    or __import__("os").environ.get("GROUPPAY_MODE") == "desktop"
+)
+IS_SERVER = not IS_DESKTOP
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+if getattr(__import__("sys"), "frozen", False):
+    BASE_DIR = Path(__import__("sys")._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Dossier de données utilisateur (survit à une réinstallation)
+DATA_DIR = Path.home() / '.grouppay'
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -14,9 +30,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=IS_SERVER)
 
-ALLOWED_HOSTS = []
+if IS_DESKTOP:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+    CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://localhost']
+else:
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=['localhost'])
+    CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 
 # Application definition
@@ -45,6 +66,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.da",
     "apps.inventory",
+    "apps.sync",
     "django_otp",
     "django_otp.plugins.otp_totp",
 ]
@@ -99,21 +121,34 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'timeout': 30,                    # 30s avant "database is locked"
-            'init_command': '''
-                PRAGMA journal_mode=WAL;
-                PRAGMA synchronous=NORMAL;
-                PRAGMA busy_timeout=30000;
-                PRAGMA foreign_keys=ON;
-            ''',
-        },
+if IS_DESKTOP:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': DATA_DIR / 'grouppay.db',
+            'OPTIONS': {
+                'timeout': 30,
+                'init_command': '''
+                    PRAGMA journal_mode=WAL;
+                    PRAGMA synchronous=NORMAL;
+                    PRAGMA busy_timeout=30000;
+                    PRAGMA foreign_keys=ON;
+                ''',
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_NAME', default='grouppay'),
+            'USER': env('DB_USER', default='grouppay'),
+            'PASSWORD': env('DB_PASSWORD', default=''),
+            'HOST': env('DB_HOST', default='localhost'),
+            'PORT': env('DB_PORT', default='5432'),
+            'CONN_MAX_AGE': 60,
+        }
+    }
 
 # Sessions en cache (évite les écritures SQLite à chaque requête)
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
@@ -157,13 +192,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = (DATA_DIR / 'staticfiles') if IS_DESKTOP else (BASE_DIR / 'staticfiles')
 
 
 # Media files (fichiers uploadés : logos, PDF, exports CSV)
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = (DATA_DIR / 'media') if IS_DESKTOP else (BASE_DIR / 'media')
 
 
 # Email
@@ -221,11 +256,17 @@ SPECTACULAR_SETTINGS = {
 ASGI_APPLICATION = "config.asgi.application"
 
 # InMemory pour dev — remplacer par channels_redis en prod
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
-}
+if IS_DESKTOP:
+    CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [env("REDIS_URL", default="redis://localhost:6379/0")]},
+        }
+    }
 
 # Daphne comme serveur ASGI par défaut (dev)
 if "daphne" in INSTALLED_APPS:
@@ -240,12 +281,20 @@ if "daphne" in INSTALLED_APPS:
 # ============================================================
 # Cache (LocMem pour dev — Redis en prod)
 # ============================================================
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "grouppay-default",
+if IS_DESKTOP:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "grouppay-desktop",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": env("REDIS_URL", default="redis://localhost:6379/0"),
+        }
+    }
 
 
 # ============================================================
@@ -305,3 +354,43 @@ REFERRAL_REWARD_AMOUNT = env.int("REFERRAL_REWARD_AMOUNT", default=5000)
 VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
 VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
 PUSH_CONTACT_EMAIL = env("PUSH_CONTACT_EMAIL", default="admin@grouppay.app")
+
+# ═══════════════════════════════════════════════════════════════
+# MODE HYBRIDE — Config additionnelle
+# ═══════════════════════════════════════════════════════════════
+
+# ─── Celery : exécution synchrone en desktop ───
+if IS_DESKTOP:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
+else:
+    CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+    CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
+
+# ─── Sentry (opt-in via SENTRY_DSN) ───
+SENTRY_DSN = env("SENTRY_DSN", default="")
+SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT", default=("desktop" if IS_DESKTOP else "production"))
+
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            environment=SENTRY_ENVIRONMENT,
+            traces_sample_rate=0.0 if IS_DESKTOP else 0.1,
+            send_default_pii=False,
+        )
+    except ImportError:
+        pass
+
+# ─── Synchronisation (mode hybride) ───
+SYNC_SERVER_URL = env("SYNC_SERVER_URL", default="")
+SYNC_API_KEY = env("SYNC_API_KEY", default="")
+SYNC_ENABLED = env.bool("SYNC_ENABLED", default=False)
+
+if IS_DESKTOP and SYNC_SERVER_URL and SYNC_API_KEY:
+    SYNC_ENABLED = True
