@@ -44,6 +44,7 @@ from apps.orders.report_views import (
 from apps.orders.admin_recovery_view import (
     abandoned_carts_list, cart_recovery_send, cart_recovery_send_all,
 )
+from apps.deductions.fasoarzeka_views import (fasoarzeka_payer, fasoarzeka_webhook, fasoarzeka_status)
 from apps.deductions.views import (
     deductions_dashboard, preview_export, generate_export, download_batch, mark_batch_sent,
 )
@@ -218,6 +219,12 @@ urlpatterns = [
     path('api/v1/', include(router.urls)),
 
     path("api/sync/", include("apps.sync.urls")),
+
+    # --- Faso Arzeka (paiements BF) ---
+    path("paiement/fasoarzeka/<uuid:order_id>/", fasoarzeka_payer, name="fasoarzeka_payer"),
+    path("webhook/fasoarzeka/", fasoarzeka_webhook, name="fasoarzeka_webhook"),
+    path("paiement/fasoarzeka/status/", fasoarzeka_status, name="fasoarzeka_status"),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

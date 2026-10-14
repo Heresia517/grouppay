@@ -34,7 +34,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=IS_SERVER)
 
 if IS_DESKTOP:
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
     CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://localhost']
 else:
     ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=['localhost'])
@@ -440,4 +440,24 @@ GROUPPAY_LEGAL = {
     "tva_standard": 18,
     "mention_facture": "Facture émise conformément au Code Général des Impôts du Burkina Faso",
     "mention_tva": "TVA acquittée — IFU et RCCM disponibles sur demande",
+}
+
+
+
+# ═══════════════════════════════════════════════════════════════
+# FASO ARZEKA — Plateforme nationale de paiements (BF)
+# https://my.fasoarzeka.bf  |  USSD *700#
+# ═══════════════════════════════════════════════════════════════
+FASOARZEKA = {
+    "ENABLED": env.bool("FASOARZEKA_ENABLED", default=False),
+    "USERNAME": env("FASOARZEKA_USERNAME", default=""),
+    "PASSWORD": env("FASOARZEKA_PASSWORD", default=""),
+    "MERCHANT_ID": env("FASOARZEKA_MERCHANT_ID", default=""),
+    "HASH_SECRET": env("FASOARZEKA_HASH_SECRET", default=""),
+    "WEBHOOK_URL": env("FASOARZEKA_WEBHOOK_URL",
+                       default="https://grouppay.bf/webhook/fasoarzeka/"),
+    "RETURN_URL": env("FASOARZEKA_RETURN_URL",
+                      default="https://grouppay.bf/retour-paiement/"),
+    "PROTOCOL": env("FASOARZEKA_PROTOCOL", default="https"),
+    "SANDBOX": env.bool("FASOARZEKA_SANDBOX", default=True),
 }
