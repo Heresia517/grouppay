@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Facture {{ invoice.number }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 15px; }
+    .org-info { font-size: 11px; line-height: 1.5; }
+    .org-info strong { font-size: 14px; color: #1e40af; }
+    .facture-info { text-align: right; }
+    .facture-info h1 { margin: 0; color: #1e40af; }
+    .legal { font-size: 9px; color: #666; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; }
+    .montants { width: 100%; margin-top: 20px; }
+    .montants td { padding: 4px 8px; }
+    .montants .total { background: #eff6ff; font-weight: bold; font-size: 14px; }
+    .tva-line { color: #666; font-size: 11px; }
+    .footer { margin-top: 30px; font-size: 9px; text-align: center; color: #666; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="org-info">
+    <strong>{{ organization.name }}</strong><br>
+    {% if organization.address %}{{ organization.address }}<br>{% endif %}
+    {% if organization.city %}{{ organization.city }}, {% endif %}Burkina Faso<br>
+    {% if organization.ifu %}<strong>IFU :</strong> {{ organization.ifu }}<br>{% endif %}
+    {% if organization.rccm %}<strong>RCCM :</strong> {{ organization.rccm }}<br>{% endif %}
+    {% if organization.phone %}<strong>Tél :</strong> {{ organization.phone }}<br>{% endif %}
+    {% if organization.email %}<strong>Email :</strong> {{ organization.email }}{% endif %}
+  </div>
+  <div class="facture-info">
+    <h1>FACTURE</h1>
+    <p><strong>N° :</strong> {{ invoice.number }}</p>
+    <p><strong>Date :</strong> {{ invoice.created_at|date:"d/m/Y" }}</p>
+    <p><strong>Échéance :</strong> {{ invoice.due_date|date:"d/m/Y"|default:"À réception" }}</p>
+  </div>
+</div>
+
+<h3 style="margin-top: 20px;">Client</h3>
+<p>
+  <strong>{{ invoice.customer_name }}</strong><br>
+  {% if invoice.customer_address %}{{ invoice.customer_address }}<br>{% endif %}
+  {% if invoice.customer_ifu %}<strong>IFU :</strong> {{ invoice.customer_ifu }}{% endif %}
+</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+  <thead style="background: #f3f4f6;">
+    <tr>
+      <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Désignation</th>
+      <th style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">Qté</th>
+      <th style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">PU HT</th>
+      <th style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">Total HT</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for line in invoice.lines.all %}
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #eee;">{{ line.designation }}</td>
+      <td style="text-align: right; padding: 8px; border-bottom: 1px solid #eee;">{{ line.quantity }}</td>
+      <td style="text-align: right; padding: 8px; border-bottom: 1px solid #eee;">{{ line.unit_price|floatformat:0 }} FCFA</td>
+      <td style="text-align: right; padding: 8px; border-bottom: 1px solid #eee;">{{ line.total_ht|floatformat:0 }} FCFA</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<table class="montants">
+  <tr>
+    <td style="text-align: right; width: 70%;"><strong>Total HT</strong></td>
+    <td style="text-align: right;">{{ invoice.total_ht|floatformat:0 }} FCFA</td>
+  </tr>
+  <tr>
+    <td style="text-align: right;"><span class="tva-line">TVA (18%)</span></td>
+    <td style="text-align: right;"><span class="tva-line">{{ invoice.tva_amount|floatformat:0 }} FCFA</span></td>
+  </tr>
+  {% if invoice.tva_exoneree %}
+  <tr>
+    <td colspan="2" style="text-align: right; font-size: 11px; color: #666;">
+      Exonération de TVA — Art. 3 du CGI Burkina Faso
+    </td>
+  </tr>
+  {% endif %}
+  <tr class="total">
+    <td style="text-align: right;">TOTAL TTC</td>
+    <td style="text-align: right;">{{ invoice.total_ttc|floatformat:0 }} FCFA</td>
+  </tr>
+</table>
+
+<div class="legal">
+  <strong>Mentions légales :</strong>
+  Facture émise conformément au Code Général des Impôts (CGI) du Burkina Faso.
+  TVA acquittée au taux de 18% sur les biens et services taxables.
+  IFU et RCCM disponibles sur demande.
+  <br>
+  Paiement : virement bancaire, chèque ou Mobile Money (Orange Money / Moov Money).
+</div>
+
+<div class="footer">
+  {{ organization.name }} — Burkina Faso — Document généré électroniquement<br>
+  N° IFU : {{ organization.ifu|default:"—" }} — N° RCCM : {{ organization.rccm|default:"—" }}
+</div>
+
+</body>
+</html>

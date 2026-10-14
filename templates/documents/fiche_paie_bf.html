@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Fiche de paie {{ mois }}/{{ annee }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
+    h1 { color: #1e40af; font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #ddd; }
+    th { background: #f3f4f6; text-align: left; }
+    .right { text-align: right; }
+    .total { background: #eff6ff; font-weight: bold; font-size: 13px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    .legal { font-size: 9px; color: #666; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <strong>{{ organization.name }}</strong><br>
+    {% if organization.ifu %}IFU : {{ organization.ifu }}<br>{% endif %}
+    {% if organization.cnss_number %}CNSS : {{ organization.cnss_number }}{% endif %}
+  </div>
+  <div style="text-align: right;">
+    <h1>BULLETIN DE PAIE</h1>
+    <p><strong>Période :</strong> {{ mois }}/{{ annee }}</p>
+  </div>
+</div>
+
+<table>
+  <tr>
+    <th>Salarié</th>
+    <th>Matricule</th>
+    <th>Emploi</th>
+    <th class="right">Entrée</th>
+  </tr>
+  <tr>
+    <td>{{ employe.nom_complet }}</td>
+    <td>{{ employe.matricule|default:"—" }}</td>
+    <td>{{ employe.poste|default:"—" }}</td>
+    <td class="right">{{ employe.date_embauche|date:"d/m/Y"|default:"—" }}</td>
+  </tr>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>Élément</th>
+      <th class="right">Base</th>
+      <th class="right">Taux</th>
+      <th class="right">Montant (FCFA)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Salaire brut</strong></td>
+      <td class="right">—</td>
+      <td class="right">—</td>
+      <td class="right"><strong>{{ fiche.salaire_brut|floatformat:0 }}</strong></td>
+    </tr>
+    <tr><td colspan="4" style="background: #f9fafb; font-weight: bold;">Retenues salariales</td></tr>
+    <tr>
+      <td>IUTS</td>
+      <td class="right">{{ fiche.salaire_brut|floatformat:0 }}</td>
+      <td class="right">Progressif</td>
+      <td class="right" style="color: #dc2626;">−{{ fiche.iuts|floatformat:0 }}</td>
+    </tr>
+    <tr>
+      <td>CNSS salarié (5,5%)</td>
+      <td class="right">{{ fiche.detail_cnss.base_cotisable|floatformat:0 }}</td>
+      <td class="right">5,50%</td>
+      <td class="right" style="color: #dc2626;">−{{ fiche.cnss_salarie|floatformat:0 }}</td>
+    </tr>
+    <tr class="total">
+      <td colspan="3">SALAIRE NET À PAYER</td>
+      <td class="right">{{ fiche.salaire_net|floatformat:0 }} FCFA</td>
+    </tr>
+    <tr><td colspan="4" style="background: #f9fafb; font-weight: bold;">Charges patronales (informatif)</td></tr>
+    <tr>
+      <td>CNSS employeur (16%)</td>
+      <td class="right">{{ fiche.detail_cnss.base_cotisable|floatformat:0 }}</td>
+      <td class="right">16,00%</td>
+      <td class="right">{{ fiche.cnss_employeur|floatformat:0 }}</td>
+    </tr>
+    <tr class="total">
+      <td colspan="3">COÛT TOTAL EMPLOYEUR</td>
+      <td class="right">{{ fiche.cout_total_employeur|floatformat:0 }} FCFA</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="legal">
+  Bulletin établi conformément à la législation sociale du Burkina Faso (Code du Travail, CNSS, CGI).
+  IUTS calculé selon le barème progressif en vigueur en {{ annee }}.
+  CNSS plafond cotisable : {{ fiche.detail_cnss.plafond|floatformat:0 }} FCFA.
+</div>
+
+</body>
+</html>

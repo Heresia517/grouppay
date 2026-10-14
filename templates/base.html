@@ -196,6 +196,8 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-white to-slate-100 min-h-screen flex flex-col"
       hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+{% if user.is_authenticated %}{% include "components/_sidebar.html" %}<div class="pl-64 pt-4">{% else %}<div>{% endif %}
+
 
     {% include "components/navbar.html" %}
 
@@ -447,5 +449,7 @@
     <script src="{% static 'js/push.js' %}?v=5"></script>
 
     {% block extra_js %}{% endblock %}
+
+</div>
 </body>
 </html>

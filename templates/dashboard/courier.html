@@ -1,35 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container py-4">
-  <div class="mb-4">
-    <h1>{{ scope_label }}</h1>
-    <p class="text-muted">Bienvenue {{ user.first_name|default:user.email }}</p>
+{% extends "base.html" %}{% block content %}
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-1">Mes livraisons</h1>
+  <p class="text-sm text-slate-500 mb-6">Tableau de bord livreur</p>
+  <div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">À livrer</div><div class="mt-2 text-3xl font-bold text-amber-600">{{ deliveries_todo }}</div></div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Livrées</div><div class="mt-2 text-3xl font-bold text-emerald-600">{{ deliveries_done }}</div></div>
   </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-md-6"><div class="card"><div class="card-body">
-      <small class="text-muted">À livrer</small>
-      <h3 class="text-warning">{{ deliveries_todo }}</h3>
-    </div></div></div>
-    <div class="col-md-6"><div class="card"><div class="card-body">
-      <small class="text-muted">Livrées</small>
-      <h3 class="text-success">{{ deliveries_done }}</h3>
-    </div></div></div>
+  <a href="{% url 'courier_deliveries' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-6">🚚 Voir mes livraisons</a>
+  <div class="bg-white rounded-xl shadow-sm border p-5">
+    <div class="text-sm font-semibold mb-3">Livraisons récentes</div>
+    <table class="w-full text-sm"><thead class="text-xs text-slate-500 border-b"><tr><th class="text-left py-2">N°</th><th class="text-left">Commande</th><th class="text-left">Statut</th></tr></thead>
+    <tbody>{% for d in recent_deliveries %}<tr class="border-b last:border-0"><td class="py-2 font-mono text-xs">{{ d.id|truncatechars:10 }}</td><td>{{ d.order.id|truncatechars:10 }}</td><td><span class="px-2 py-0.5 rounded-full text-xs bg-slate-100">{{ d.status }}</span></td></tr>
+    {% empty %}<tr><td colspan="3" class="text-center text-slate-400 py-8">Aucune livraison</td></tr>{% endfor %}</tbody></table>
   </div>
-
-  <a href="{% url 'courier_deliveries' %}" class="btn btn-primary mb-3">Mes livraisons</a>
-
-  <h4>Livraisons récentes</h4>
-  <table class="table table-sm">
-    <thead><tr><th>N°</th><th>Commande</th><th>Statut</th></tr></thead>
-    <tbody>
-    {% for d in recent_deliveries %}
-      <tr><td>{{ d.id|truncatechars:10 }}</td><td>{{ d.order.number|default:d.order.id }}</td>
-          <td>{{ d.status }}</td></tr>
-    {% empty %}
-      <tr><td colspan="3" class="text-muted">Aucune livraison</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endblock %}
+</div>{% endblock %}

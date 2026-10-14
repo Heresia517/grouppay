@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pathlib import Path
 import environ
 env = environ.Env()
@@ -66,6 +67,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.da",
     "apps.inventory",
+    "apps.burkina",
     "apps.sync",
     "django_otp",
     "django_otp.plugins.otp_totp",
@@ -87,6 +89,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -394,3 +397,47 @@ SYNC_ENABLED = env.bool("SYNC_ENABLED", default=False)
 
 if IS_DESKTOP and SYNC_SERVER_URL and SYNC_API_KEY:
     SYNC_ENABLED = True
+
+
+# ─── Support DATABASE_URL (Render, Fly, Heroku) ───
+if IS_SERVER:
+    import dj_database_url
+    _db_url = env("DATABASE_URL", default="")
+    if _db_url:
+        DATABASES["default"] = dj_database_url.parse(_db_url, conn_max_age=600)
+        DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+
+# ─── WhiteNoise : servir les statiques en prod ───
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# ═══════════════════════════════════════════════════════════════
+# SPÉCIFICITÉS BURKINA FASO
+# ═══════════════════════════════════════════════════════════════
+GROUPPAY_COUNTRY = env("GROUPPAY_COUNTRY", default="BF")
+GROUPPAY_CURRENCY = "XOF"
+GROUPPAY_CURRENCY_SYMBOL = "FCFA"
+GROUPPAY_LOCALE = "fr-BF"
+
+# Fiscalité
+GROUPPAY_TVA_RATE = Decimal("0.18")           # TVA standard BF
+GROUPPAY_TVA_REDUIT = Decimal("0.11")          # TVA réduite (prestations)
+GROUPPAY_TVA_EXO = Decimal("0.00")
+GROUPPAY_IUTS_ANNEE = 2024
+GROUPPAY_SMIG = 45000                          # SMIG mensuel FCFA
+GROUPPAY_CNSS_PLAFOND = 600000                 # Plafond cotisable FCFA
+
+# Devise par défaut
+DEFAULT_CURRENCY = "XOF"
+DECIMAL_SEPARATOR = ","
+THOUSAND_SEPARATOR = " "
+USE_THOUSAND_SEPARATOR = True
+
+# Mentions légales BF (à personnaliser par organisation)
+GROUPPAY_LEGAL = {
+    "pays": "Burkina Faso",
+    "devise_iso": "XOF",
+    "tva_standard": 18,
+    "mention_facture": "Facture émise conformément au Code Général des Impôts du Burkina Faso",
+    "mention_tva": "TVA acquittée — IFU et RCCM disponibles sur demande",
+}

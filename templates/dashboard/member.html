@@ -1,38 +1,22 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container py-4">
-  <div class="mb-4">
-    <h1>{{ scope_label }}</h1>
-    <p class="text-muted">Bienvenue {{ user.first_name|default:user.email }}</p>
+{% extends "base.html" %}{% block content %}
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-1">Mon espace</h1>
+  <p class="text-sm text-slate-500 mb-6">Bienvenue {{ user.first_name }}</p>
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Mes commandes</div><div class="mt-2 text-3xl font-bold text-blue-600">{{ total_orders }}</div></div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">En attente</div><div class="mt-2 text-3xl font-bold text-amber-600">{{ pending_orders }}</div></div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Panier</div><div class="mt-2 text-3xl font-bold text-indigo-600">→</div></div>
   </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card"><div class="card-body">
-      <small class="text-muted">Mes commandes</small>
-      <h3>{{ total_orders }}</h3>
-    </div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">
-      <small class="text-muted">En attente</small>
-      <h3 class="text-warning">{{ pending_orders }}</h3>
-    </div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">
-      <small class="text-muted">Actions</small>
-      <div><a href="{% url 'catalog' %}" class="btn btn-sm btn-primary mt-1">Catalogue</a></div>
-      <div><a href="{% url 'view_cart' %}" class="btn btn-sm btn-outline-primary mt-1">Mon panier</a></div>
-    </div></div></div>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <a href="{% url 'catalog' %}" class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">🛍️</div><div class="font-semibold">Catalogue</div></a>
+    <a href="{% url 'view_cart' %}" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">🛒</div><div class="font-semibold">Panier</div></a>
+    <a href="{% url 'my_orders' %}" class="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">📋</div><div class="font-semibold">Mes commandes</div></a>
+    <a href="{% url 'wishlist' %}" class="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">❤️</div><div class="font-semibold">Wishlist</div></a>
   </div>
-
-  <h4>Mes dernières commandes</h4>
-  <table class="table table-sm">
-    <thead><tr><th>N°</th><th>Statut</th><th>Montant</th><th>Date</th></tr></thead>
-    <tbody>
-    {% for o in my_orders %}
-      <tr><td>{{ o.number|default:o.id|truncatechars:10 }}</td><td>{{ o.status }}</td>
-          <td>{{ o.total_amount }}</td><td>{{ o.created_at|date:"d/m/Y" }}</td></tr>
-    {% empty %}
-      <tr><td colspan="4" class="text-muted">Aucune commande</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endblock %}
+  <div class="bg-white rounded-xl shadow-sm border p-5">
+    <div class="text-sm font-semibold mb-3">Dernières commandes</div>
+    <table class="w-full text-sm"><thead class="text-xs text-slate-500 border-b"><tr><th class="text-left py-2">N°</th><th class="text-left">Statut</th><th class="text-right">Montant</th></tr></thead>
+    <tbody>{% for o in my_orders %}<tr class="border-b last:border-0"><td class="py-2 font-mono text-xs">{{ o.id|truncatechars:10 }}</td><td><span class="px-2 py-0.5 rounded-full text-xs bg-slate-100">{{ o.status }}</span></td><td class="text-right">{{ o.total_amount }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="text-center text-slate-400 py-8">Aucune commande</td></tr>{% endfor %}</tbody></table>
+  </div>
+</div>{% endblock %}

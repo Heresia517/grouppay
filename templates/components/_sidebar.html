@@ -1,0 +1,44 @@
+<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 flex flex-col pt-16 overflow-y-auto">
+  <nav class="flex-1 px-3 py-4 space-y-1">
+    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-50 text-blue-700{% else %}text-slate-700 hover:bg-slate-100{% endif %}"><span>🏠</span> Mon espace</a>
+    {% if user.is_dg or user.role == 'ADMIN' %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">Direction Générale</div></div>
+      <a href="{% url 'rh_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📊</span> Dashboard RH</a>
+      <a href="/da/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📝</span> Demandes d'achat</a>
+      <a href="/inventory/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📦</span> Inventaire</a>
+      <a href="{% url 'deductions_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>💰</span> Retenues</a>
+      <a href="/admin/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>⚙️</span> Admin Django</a>
+    {% elif user.is_director %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">Ma direction</div></div>
+      <a href="{% url 'rh_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📊</span> Vue direction</a>
+      <a href="/da/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📝</span> Demandes d'achat</a>
+    {% elif user.is_service_chief %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">Mon service : {{ user.service.name|default:"—" }}</div></div>
+      <a href="{% url 'catalog' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>🛍️</span> Catalogue</a>
+      <a href="{% url 'my_orders' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📋</span> Commandes service</a>
+      <a href="{% url 'view_cart' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>🛒</span> Panier</a>
+    {% elif user.role == 'GESTIONNAIRE' %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">RH / Gestion</div></div>
+      <a href="{% url 'rh_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📊</span> Dashboard</a>
+      <a href="{% url 'import_members' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📥</span> Import membres</a>
+      <a href="{% url 'deductions_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>💰</span> Retenues</a>
+      <a href="{% url 'stock_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📈</span> Stock</a>
+    {% elif user.role == 'LIVREUR' %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">Livraisons</div></div>
+      <a href="{% url 'courier_deliveries' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>🚚</span> Mes livraisons</a>
+    {% elif user.role == 'FOURNISSEUR' %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">Espace fournisseur</div></div>
+      <a href="{% url 'supplier_my_products' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📦</span> Mes produits</a>
+      <a href="{% url 'stock_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📈</span> Stock</a>
+    {% else %}
+      <div class="pt-4 mt-4 border-t border-slate-200"><div class="px-3 text-xs font-semibold text-slate-400 uppercase">Mon espace</div></div>
+      <a href="{% url 'catalog' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>🛍️</span> Catalogue</a>
+      <a href="{% url 'view_cart' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>🛒</span> Panier</a>
+      <a href="{% url 'my_orders' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>📋</span> Mes commandes</a>
+      <a href="{% url 'wishlist' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"><span>❤️</span> Wishlist</a>
+    {% endif %}
+  </nav>
+  <div class="p-3 border-t border-slate-200">
+    <a href="/accounts/logout/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"><span>🚪</span> Déconnexion</a>
+  </div>
+</aside>

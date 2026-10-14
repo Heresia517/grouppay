@@ -1,37 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container py-4">
-  <div class="mb-4">
-    <h1>{{ scope_label }}</h1>
-    <p class="text-muted">Bienvenue {{ user.first_name|default:user.email }}</p>
+{% extends "base.html" %}{% block content %}
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-1">{{ scope_label }}</h1>
+  <p class="text-sm text-slate-500 mb-6">Vue de votre service</p>
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Commandes service</div><div class="mt-2 text-3xl font-bold text-blue-600">{{ total_orders }}</div></div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">En attente</div><div class="mt-2 text-3xl font-bold text-amber-600">{{ pending_orders }}</div></div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Membres du service</div><div class="mt-2 text-3xl font-bold text-indigo-600">{{ total_members }}</div></div>
   </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card"><div class="card-body">
-      <small class="text-muted">Commandes service</small>
-      <h3>{{ total_orders }}</h3>
-    </div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">
-      <small class="text-muted">En attente</small>
-      <h3 class="text-warning">{{ pending_orders }}</h3>
-    </div></div></div>
-    <div class="col-md-4"><div class="card"><div class="card-body">
-      <small class="text-muted">Membres</small>
-      <h3>{{ total_members }}</h3>
-    </div></div></div>
+  <div class="bg-white rounded-xl shadow-sm border p-5">
+    <div class="text-sm font-semibold mb-4">Commandes du service : {{ service.name }}</div>
+    <table class="w-full text-sm"><thead class="text-xs text-slate-500 border-b"><tr><th class="text-left py-2">N°</th><th class="text-left">Membre</th><th class="text-left">Statut</th><th class="text-right">Montant</th></tr></thead>
+    <tbody>{% for o in recent_orders %}<tr class="border-b last:border-0"><td class="py-2 font-mono text-xs">{{ o.id|truncatechars:10 }}</td><td>{{ o.member.email }}</td><td><span class="px-2 py-0.5 rounded-full text-xs bg-slate-100">{{ o.status }}</span></td><td class="text-right">{{ o.total_amount }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-center text-slate-400 py-8">Aucune commande</td></tr>{% endfor %}</tbody></table>
   </div>
-
-  <h4>Commandes de mon service : {{ service.name }}</h4>
-  <table class="table table-sm">
-    <thead><tr><th>N°</th><th>Membre</th><th>Statut</th><th>Montant</th></tr></thead>
-    <tbody>
-    {% for o in recent_orders %}
-      <tr><td>{{ o.number|default:o.id|truncatechars:10 }}</td><td>{{ o.member.email }}</td>
-          <td>{{ o.status }}</td><td>{{ o.total_amount }}</td></tr>
-    {% empty %}
-      <tr><td colspan="4" class="text-muted">Aucune commande</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endblock %}
+</div>{% endblock %}
