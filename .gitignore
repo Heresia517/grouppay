@@ -34,3 +34,8 @@ venv/
 .idea/
 .vscode/
 *.bak
+
+# ─── PyInstaller / Desktop build ───
+build/
+dist/
+*.spec
