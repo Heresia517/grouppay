@@ -1,22 +1,100 @@
-{% extends "base.html" %}{% block content %}
-<div class="p-6">
-  <h1 class="text-2xl font-bold mb-1">Mon espace</h1>
-  <p class="text-sm text-slate-500 mb-6">Bienvenue {{ user.first_name }}</p>
-  <div class="grid grid-cols-3 gap-4 mb-6">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Mes commandes</div><div class="mt-2 text-3xl font-bold text-blue-600">{{ total_orders }}</div></div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">En attente</div><div class="mt-2 text-3xl font-bold text-amber-600">{{ pending_orders }}</div></div>
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"><div class="text-xs font-semibold text-slate-500 uppercase">Panier</div><div class="mt-2 text-3xl font-bold text-indigo-600">→</div></div>
+{% extends "base.html" %}
+{% load fcfa %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+  <h1 class="text-2xl font-bold text-slate-900 mb-1">Mon espace</h1>
+  <p class="text-sm text-slate-500 mb-6">Bienvenue {{ user.first_name|default:user.email }}</p>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+      <div class="text-xs font-semibold text-slate-500 uppercase">Mes commandes</div>
+      <div class="mt-2 text-3xl font-bold text-blue-600">{{ total_orders|default:0 }}</div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+      <div class="text-xs font-semibold text-slate-500 uppercase">En attente</div>
+      <div class="mt-2 text-3xl font-bold text-amber-500">{{ pending_orders|default:0 }}</div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+      <div class="text-xs font-semibold text-slate-500 uppercase">Livrées</div>
+      <div class="mt-2 text-3xl font-bold text-emerald-500">{{ delivered_orders|default:0 }}</div>
+    </div>
   </div>
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-    <a href="{% url 'catalog' %}" class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">🛍️</div><div class="font-semibold">Catalogue</div></a>
-    <a href="{% url 'view_cart' %}" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">🛒</div><div class="font-semibold">Panier</div></a>
-    <a href="{% url 'my_orders' %}" class="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">📋</div><div class="font-semibold">Mes commandes</div></a>
-    <a href="{% url 'wishlist' %}" class="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-xl p-5 hover:shadow-lg transition"><div class="text-2xl mb-2">❤️</div><div class="font-semibold">Wishlist</div></a>
+
+  <!-- Actions rapides -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+    <a href="{% url 'catalog' %}" class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl p-5 hover:shadow-lg transition text-center">
+      <div class="text-2xl mb-2">🛍️</div>
+      <div class="font-semibold text-sm">Catalogue</div>
+    </a>
+    <a href="{% url 'view_cart' %}" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl p-5 hover:shadow-lg transition text-center">
+      <div class="text-2xl mb-2">🛒</div>
+      <div class="font-semibold text-sm">Panier</div>
+    </a>
+    <a href="{% url 'my_orders' %}" class="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl p-5 hover:shadow-lg transition text-center">
+      <div class="text-2xl mb-2">📋</div>
+      <div class="font-semibold text-sm">Mes commandes</div>
+    </a>
+    <a href="{% url 'wishlist' %}" class="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-xl p-5 hover:shadow-lg transition text-center">
+      <div class="text-2xl mb-2">❤️</div>
+      <div class="font-semibold text-sm">Wishlist</div>
+    </a>
   </div>
-  <div class="bg-white rounded-xl shadow-sm border p-5">
-    <div class="text-sm font-semibold mb-3">Dernières commandes</div>
-    <table class="w-full text-sm"><thead class="text-xs text-slate-500 border-b"><tr><th class="text-left py-2">N°</th><th class="text-left">Statut</th><th class="text-right">Montant</th></tr></thead>
-    <tbody>{% for o in my_orders %}<tr class="border-b last:border-0"><td class="py-2 font-mono text-xs">{{ o.id|truncatechars:10 }}</td><td><span class="px-2 py-0.5 rounded-full text-xs bg-slate-100">{{ o.status }}</span></td><td class="text-right">{{ o.total_amount }}</td></tr>
-    {% empty %}<tr><td colspan="3" class="text-center text-slate-400 py-8">Aucune commande</td></tr>{% endfor %}</tbody></table>
+
+  <!-- Dernières commandes avec suivi livraison -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-sm font-semibold text-slate-700">Suivi de mes dernières commandes</div>
+      <a href="{% url 'my_orders' %}" class="text-xs text-blue-600 hover:underline">Voir tout →</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-slate-500 border-b border-slate-200">
+          <tr>
+            <th class="text-left py-2">N°</th>
+            <th class="text-left">Statut commande</th>
+            <th class="text-left">Livraison</th>
+            <th class="text-right">Montant</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for o in my_orders %}
+          <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+            <td class="py-3 font-mono text-xs">{{ o.order_number }}</td>
+            <td>
+              <span class="px-2 py-1 rounded-full text-xs font-medium
+                {% if o.status == 'LIVREE' %}bg-emerald-100 text-emerald-700
+                {% elif o.status == 'VALIDEE' %}bg-blue-100 text-blue-700
+                {% else %}bg-amber-100 text-amber-700{% endif %}">
+                {{ o.get_status_display|default:o.status }}
+              </span>
+            </td>
+            <td>
+              {% if o.delivery %}
+                {% if o.delivery.status == 'LIVREE' %}
+                  <span class="text-emerald-600 font-medium text-xs">✅ Livré</span>
+                {% elif o.delivery.status == 'EN_COURS' %}
+                  <span class="text-blue-600 font-medium text-xs">🚚 En cours</span>
+                {% else %}
+                  <span class="text-slate-500 text-xs">📦 Prêt à expédier</span>
+                {% endif %}
+              {% else %}
+                <span class="text-slate-400 text-xs">—</span>
+              {% endif %}
+            </td>
+            <td class="text-right font-medium">{{ o.total_amount|fcfa }}</td>
+            <td class="text-right">
+              <a href="{% url 'order_detail' o.id %}" class="text-xs text-blue-600 hover:underline">Détail →</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-slate-400 py-8">Aucune commande pour le moment.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>{% endblock %}
+</div>
+{% endblock %}

@@ -1,98 +1,69 @@
 {% extends "base.html" %}
-
-{% block title %}Mes commandes — {{ organization.name }}{% endblock %}
+{% load fcfa %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-extrabold text-slate-900">Mes commandes</h1>
-            <p class="text-slate-500 mt-1">Suivez l'état de vos achats</p>
-        </div>
-        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 shadow-sm transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            Nouvelle commande
-        </a>
-    </div>
+<div class="p-6 max-w-7xl mx-auto">
+  <h1 class="text-2xl font-bold text-slate-900 mb-1">Mes commandes</h1>
+  <p class="text-sm text-slate-500 mb-6">Historique et suivi de toutes vos commandes</p>
 
-    {% if orders %}
-    <div class="space-y-3">
-        {% for order in orders %}
-        <a href="{% url 'order_detail' order.id %}"
-           class="block bg-white rounded-2xl shadow-card border border-slate-100 p-5 hover:shadow-card-hover hover:border-brand-200 transition group">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <!-- Icon -->
-                <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center
-                            {% if order.status == 'LIVREE' %}bg-emerald-100 text-emerald-600
-                            {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-100 text-red-600
-                            {% elif order.status == 'VALIDEE' %}bg-blue-100 text-blue-600
-                            {% else %}bg-amber-100 text-amber-600{% endif %}">
-                    {% if order.status == 'LIVREE' %}
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    {% elif order.status == 'REFUSEE' %}
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    {% else %}
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {% endif %}
-                </div>
-
-                <!-- Info -->
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h3 class="font-bold text-slate-900 group-hover:text-brand-700 transition">
-                            {{ order.order_number }}
-                        </h3>
-                        <!-- Status badge -->
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
-                            {% if order.status == 'LIVREE' %}bg-emerald-100 text-emerald-800
-                            {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-100 text-red-800
-                            {% elif order.status == 'VALIDEE' %}bg-blue-100 text-blue-800
-                            {% elif order.status == 'EN_LIVRAISON' %}bg-purple-100 text-purple-800
-                            {% else %}bg-amber-100 text-amber-800{% endif %}">
-                            <span class="w-1.5 h-1.5 rounded-full
-                                {% if order.status == 'LIVREE' %}bg-emerald-500
-                                {% elif order.status == 'REFUSEE' or order.status == 'ANNULEE' %}bg-red-500
-                                {% elif order.status == 'VALIDEE' %}bg-blue-500
-                                {% elif order.status == 'EN_LIVRAISON' %}bg-purple-500
-                                {% else %}bg-amber-500{% endif %}"></span>
-                            {{ order.get_status_display }}
-                        </span>
-                    </div>
-                    <p class="text-sm text-slate-500 mt-1 flex items-center gap-3">
-                        <span>{{ order.created_at|date:"d/m/Y à H:i" }}</span>
-                        <span>·</span>
-                        <span>{{ order.items.count }} article{{ order.items.count|pluralize }}</span>
-                    </p>
-                </div>
-
-                <!-- Total + arrow -->
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <p class="text-lg font-extrabold text-slate-900">{{ order.total_amount|floatformat:0 }}</p>
-                        <p class="text-xs text-slate-500">{{ order.currency_code }}</p>
-                    </div>
-                    <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </div>
-            </div>
-        </a>
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-slate-500 border-b border-slate-200">
+          <tr>
+            <th class="text-left py-3">N° Commande</th>
+            <th class="text-left">Date</th>
+            <th class="text-left">Statut Commande</th>
+            <th class="text-left">Suivi Livraison</th>
+            <th class="text-right">Montant</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for o in orders %}
+          <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+            <td class="py-3 font-mono text-xs font-medium">{{ o.order_number }}</td>
+            <td class="text-slate-500">{{ o.created_at|date:"d/m/Y" }}</td>
+            <td>
+              <span class="px-2 py-1 rounded-full text-xs font-medium
+                {% if o.status == 'LIVREE' %}bg-emerald-100 text-emerald-700
+                {% elif o.status == 'VALIDEE' %}bg-blue-100 text-blue-700
+                {% else %}bg-amber-100 text-amber-700{% endif %}">
+                {{ o.get_status_display|default:o.status }}
+              </span>
+            </td>
+            <td>
+              {% if o.delivery %}
+                {% if o.delivery.status == 'LIVREE' %}
+                  <span class="inline-flex items-center gap-1 text-emerald-600 font-medium text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Livré
+                  </span>
+                {% elif o.delivery.status == 'EN_COURS' %}
+                  <span class="inline-flex items-center gap-1 text-blue-600 font-medium text-xs">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> En cours
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1 text-slate-500 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> En préparation
+                  </span>
+                {% endif %}
+              {% else %}
+                <span class="text-slate-400 text-xs">Non assigné</span>
+              {% endif %}
+            </td>
+            <td class="text-right font-medium">{{ o.total_amount|fcfa }}</td>
+            <td class="text-center">
+              <a href="{% url 'order_detail' o.id %}" class="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100">
+                Voir
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-slate-400 py-12">Aucune commande pour le moment.</td></tr>
         {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    {% else %}
-    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
-        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-100 mb-5">
-            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-        </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucune commande</h3>
-        <p class="text-slate-500 mb-6 max-w-sm mx-auto">Vous n'avez pas encore passé de commande.</p>
-        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm transition">
-            Explorer le catalogue
-        </a>
-    </div>
-    {% endif %}
+  </div>
 </div>
 {% endblock %}

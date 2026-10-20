@@ -131,5 +131,6 @@ def dashboard(request):
         "my_orders": my_orders[:10],
         "total_orders": my_orders.count(),
         "pending_orders": my_orders.filter(status="EN_ATTENTE_VALIDATION").count(),
+        "delivered_orders": my_orders.filter(status="LIVREE").count(),
     }
     return render(request, "dashboard/member.html", ctx)
