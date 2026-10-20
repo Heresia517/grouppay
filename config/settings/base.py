@@ -7,10 +7,19 @@ environ.Env.read_env(Path(__file__).resolve().parent.parent.parent / '.env')
 # ═══════════════════════════════════════════════════════════════
 # Mode hybride : desktop (SQLite + offline) vs server (PostgreSQL)
 # ═══════════════════════════════════════════════════════════════
-IS_DESKTOP = (
-    getattr(__import__("sys"), "frozen", False)
-    or __import__("os").environ.get("GROUPPAY_MODE") == "desktop"
-)
+import os as _os
+import sys as _sys
+
+_is_frozen = getattr(_sys, "frozen", False)
+_mode = _os.environ.get("GROUPPAY_MODE", "").lower()
+_has_db_url = bool(_os.environ.get("DATABASE_URL", "").strip())
+
+# Mode desktop par defaut (dev local, SQLite, ~/.grouppay/)
+# Mode serveur si : GROUPPAY_MODE=server OU DATABASE_URL defini (Render, prod)
+if _mode == "server" or (_mode != "desktop" and _has_db_url):
+    IS_DESKTOP = False
+else:
+    IS_DESKTOP = True
 IS_SERVER = not IS_DESKTOP
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
