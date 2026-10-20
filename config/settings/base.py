@@ -16,10 +16,14 @@ _has_db_url = bool(_os.environ.get("DATABASE_URL", "").strip())
 
 # Mode desktop par defaut (dev local, SQLite, ~/.grouppay/)
 # Mode serveur si : GROUPPAY_MODE=server OU DATABASE_URL defini (Render, prod)
-if _mode == "server" or (_mode != "desktop" and _has_db_url):
-    IS_DESKTOP = False
-else:
+if _is_frozen:
     IS_DESKTOP = True
+elif _mode == "server":
+    IS_DESKTOP = False
+elif _mode == "desktop":
+    IS_DESKTOP = True
+else:
+    IS_DESKTOP = not _has_db_url
 IS_SERVER = not IS_DESKTOP
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

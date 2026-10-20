@@ -1,43 +1,100 @@
+{% load fcfa %}
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-<meta charset="utf-8">
-<style>
-    body { font-family: Helvetica; font-size: 11px; }
-    .header { border-bottom: 3px solid #EF233C; padding-bottom: 10px; }
-    .title { font-size: 16px; font-weight: bold; color: #EF233C; }
-    .info { margin-top: 10px; font-size: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }
-    th { background-color: #2A9D8F; color: white; }
-    .total { text-align: right; font-weight: bold; margin-top: 10px; }
-</style>
+  <meta charset="utf-8">
+  <title>Bon de Commande {{ order.order_number|default:order.number }}</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #333; }
+    .header-table { width: 100%; margin-bottom: 30px; }
+    .header-table td { vertical-align: top; }
+    .org-name { font-size: 20px; font-weight: bold; color: #1e40af; }
+    .doc-title { font-size: 18px; font-weight: bold; color: #1e40af; text-align: right; }
+    .info-block td { padding: 4px 0; }
+    .label { font-weight: bold; width: 100px; }
+    table.items { width: 100%; margin-top: 20px; border: 1px solid #ddd; }
+    table.items th { background-color: #1e40af; color: #fff; padding: 8px; text-align: left; font-size: 11px; }
+    table.items td { padding: 8px; border-bottom: 1px solid #ddd; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .totals { width: 100%; margin-top: 20px; }
+    .totals td { padding: 6px 8px; }
+    .grand-total { font-size: 16px; font-weight: bold; color: #1e40af; border-top: 2px solid #1e40af; }
+    .footer { margin-top: 50px; font-size: 10px; color: #666; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <div class="title">{{ organization.name }}</div>
-        <div>BON DE COMMANDE N° {{ order.order_number }}</div>
-        <div class="info">Date : {{ order.created_at|date:"d/m/Y H:i" }}</div>
-    </div>
 
-    <div class="info">
-        <p><strong>Employé :</strong> {{ order.member.email }} ({{ order.member.internal_id }})</p>
-        <p><strong>Adresse :</strong> {{ order.delivery_address }}</p>
-        <p><strong>Statut :</strong> {{ order.get_status_display }}</p>
-    </div>
+<table class="header-table">
+  <tr>
+    <td>
+      <div class="org-name">{{ organization.name }}</div>
+      <div style="font-size: 10px; color: #666;">
+        {% if organization.address %}{{ organization.address }}<br>{% endif %}
+        {% if organization.city %}{{ organization.city }}, {% endif %}Burkina Faso<br>
+        {% if organization.ifu %}IFU : {{ organization.ifu }}{% endif %}
+      </div>
+    </td>
+    <td class="text-right">
+      <div class="doc-title">BON DE COMMANDE</div>
+      <div style="margin-top: 5px;">
+        <strong>N° :</strong> {{ order.order_number|default:order.number|default:order.id }}<br>
+        <strong>Date :</strong> {{ order.created_at|date:"d/m/Y H:i" }}<br>
+        <strong>Statut :</strong> {{ order.get_status_display|default:order.status }}
+      </div>
+    </td>
+  </tr>
+</table>
 
-    <table>
-        <tr><th>Produit</th><th>Quantité</th><th>Prix unitaire</th><th>Total</th></tr>
-        {% for item in order.items.all %}
-        <tr>
-            <td>{{ item.product.name }}</td>
-            <td style="text-align: center;">{{ item.quantity }}</td>
-            <td style="text-align: right;">{{ item.unit_price }}</td>
-            <td style="text-align: right;">{{ item.quantity|add:0 }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+<table class="info-block">
+  <tr>
+    <td class="label">Employé :</td>
+    <td>{{ order.member.email }} ({{ order.member.matricule|default:"-" }})</td>
+  </tr>
+  <tr>
+    <td class="label">Adresse :</td>
+    <td>{{ order.delivery_address|default:"Non renseignée" }}</td>
+  </tr>
+</table>
 
-    <div class="total">TOTAL : {{ order.total_amount }} {{ order.currency_code }}</div>
+<table class="items">
+  <thead>
+    <tr>
+      <th style="width: 50%;">Produit</th>
+      <th style="width: 15%;" class="text-center">Quantité</th>
+      <th style="width: 15%;" class="text-right">Prix unitaire</th>
+      <th style="width: 20%;" class="text-right">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in order.items.all %}
+    <tr>
+      <td>{{ item.product.name }}</td>
+      <td class="text-center">{{ item.quantity }}</td>
+      <td class="text-right">{{ item.unit_price|fcfa }}</td>
+      <td class="text-right">{% widthratio item.unit_price 1 item.quantity as line_total %}{{ line_total|fcfa }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4" class="text-center" style="color: #999;">Aucun article</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="totals">
+  <tr>
+    <td style="width: 70%;"></td>
+    <td class="text-right" style="font-weight: bold;">TOTAL :</td>
+    <td class="text-right grand-total">{{ order.total_amount|fcfa }}</td>
+  </tr>
+</table>
+
+<div class="footer">
+  Ce document est généré automatiquement par la plateforme GroupPay.<br>
+  Retenue salariale automatique conformément au Code du Travail du Burkina Faso.
+</div>
+
 </body>
 </html>

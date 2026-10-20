@@ -206,21 +206,46 @@ def create_order_view(request):
 
 @login_required
 def my_orders(request):
-    orders_qs = qs.order_by("-created_at")
+    """Liste des commandes filtrée selon le périmètre de l'utilisateur."""
+    user = request.user
+    org = user.organization
+
     # ─── Filtrage par périmètre ───
-    qs = Order.objects.filter(organization=request.user.organization)
-    if request.user.is_dg or request.user.role == "ADMIN":
-        pass
-    elif request.user.is_director:
-        dir_ids = list(request.user.directed_directions.values_list("id", flat=True))
-        qs = qs.filter(member__service__direction_id__in=dir_ids)
-    elif request.user.is_service_chief and request.user.service_id:
-        qs = qs.filter(member__service_id=request.user.service_id)
+    if user.is_dg or user.role == "ADMIN":
+        orders_qs = Order.objects.filter(organization=org)
+    elif user.role == "GESTIONNAIRE":
+        orders_qs = Order.objects.filter(organization=org)
+    elif user.is_director:
+        try:
+            dir_ids = list(user.directed_directions.values_list("id", flat=True))
+            orders_qs = Order.objects.filter(
+                organization=org,
+                member__service__direction_id__in=dir_ids,
+            )
+        except Exception:
+            orders_qs = Order.objects.filter(organization=org, member=user)
+    elif user.is_service_chief and user.service_id:
+        orders_qs = Order.objects.filter(
+            organization=org,
+            member__service_id=user.service_id,
+        )
     else:
-        qs = qs.filter(member=request.user)
+        orders_qs = Order.objects.filter(organization=org, member=user)
 
-    return render(request, "orders/my_orders.html", {"orders": orders})
+    orders_qs = orders_qs.select_related("member").order_by("-created_at")
 
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(orders_qs, 20)
+    page = request.GET.get("page", 1)
+    orders_page = paginator.get_page(page)
+
+    return render(request, "orders/my_orders.html", {
+        "orders": orders_page,
+        "page_obj": orders_page,
+        "is_paginated": paginator.num_pages > 1,
+        "total": orders_qs.count(),
+    })
 
 @login_required
 def order_detail(request, order_id):
