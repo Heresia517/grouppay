@@ -28,7 +28,8 @@
           <form method="post" action="{% url 'update_cart_item_qty' item.id %}">
             {% csrf_token %}
             <input type="hidden" name="qty" value="{{ item.quantity|add:'-1' }}">
-            <button type="submit" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-600 font-bold" {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
+            <textarea name="delivery_address" class="w-full border p-2 rounded mb-2" placeholder="Adresse de livraison..." required></textarea>
+        <button type="submit" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-600 font-bold" {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
           </form>
           
           <span class="w-6 text-center font-medium">{{ item.quantity }}</span>
@@ -36,7 +37,8 @@
           <form method="post" action="{% url 'update_cart_item_qty' item.id %}">
             {% csrf_token %}
             <input type="hidden" name="qty" value="{{ item.quantity|add:'1' }}">
-            <button type="submit" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-600 font-bold">+</button>
+            <textarea name="delivery_address" class="w-full border p-2 rounded mb-2" placeholder="Adresse de livraison..." required></textarea>
+        <button type="submit" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-600 font-bold">+</button>
           </form>
         </div>
 
@@ -78,6 +80,7 @@
       {% if items %}
       <form method="post" action="{% url 'create_order' %}">
         {% csrf_token %}
+        <textarea name="delivery_address" class="w-full border p-2 rounded mb-2" placeholder="Adresse de livraison..." required></textarea>
         <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20">
           Valider ma commande
         </button>

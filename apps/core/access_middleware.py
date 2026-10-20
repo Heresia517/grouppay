@@ -10,7 +10,7 @@ from .helpers import is_internal_staff, is_inventory_manager
 PROTECTED_PATHS = {
     "/da/": "internal",         # DA : personnel interne uniquement
     "/inventory/": "inventory",  # Inventaire : gestionnaires uniquement
-    "/stock/": "internal",      # Stock : personnel interne uniquement
+    "/stock/": "stock",      # Stock : personnel interne uniquement
     "/rh/": "rh",               # RH : RH/ADMIN uniquement
     "/supplier/": "supplier",   # Espace fournisseur : fournisseurs ou admin
     "/deliveries/": "courier",  # Livraisons : livreur ou admin
@@ -71,6 +71,10 @@ class AccessControlMiddleware:
         elif required == "supplier":
             if request.user.role not in ("FOURNISSEUR", "ADMIN") and not request.user.is_dg:
                 raise PermissionDenied("Acces reserve aux fournisseurs.")
+
+        elif required == "stock":
+            if request.user.role not in ("FOURNISSEUR", "ADMIN", "GESTIONNAIRE") and not request.user.is_dg:
+                raise PermissionDenied("Acces reserve aux fournisseurs, gestionnaires et administrateurs.")
 
         elif required == "courier":
             if request.user.role not in ("LIVREUR", "ADMIN") and not request.user.is_dg:

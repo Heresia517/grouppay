@@ -69,21 +69,23 @@ def stock_dashboard(request):
 
 @login_required
 def product_stock_history(request, product_id):
-    """Historique complet d'un produit."""
-    _require_manager(request.user)
-    product = get_object_or_404(Product, id=product_id, organization=request.user.organization)
-    movements = product.movements.select_related("actor", "order")[:100]
-
+    """Historique stock avec isolation fournisseur."""
+    from django.shortcuts import get_object_or_404, render
+    from .models import Product, StockMovement
+    
+    # Filtre : si FOURNISSEUR, il ne voit QUE ses propres produits
+    qs = Product.objects.filter(organization=request.user.organization)
+    if request.user.role == "FOURNISSEUR":
+        qs = qs.filter(supplier=request.user)
+    
+    product = get_object_or_404(qs, id=product_id)
+    movements = StockMovement.objects.filter(product=product).order_by("-created_at")[:50]
+    
     return render(request, "catalog/stock_history.html", {
         "product": product,
         "movements": movements,
-        "total_in": product.movements.filter(quantity__gt=0).aggregate(s=Sum("quantity"))["s"] or 0,
-        "total_out": abs(product.movements.filter(quantity__lt=0).aggregate(s=Sum("quantity"))["s"] or 0),
     })
 
-
-@login_required
-@require_POST
 def adjust_stock(request, product_id):
     """Ajustement manuel du stock (inventaire, casse, etc.)."""
     _require_manager(request.user)

@@ -170,14 +170,14 @@ def generate_monthly_report_excel(report):
         ("Commandes totales", data["orders"]["total"]),
         ("Commandes validees", data["orders"]["validated"]),
         ("Commandes livrees", data["orders"]["delivered"]),
-        ("Montant total (XOF)", float(data["orders"]["amount"])),
-        ("Panier moyen (XOF)", float(data["orders"]["avg_amount"])),
+        ("Montant total (FCFA)", float(data["orders"]["amount"])),
+        ("Panier moyen (FCFA)", float(data["orders"]["avg_amount"])),
         ("Nouveaux membres", data["members"]["new"]),
         ("Membres actifs", data["members"]["active"]),
     ]
     if data["da"]["count"]:
         kpis.append(("Demandes d'achat", data["da"]["count"]))
-        kpis.append(("Montant DA (XOF)", float(data["da"]["amount"])))
+        kpis.append(("Montant DA (FCFA)", float(data["da"]["amount"])))
 
     for label, val in kpis:
         ws1.append([label, val])
@@ -187,7 +187,7 @@ def generate_monthly_report_excel(report):
 
     # Feuille Top produits
     ws2 = wb.create_sheet("Top produits")
-    ws2.append(["Produit", "Quantite", "CA (XOF)"])
+    ws2.append(["Produit", "Quantite", "CA (FCFA)"])
     for cell in ws2[1]:
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="2563EB")
@@ -199,7 +199,7 @@ def generate_monthly_report_excel(report):
 
     # Feuille Top membres
     ws3 = wb.create_sheet("Top membres")
-    ws3.append(["Email", "Matricule", "Commandes", "Total (XOF)"])
+    ws3.append(["Email", "Matricule", "Commandes", "Total (FCFA)"])
     for cell in ws3[1]:
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="2563EB")

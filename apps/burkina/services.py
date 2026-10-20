@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 
 def arrondi_fcfa(montant):
-    """Arrondit au FCFA entier (pas de centimes en XOF)."""
+    """Arrondit au FCFA entier (pas de centimes en FCFA)."""
     if montant is None:
         return 0
     return int(Decimal(str(montant)).quantize(Decimal("1"), rounding=ROUND_HALF_UP))

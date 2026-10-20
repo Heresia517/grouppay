@@ -1,13 +1,89 @@
-<!DOCTYPE html>
+{% load fcfa %}<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
-<body style="font-family:Inter,system-ui,sans-serif;background:#f8fafc;margin:0;padding:32px 16px">
-<table width="100%">
+<body style="font-family:Inter,system-ui,Arial,sans-serif;background:#f8fafc;margin:0;padding:32px 16px;color:#334155">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto">
+  <tr><td>
+
+    <!-- HEADER -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#2563eb,#1e40af);border-radius:16px 16px 0 0">
+      <tr><td style="padding:32px 24px;text-align:center">
+        <div style="font-size:24px;font-weight:bold;color:#fff">GroupPay</div>
+        <div style="font-size:13px;color:#dbeafe;margin-top:6px">Achats groupés sur retenue salariale</div>
+      </td></tr>
+    </table>
+
+    <!-- BODY -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff;padding:32px 24px">
+
+      <!-- Icone succes -->
+      <tr><td style="text-align:center;padding-bottom:24px">
+        <div style="display:inline-block;width:64px;height:64px;background:#dcfce7;border-radius:50%;line-height:64px;font-size:32px;color:#16a34a">✓</div>
+      </td></tr>
+
+      <!-- Titre -->
+      <tr><td style="text-align:center;padding-bottom:8px">
+        <h1 style="margin:0;font-size:22px;color:#0f172a">Commande validée !</h1>
+      </td></tr>
+      <tr><td style="text-align:center;padding-bottom:32px">
+        <p style="margin:0;font-size:14px;color:#64748b">Votre commande a été validée par la direction.</p>
+      </td></tr>
+
+      <!-- Details -->
+      <tr><td style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:24px">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:8px 0;font-size:13px;color:#64748b">Numéro de commande</td>
+            <td style="padding:8px 0;font-size:13px;color:#0f172a;font-weight:bold;text-align:right">{{ order.order_number }}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;font-size:13px;color:#64748b">Montant total</td>
+            <td style="padding:8px 0;font-size:16px;color:#2563eb;font-weight:bold;text-align:right">{{ order.total_amount|fcfa }}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;font-size:13px;color:#64748b">Statut</td>
+            <td style="padding:8px 0;text-align:right">
+              <span style="display:inline-block;padding:4px 12px;background:#dcfce7;color:#166534;font-size:12px;font-weight:bold;border-radius:99px">VALIDÉE</span>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Produits -->
+      <tr><td style="padding-top:24px">
+        <h2 style="margin:0 0 12px 0;font-size:15px;color:#0f172a">Détail des articles</h2>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+          {% for item in order.items.all %}
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #e2e8f0;font-size:13px;color:#334155">
+              {{ item.product.name }} <span style="color:#94a3b8">× {{ item.quantity }}</span>
+            </td>
+            <td style="padding:10px 0;border-bottom:1px solid #e2e8f0;font-size:13px;color:#0f172a;font-weight:bold;text-align:right">
+              {{ item.product.price|fcfa }}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td></tr>
+
+      <!-- CTA -->
+      <tr><td style="text-align:center;padding-top:32px">
+        <a href="{{ site_url }}/orders/{{ order.id }}/" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">
+          Voir ma commande →
+        </a>
+      </td></tr>
+
+    </table>
+
+    <!-- FOOTER -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:0 0 16px 16px">
+      <tr><td style="padding:24px;text-align:center;font-size:11px;color:#94a3b8">
+        © 2026 GroupPay — Burkina Faso<br>
+        Ne pas répondre à cet email
+      </td></tr>
+    </table>
+
+  </td></tr>
 </table>
-<a href="{{ order_url }}" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Voir ma commande →</a>
-</td></tr>
-<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">
-© {% now "Y" %} GroupPay — Ne pas répondre à cet email
-</td></tr>
-</table>
-</td></tr></table>
+
 </body></html>
