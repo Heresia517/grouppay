@@ -80,7 +80,7 @@ def export_da_list_excel(purchase_requests, title="Demandes d'Achat"):
     for cell in ws1[4]:
         _style_header(cell)
 
-    currency = "XOF"
+    currency = "FCFA"
     if total_count and hasattr(qs, "first"):
         first = qs.first() if hasattr(qs, "first") else (qs[0] if qs else None)
         if first:

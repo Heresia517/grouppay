@@ -63,7 +63,7 @@ class ParametreFiscalBF(models.Model):
     smig_mensuel = models.BigIntegerField(default=45000, help_text="SMIG mensuel FCFA")
     plafond_cnss = models.BigIntegerField(default=600000, help_text="Plafond cotisable CNSS FCFA")
     taux_iuts_max = models.DecimalField(max_digits=5, decimal_places=4, default=0.2510)
-    devise = models.CharField(max_length=3, default="XOF")
+    devise = models.CharField(max_length=3, default="FCFA")
     actif = models.BooleanField(default=True)
 
     class Meta:

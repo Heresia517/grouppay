@@ -1,126 +1,93 @@
 {% extends "base.html" %}
-{% block title %}Panier — {{ organization.name }}{% endblock %}
+{% load fcfa %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto" id="cart-root">
-    <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Mon panier</h1>
-    <p class="text-slate-500 mb-8">Vérifiez vos articles avant de valider votre commande</p>
+<div class="p-6 max-w-7xl mx-auto">
+  
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-900">Mon panier</h1>
+    <p class="text-sm text-slate-500 mt-1">Vérifiez vos articles avant de valider</p>
+  </div>
 
-    {% if error %}
-    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 mb-4">
-        <p class="text-sm font-medium">{{ error }}</p>
-    </div>
-    {% endif %}
-    {% if success %}
-    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 mb-4">
-        <p class="text-sm font-medium">{{ success }}</p>
-    </div>
-    {% endif %}
-
-    {% if items %}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-3">
-            {% for item in items %}
-            <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-4 flex items-center gap-4" id="cart-item-{{ item.id }}">
-                <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    {% if item.product.image %}<img src="{{ item.product.image.url }}" class="w-full h-full object-cover">{% else %}
-                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>{% endif %}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-slate-900 truncate">{{ item.product.name }}</h3>
-                    <p class="text-sm text-slate-500 mt-0.5">{{ item.product.price|floatformat:0 }} {{ organization.currency_code }}</p>
-                </div>
-                <div class="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
-                    <button hx-post="{% url 'update_cart_item_qty' item.id %}" hx-vals='{"quantity": {{ item.quantity|add:"-1" }}}' hx-target="#cart-root" hx-swap="outerHTML"
-                            class="w-8 h-8 rounded-lg bg-white text-slate-700 font-bold flex items-center justify-center shadow-sm" {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
-                    <span class="w-8 text-center font-bold text-slate-900 text-sm">{{ item.quantity }}</span>
-                    <button hx-post="{% url 'update_cart_item_qty' item.id %}" hx-vals='{"quantity": {{ item.quantity|add:"1" }}}' hx-target="#cart-root" hx-swap="outerHTML"
-                            class="w-8 h-8 rounded-lg bg-white text-slate-700 font-bold flex items-center justify-center shadow-sm">+</button>
-                </div>
-                <div class="flex flex-col items-end gap-2 min-w-[110px]">
-                    <p class="font-bold text-slate-900 text-right">{% widthratio item.product.price 1 item.quantity %} {{ organization.currency_code }}</p>
-                    <button hx-get="{% url 'remove_from_cart' item.id %}" hx-target="#cart-root" hx-swap="outerHTML"
-                            class="text-xs text-red-600 hover:text-red-700 font-medium">Retirer</button>
-                </div>
-            </div>
-            {% endfor %}
-            <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-brand-600 transition pt-2">← Continuer mes achats</a>
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+    
+    {# Articles #}
+    <div class="space-y-4">
+      {% for item in items %}
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center gap-5">
+        <div class="w-24 h-24 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        </div>
+        
+        <div class="flex-1">
+          <h3 class="text-lg font-bold text-slate-900">{{ item.product.name }}</h3>
+          <p class="text-sm text-slate-500">{{ item.product.price|fcfa }} / unité</p>
         </div>
 
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl shadow-card border border-slate-100 p-6 lg:sticky lg:top-24">
-                <h2 class="font-bold text-slate-900 text-lg mb-4">Récapitulatif</h2>
-
-                <!-- Bloc coupon -->
-                {% if cart.coupon_code and discount > 0 %}
-                <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-emerald-700 uppercase">Code appliqué</p>
-                        <p class="font-bold text-emerald-900">{{ cart.coupon_code }}</p>
-                    </div>
-                    <button hx-post="{% url 'remove_coupon' %}" hx-target="#cart-root" hx-swap="outerHTML"
-                            class="text-xs text-emerald-700 hover:text-red-600 font-medium">Retirer</button>
-                </div>
-                {% else %}
-                <form hx-post="{% url 'apply_coupon' %}" hx-target="#cart-root" hx-swap="outerHTML" class="mb-4">
-                    {% csrf_token %}
-                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Code promo</label>
-                    <div class="flex gap-2">
-                        <input type="text" name="code" placeholder="SAVE10" required
-                               class="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm uppercase tracking-wider">
-                        <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800">OK</button>
-                    </div>
-                </form>
-                {% endif %}
-
-                <!-- Totaux -->
-                <dl class="space-y-2 pb-4 border-b border-slate-100">
-                    <div class="flex justify-between text-sm">
-                        <dt class="text-slate-500">Sous-total</dt>
-                        <dd class="font-medium text-slate-900">{{ subtotal|floatformat:0 }} {{ organization.currency_code }}</dd>
-                    </div>
-                    {% if discount > 0 %}
-                    <div class="flex justify-between text-sm">
-                        <dt class="text-emerald-600 font-medium">Remise</dt>
-                        <dd class="font-bold text-emerald-600">−{{ discount|floatformat:0 }} {{ organization.currency_code }}</dd>
-                    </div>
-                    {% endif %}
-                    <div class="flex justify-between text-sm">
-                        <dt class="text-slate-500">Retenue salariale</dt>
-                        <dd class="font-medium text-emerald-600">Automatique</dd>
-                    </div>
-                </dl>
-
-                <div class="flex justify-between items-baseline py-4">
-                    <span class="font-semibold text-slate-900">Total</span>
-                    <span class="text-2xl font-extrabold text-slate-900">{{ total|floatformat:0 }} <span class="text-sm font-medium text-slate-500">{{ organization.currency_code }}</span></span>
-                </div>
-
-                <form method="post" action="{% url 'create_order' %}" class="space-y-4">
-                    {% csrf_token %}
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Adresse de livraison</label>
-                        <textarea name="delivery_address" required rows="3" placeholder="Ex : Secteur 15, Ouagadougou"
-                                  class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm resize-none"></textarea>
-                    </div>
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 transition">
-                        Valider ma commande
-                    </button>
-                    <p class="text-xs text-slate-500 text-center">💡 Le montant sera déduit automatiquement de votre salaire</p>
-                </form>
-            </div>
+        <div class="flex items-center gap-3 bg-slate-50 rounded-xl p-1 border border-slate-200">
+          <form method="post" action="{% url 'update_cart_item_qty' item.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="qty" value="{{ item.quantity|add:'-1' }}">
+            <button type="submit" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-600 font-bold" {% if item.quantity <= 1 %}disabled{% endif %}>−</button>
+          </form>
+          
+          <span class="w-6 text-center font-medium">{{ item.quantity }}</span>
+          
+          <form method="post" action="{% url 'update_cart_item_qty' item.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="qty" value="{{ item.quantity|add:'1' }}">
+            <button type="submit" class="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg text-slate-600 font-bold">+</button>
+          </form>
         </div>
+
+        <div class="text-right w-28">
+          <div class="font-bold text-lg text-slate-900">{{ item.line_total|fcfa }}</div>
+          <a href="{% url 'remove_from_cart' item.id %}" class="text-xs text-red-500 hover:text-red-700 mt-1 inline-block">Retirer</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
+        Votre panier est vide.
+      </div>
+      {% endfor %}
+
+      <div class="pt-4">
+        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900">
+          ← Continuer mes achats
+        </a>
+      </div>
     </div>
 
-    {% else %}
-    <div class="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-card">
-        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-100 mb-5">
-            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    {# Résumé #}
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-fit sticky top-24">
+      <h2 class="text-xl font-bold text-slate-900 mb-6">Récapitulatif</h2>
+      
+      <div class="space-y-3 mb-6 border-b border-slate-100 pb-6">
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-500">Sous-total</span>
+          <span class="font-medium text-slate-900">{{ subtotal|default:0|fcfa }}</span>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">Votre panier est vide</h3>
-        <p class="text-slate-500 mb-6">Explorez notre catalogue et ajoutez vos premiers articles.</p>
-        <a href="{% url 'catalog' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 shadow-sm transition">Explorer le catalogue</a>
+        
+      </div>
+
+      <div class="flex justify-between items-end mb-6">
+        <span class="text-lg font-bold text-slate-900">Total</span>
+        <span class="text-3xl font-bold text-slate-900">{{ total|default:0|fcfa }}</span>
+      </div>
+
+      {% if items %}
+      <form method="post" action="{% url 'create_order' %}">
+        {% csrf_token %}
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20">
+          Valider ma commande
+        </button>
+      </form>
+      {% else %}
+      <button type="button" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-xl cursor-not-allowed">
+        Panier vide
+      </button>
+      {% endif %}
     </div>
-    {% endif %}
+  </div>
 </div>
 {% endblock %}

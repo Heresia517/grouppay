@@ -30,7 +30,7 @@
                 <label class="block text-sm font-semibold text-slate-700 mb-1.5">De</label>
                 <select id="from" class="block w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm">
                     {% for c in currencies %}
-                    <option value="{{ c.code }}" {% if c.code == 'XOF' %}selected{% endif %}>{{ c.code }}</option>
+                    <option value="{{ c.code }}" {% if c.code == 'FCFA' %}selected{% endif %}>{{ c.code }}</option>
                     {% endfor %}
                 </select>
             </div>

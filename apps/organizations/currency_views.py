@@ -26,7 +26,7 @@ def api_convert(request):
     """API conversion AJAX."""
     try:
         amount = Decimal(request.GET.get("amount", "0"))
-        from_currency = request.GET.get("from", "XOF").upper()
+        from_currency = request.GET.get("from", "FCFA").upper()
         to_currency = request.GET.get("to", "EUR").upper()
 
         converted, rate = convert_amount(amount, from_currency, to_currency)

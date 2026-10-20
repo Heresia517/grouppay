@@ -6,10 +6,10 @@ from django.core.cache import cache
 
 # Taux par defaut (fallback si pas en base)
 DEFAULT_RATES = {
-    ("XOF", "EUR"): Decimal("0.001524"),
-    ("EUR", "XOF"): Decimal("655.957"),
-    ("XOF", "USD"): Decimal("0.001667"),
-    ("USD", "XOF"): Decimal("600.00"),
+    ("FCFA", "EUR"): Decimal("0.001524"),
+    ("EUR", "FCFA"): Decimal("655.957"),
+    ("FCFA", "USD"): Decimal("0.001667"),
+    ("USD", "FCFA"): Decimal("600.00"),
     ("EUR", "USD"): Decimal("1.09"),
     ("USD", "EUR"): Decimal("0.917"),
 }
@@ -71,12 +71,12 @@ def convert_amount(amount, from_currency, to_currency):
 
 def format_currency(amount, currency_code):
     """Formate un montant avec son symbole."""
-    symbols = {"XOF": "FCFA", "EUR": "€", "USD": "$"}
+    symbols = {"FCFA": "FCFA", "EUR": "€", "USD": "$"}
     symbol = symbols.get(currency_code, currency_code)
 
     try:
         amount_float = float(amount)
-        if currency_code == "XOF":
+        if currency_code == "FCFA":
             return f"{amount_float:,.0f} {symbol}".replace(",", " ")
         return f"{amount_float:,.2f} {symbol}".replace(",", " ")
     except Exception:
@@ -88,7 +88,7 @@ def seed_default_currencies():
     from .models import Currency, ExchangeRate
 
     currencies = [
-        ("XOF", "Franc CFA (BCEAO)", "FCFA", 0),
+        ("FCFA", "Franc CFA (BCEAO)", "FCFA", 0),
         ("EUR", "Euro", "€", 2),
         ("USD", "Dollar americain", "$", 2),
     ]

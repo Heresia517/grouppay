@@ -49,7 +49,7 @@ def export_dashboard_excel(request):
     title_font = Font(bold=True, size=14, color="1E3A8A")
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill("solid", fgColor="2563EB")
-    money_fmt = '#,##0 "XOF"'
+    money_fmt = '#,##0 "FCFA"'
     border = Border(
         left=Side(style="thin", color="E2E8F0"),
         right=Side(style="thin", color="E2E8F0"),
@@ -66,9 +66,9 @@ def export_dashboard_excel(request):
     ws1["A2"].font = Font(italic=True, color="64748B")
 
     kpis = [
-        ("Chiffre d'affaires", qs_valid.aggregate(s=Sum("total_amount"))["s"] or 0, "XOF"),
+        ("Chiffre d'affaires", qs_valid.aggregate(s=Sum("total_amount"))["s"] or 0, "FCFA"),
         ("Nombre de commandes", qs_valid.count(), ""),
-        ("Panier moyen", qs_valid.aggregate(a=Avg("total_amount"))["a"] or 0, "XOF"),
+        ("Panier moyen", qs_valid.aggregate(a=Avg("total_amount"))["a"] or 0, "FCFA"),
         ("En attente de validation", qs.filter(status="EN_ATTENTE_VALIDATION").count(), ""),
     ]
     ws1.append([])

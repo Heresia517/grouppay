@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 "smig_mensuel": 45000,
                 "plafond_cnss": 600000,
                 "taux_iuts_max": Decimal("0.2510"),
-                "devise": "XOF",
+                "devise": "FCFA",
                 "actif": True,
             }
         )

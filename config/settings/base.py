@@ -474,3 +474,8 @@ FASOARZEKA = {
     "PROTOCOL": env("FASOARZEKA_PROTOCOL", default="https"),
     "SANDBOX": env.bool("FASOARZEKA_SANDBOX", default=True),
 }
+
+# --- Authentication ---
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "login"

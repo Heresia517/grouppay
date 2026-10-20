@@ -17,7 +17,7 @@ class Organization(models.Model):
     color_primary = models.CharField(max_length=7, default="#EF233C")
     color_secondary = models.CharField(max_length=7, default="#2A9D8F")
     country_code = models.CharField(max_length=2, default="BF")
-    currency_code = models.CharField(max_length=3, default="XOF")
+    currency_code = models.CharField(max_length=3, default="FCFA")
     timezone = models.CharField(max_length=50, default="UTC")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="TRIAL")
 

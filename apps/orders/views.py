@@ -121,8 +121,37 @@ def product_detail(request, product_id):
 
 @login_required
 def view_cart(request):
-    return _render_cart_page(request)
-
+    """Affiche le panier. Reutilise le panier existant (contrainte UNIQUE user_id)."""
+    from .models import Cart
+    
+    # 1. On cherche le panier de l'utilisateur (peu importe son statut)
+    cart = Cart.objects.filter(user=request.user).first()
+    
+    if cart:
+        # Si le panier n'est plus "OPEN" (ex: il vient d'etre valide),
+        # on le vide et on le repasse en "OPEN" pour qu'il soit reutilisable.
+        if cart.status != "OPEN":
+            cart.items.all().delete()
+            cart.status = "OPEN"
+            cart.save()
+    else:
+        # Si c'est le tout premier panier de l'utilisateur
+        cart = Cart.objects.create(user=request.user, status="OPEN")
+        
+    items = cart.items.select_related("product").all()
+    
+    subtotal = 0
+    for item in items:
+        line_total = item.product.price * item.quantity
+        item.line_total = line_total
+        subtotal += line_total
+    
+    return render(request, "orders/cart.html", {
+        "cart": cart,
+        "items": items,
+        "subtotal": subtotal,
+        "total": subtotal,
+    })
 
 @login_required
 @require_POST
@@ -184,25 +213,44 @@ def update_cart_item_qty(request, item_id):
 
 @login_required
 def create_order_view(request):
-    if request.method != "POST":
-        return redirect("view_cart")
+    """Valide le panier -> cree la commande -> redirige vers le detail."""
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    from .models import Cart
+    from .services import create_order_from_cart
 
-    from apps.orders.services import create_order_from_cart, EmptyCartError, InsufficientStockError
+    # 1. Recuperer le panier
+    cart = Cart.objects.filter(user=request.user, status="OPEN").first()
+    if not cart or not cart.items.exists():
+        messages.warning(request, "Votre panier est vide.")
+        return redirect("catalog")
 
+    # 2. Recuperer l'adresse de livraison depuis le formulaire (POST)
     delivery_address = request.POST.get("delivery_address", "").strip()
     if not delivery_address:
-        return render(request, "orders/cart.html", {
-            "items": [],
-            "error": "Adresse de livraison obligatoire.",
-        })
+        # Fallback : utiliser le service ou la direction du membre
+        service = getattr(request.user, "service", None)
+        direction = getattr(service, "direction", None) if service else None
+        delivery_address = (
+            f"{request.user.first_name} {request.user.last_name} - "
+            f"{service.name if service else ''}, {direction.name if direction else ''}"
+        ).strip(" -, ")
 
+    # 3. Appeler le service avec la BONNE signature
     try:
-        order = create_order_from_cart(request.user, delivery_address)
-    except (EmptyCartError, InsufficientStockError) as e:
-        return render(request, "orders/cart.html", {"items": [], "error": str(e)})
+        order = create_order_from_cart(
+            user=request.user,
+            delivery_address=delivery_address,
+        )
+        messages.success(
+            request,
+            f"Commande {order.order_number} validee avec succes !",
+        )
+        return redirect("order_detail", order_id=order.id)
 
-    return redirect("order_detail", order_id=order.id)
-
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la validation : {e}")
+        return redirect("view_cart")
 
 @login_required
 def my_orders(request):
@@ -249,22 +297,36 @@ def my_orders(request):
 
 @login_required
 def order_detail(request, order_id):
-    order = get_object_or_404(
-        Order, id=order_id, member=request.user
-    )
-    items = order.items.select_related("product").all()
-    history = order.status_history.order_by("created_at")
-    return render(request, "orders/order_detail.html", {
-        "order": order,
-        "items": items,
-        "history": history,
-    })
+    """Detail commande : membre voit les siennes, chef son service, RH/dir tout."""
+    from django.shortcuts import get_object_or_404, render
+    from django.core.exceptions import PermissionDenied
 
+    user = request.user
+    org = user.organization
 
+    # Base : la commande doit etre dans l'organisation de l'utilisateur
+    qs = Order.objects.filter(organization=org)
 
-# ═══════════════════════════════════════════════════════════════
-# WISHLIST
-# ═══════════════════════════════════════════════════════════════
+    # Filtrage par perimetre
+    if user.is_dg or user.role == "ADMIN" or user.role == "GESTIONNAIRE":
+        # Admin/RH : voient toutes les commandes de l'org
+        order = get_object_or_404(qs, id=order_id)
+    elif user.is_director:
+        # Directeur : voit les commandes de sa direction
+        try:
+            dir_ids = list(user.directed_directions.values_list("id", flat=True))
+            order = get_object_or_404(qs, id=order_id, member__service__direction_id__in=dir_ids)
+        except Exception:
+            order = get_object_or_404(qs, id=order_id, member=user)
+    elif user.is_service_chief and user.service_id:
+        # Chef : voit les commandes de son service
+        order = get_object_or_404(qs, id=order_id, member__service_id=user.service_id)
+    else:
+        # Membre simple : voit uniquement SES commandes
+        order = get_object_or_404(qs, id=order_id, member=user)
+
+    return render(request, "orders/order_detail.html", {"order": order})
+
 @login_required
 @require_POST
 def toggle_wishlist(request, product_id):

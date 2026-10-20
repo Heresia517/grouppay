@@ -64,3 +64,14 @@ def is_inventory_manager(user):
     if user.service and user.service.direction and user.service.direction.is_achats:
         return True
     return False
+
+
+def format_fcfa(montant):
+    """Formate un montant en FCFA avec separateur espace."""
+    if montant is None:
+        return "0 FCFA"
+    try:
+        v = int(float(montant))
+        return f"{v:,}".replace(",", " ") + " FCFA"
+    except (ValueError, TypeError):
+        return f"{montant} FCFA"
