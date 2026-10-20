@@ -39,3 +39,7 @@ venv/
 build/
 dist/
 *.spec
+
+# Scripts de dev temporaires
+_fix_*.py
+setup_*.py
