@@ -338,7 +338,7 @@ try:
         mail.outbox = []
         result = send_email(
             recipient_email="test@example.com",
-            subject="Test GroupPay",
+            subject="Test ZionPay",
             template_name="emails/order_validated.html",
             context={
                 "organization": user.organization,
@@ -360,7 +360,7 @@ try:
             msg = mail.outbox[0]
             if msg.to == ["test@example.com"]:
                 ok(f"Destinataire correct : {msg.to}")
-            if "GroupPay" in msg.subject or "Commande" in msg.subject:
+            if "ZionPay" in msg.subject or "Commande" in msg.subject:
                 ok(f"Sujet : {msg.subject}")
             # Vérifier le HTML
             html_alt = msg.alternatives

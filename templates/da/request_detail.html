@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load fcfa %}
 {% block title %}{{ da.number }} — {{ organization.name }}{% endblock %}
 {% block content %}
 <div class="max-w-5xl mx-auto">
@@ -47,7 +48,7 @@
             </div>
             <div>
                 <p class="text-xs text-slate-500 uppercase mb-1">Montant total</p>
-                <p class="font-extrabold text-slate-900">{{ da.total_amount|floatformat:0 }} {{ da.currency_code }}</p>
+                <p class="font-extrabold text-slate-900">{{ da.total_amount|fcfa }} {{ da.currency_code }}</p>
             </div>
         </div>
 
@@ -62,7 +63,83 @@
     <!-- Lignes -->
     <div class="bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden mb-6">
         <div class="p-5 border-b border-slate-100">
-            <h2 class="font-bold text-slate-900">Articles demandes</h2>
+            
+    {# ============ BOUTONS D'ACTION PAR ROLE ============ #}
+    
+    {# Directeur des Achats : verifie stock + vise #}
+    {% if can_visa_achats %}
+    <div class="bg-amber-50 border border-amber-300 rounded-xl p-5 mb-4">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">⚖️</div>
+        <div class="flex-1">
+          <h3 class="font-bold text-amber-900 text-lg mb-1">Action requise : Visa du Directeur des Achats</h3>
+          <p class="text-sm text-amber-800 mb-3">
+            En tant que Directeur des Achats, vous devez vérifier le stock disponible et apposer votre visa sur cette demande.
+          </p>
+          <a href="{% url 'da_visa' da.id %}" 
+             class="inline-flex items-center gap-2 bg-amber-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-amber-700 transition">
+            🔍 Vérifier le stock et viser
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    {# Directeur du service : appose son visa #}
+    {% if can_visa_director %}
+    <div class="bg-blue-50 border border-blue-300 rounded-xl p-5 mb-4">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">✍️</div>
+        <div class="flex-1">
+          <h3 class="font-bold text-blue-900 text-lg mb-1">Action requise : Visa du Directeur</h3>
+          <p class="text-sm text-blue-800 mb-3">
+            Cette DA est soumise et attend votre visa de Directeur.
+          </p>
+          <a href="{% url 'da_visa' da.id %}" 
+             class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition">
+            ✓ Apposer le visa
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    {# DG : signe la DA visee par les Achats #}
+    {% if can_sign_dg %}
+    <div class="bg-indigo-50 border border-indigo-300 rounded-xl p-5 mb-4">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">🏛️</div>
+        <div class="flex-1">
+          <h3 class="font-bold text-indigo-900 text-lg mb-1">Action requise : Signature finale du DG</h3>
+          <p class="text-sm text-indigo-800 mb-3">
+            La DA a été visée par les Achats. Elle attend votre signature finale.
+          </p>
+          <a href="{% url 'da_sign_page' da.id %}" 
+             class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition">
+            🖊️ Signer la DA
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    {# DG : valide apres verif stock (fallback si workflow simplifie) #}
+    {% if can_validate_dg %}
+    <div class="bg-indigo-50 border border-indigo-300 rounded-xl p-5 mb-4">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">🏛️</div>
+        <div class="flex-1">
+          <h3 class="font-bold text-indigo-900 text-lg mb-1">Action requise : Validation DG</h3>
+          <a href="{% url 'da_sign_page' da.id %}" 
+             class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition">
+            🖊️ Valider la DA
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    <h2 class="font-bold text-slate-900">Articles demandes</h2>
         </div>
         <table class="w-full text-sm">
             <thead class="bg-slate-50">
@@ -82,7 +159,7 @@
                         <p class="text-xs text-slate-400">{{ line.item.get_unit_display }}</p>
                     </td>
                     <td class="p-3 text-center font-semibold">{{ line.quantity }}</td>
-                    <td class="p-3 text-right tabular-nums">{{ line.unit_price|floatformat:0 }}</td>
+                    <td class="p-3 text-right tabular-nums">{{ line.unit_price|fcfa }}</td>
                     <td class="p-3 text-right font-bold tabular-nums">{{ line.subtotal|floatformat:0 }}</td>
                     <td class="p-3 text-xs text-slate-500">{{ line.notes|default:"—" }}</td>
                 </tr>
@@ -91,7 +168,7 @@
             <tfoot class="bg-slate-900 text-white">
                 <tr>
                     <td colspan="3" class="p-3 text-right font-bold">TOTAL</td>
-                    <td colspan="2" class="p-3 text-right font-extrabold">{{ da.total_amount|floatformat:0 }} {{ da.currency_code }}</td>
+                    <td colspan="2" class="p-3 text-right font-extrabold">{{ da.total_amount|fcfa }} {{ da.currency_code }}</td>
                 </tr>
             </tfoot>
         </table>

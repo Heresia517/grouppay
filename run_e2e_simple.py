@@ -61,7 +61,7 @@ def test_page(session, path, expected_status=200, must_contain=None):
 def main():
     print()
     print("=" * 72)
-    print("  GROUPPAY TESTS SIMPLES")
+    print("  ZIONPAY TESTS SIMPLES")
     print("=" * 72)
     print()
 

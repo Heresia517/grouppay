@@ -510,10 +510,10 @@ write("templates/documents/invoice.html", '''{% extends "base.html" %}
         <div class="mt-8 pt-6 border-t border-slate-200">
             <p class="text-xs text-slate-500 leading-relaxed">
                 <strong>Mode de règlement :</strong> Retenue salariale automatique — le montant sera prélevé sur le salaire du membre conformément à l'accord de mutuelle.<br>
-                <strong>Mention légale :</strong> Facture émise par GroupPay pour {{ organization.name }}. Pas de TVA applicable (retenue salariale).
+                <strong>Mention légale :</strong> Facture émise par ZionPay pour {{ organization.name }}. Pas de TVA applicable (retenue salariale).
             </p>
             <p class="text-xs text-slate-400 text-center mt-6">
-                Document généré le {% now "d/m/Y à H:i" %} · GroupPay
+                Document généré le {% now "d/m/Y à H:i" %} · ZionPay
             </p>
         </div>
     </div>
@@ -623,8 +623,8 @@ write("templates/documents/invoice_pdf.html", '''<!DOCTYPE html>
 
     <div class="footer">
         <strong>Mode de reglement :</strong> Retenue salariale automatique.<br>
-        <strong>Mention legale :</strong> Facture emise par GroupPay pour {{ organization.name }}. Pas de TVA applicable.<br>
-        <div style="text-align:center; margin-top:10pt; color:#94a3b8;">Document genere par GroupPay</div>
+        <strong>Mention legale :</strong> Facture emise par ZionPay pour {{ organization.name }}. Pas de TVA applicable.<br>
+        <div style="text-align:center; margin-top:10pt; color:#94a3b8;">Document genere par ZionPay</div>
     </div>
 </body>
 </html>

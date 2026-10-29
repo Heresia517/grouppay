@@ -1,4 +1,4 @@
-"""Build GroupPay Desktop en exécutable Windows via PyInstaller."""
+"""Build ZionPay Desktop en exécutable Windows via PyInstaller."""
 import os
 import subprocess
 import sys
@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent
 env = os.environ.copy()
 env["DJANGO_SETTINGS_MODULE"] = "config.settings.base"
 env["SECRET_KEY"] = "build-time-dummy-not-used-at-runtime"
-env["GROUPPAY_MODE"] = "desktop"
+env["ZIONPAY_MODE"] = "desktop"
 env["PYTHONPATH"] = str(ROOT)
 
 SEP = os.pathsep  # ';' sur Windows, ':' sur Unix
@@ -18,7 +18,7 @@ SEP = os.pathsep  # ';' sur Windows, ':' sur Unix
 args = [
     sys.executable, "-m", "PyInstaller",
     "launcher.py",
-    "--name=GroupPay",
+    "--name=ZionPay",
     "--onefile",
     "--noconsole",
     "--clean",
@@ -66,7 +66,7 @@ print("→ Build PyInstaller en cours (5-8 min)...\n")
 result = subprocess.run(args, cwd=ROOT, env=env)
 
 if result.returncode == 0:
-    exe = ROOT / "dist" / "GroupPay.exe"
+    exe = ROOT / "dist" / "ZionPay.exe"
     if exe.exists():
         print(f"\n✓ Build terminé : {exe}")
         print(f"  Taille : {exe.stat().st_size / 1024 / 1024:.1f} Mo")

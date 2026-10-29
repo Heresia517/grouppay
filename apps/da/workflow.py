@@ -461,3 +461,60 @@ def close_request(purchase_request, actor):
 
     _add_history(purchase_request, old_status, "CLOTUREE", actor, "DA cloturee")
     return purchase_request
+
+
+
+def visa_by_achats(purchase_request, actor, comment="", approved=True):
+    """Visa du Directeur des Achats : STOCK_VERIFIE -> VISEE_ACHATS."""
+    from django.core.exceptions import ValidationError
+    old_status = purchase_request.status
+
+    if purchase_request.status not in ("STOCK_VERIFIE", "VISEE_DIRECTEUR"):
+        raise ValidationError(
+            f"Cette DA n'est pas prete pour le visa des Achats (statut actuel : {purchase_request.status})."
+        )
+
+    if not approved:
+        purchase_request.status = "REFUSEE"
+        purchase_request.rejection_reason = comment or "Refusee par les Achats"
+        purchase_request.save()
+        _add_history(purchase_request, old_status, "REFUSEE", actor, comment or "Refusee par les Achats")
+        return
+
+    purchase_request.status = "VISEE_ACHATS"
+    purchase_request.save()
+    _add_history(purchase_request, old_status, "VISEE_ACHATS", actor, comment or "Visa des Achats accorde")
+
+
+def validate_da(purchase_request, actor, comment=""):
+    """Validation finale par le DG : VISEE_ACHATS -> VALIDEE."""
+    from django.core.exceptions import ValidationError
+    from django.utils import timezone
+
+    old_status = purchase_request.status
+
+    if purchase_request.status not in ("VISEE_ACHATS", "STOCK_VERIFIE", "VISEE_DIRECTEUR"):
+        raise ValidationError(
+            f"Cette DA ne peut pas etre validee (statut: {purchase_request.status})."
+        )
+
+    purchase_request.status = "VALIDEE"
+    purchase_request.validated_by = actor
+    purchase_request.validated_at = timezone.now()
+    purchase_request.save()
+    _add_history(purchase_request, old_status, "VALIDEE", actor, comment or "Validation DG")
+
+    # Marquer les flows DG comme completes
+    try:
+        from .models import DASignatureFlow
+        DASignatureFlow.objects.filter(
+            purchase_request=purchase_request,
+            role_required="DG",
+            status="PENDING",
+        ).update(status="COMPLETED")
+    except Exception:
+        pass
+
+    return purchase_request
+
+

@@ -12,7 +12,7 @@ def health(request):
     """
     return JsonResponse({
         "status": "ok",
-        "service": "grouppay",
+        "service": "zionpay",
         "env": getattr(settings, "SENTRY_ENVIRONMENT", "development"),
         "debug": settings.DEBUG,
         "sentry_enabled": bool(getattr(settings, "SENTRY_DSN", "")),
@@ -29,7 +29,7 @@ def sentry_test(request):
 
     try:
         import sentry_sdk
-        sentry_sdk.capture_message("Test GroupPay Sentry", level="info")
+        sentry_sdk.capture_message("Test ZionPay Sentry", level="info")
         return JsonResponse({
             "ok": True,
             "message": "Event sent to Sentry (check your dashboard)",

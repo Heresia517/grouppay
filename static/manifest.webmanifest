@@ -1,6 +1,6 @@
 {
-  "name": "GroupPay — Achat groupé",
-  "short_name": "GroupPay",
+  "name": "ZionPay — Achat groupé",
+  "short_name": "ZionPay",
   "description": "Plateforme d'achat groupé sur retenue salariale",
   "start_url": "/",
   "display": "standalone",

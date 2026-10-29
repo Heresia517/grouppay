@@ -1,7 +1,7 @@
 """Test complet du flux de livraison (RH valide -> Livreur livre)."""
 import os
 os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.base"
-os.environ["GROUPPAY_MODE"] = "desktop"
+os.environ["ZIONPAY_MODE"] = "desktop"
 
 import django
 django.setup()

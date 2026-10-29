@@ -5,11 +5,14 @@ from apps.catalog.models import Product
 
 
 class Cart(models.Model):
-    STATUS_CHOICES = [("OPEN", "Open"), ("LOCKED", "Locked"), ("EXPIRED", "Expired")]
+    STATUS_CHOICES = [("OPEN", "Open"), ("LOCKED", "Locked"), ("EXPIRED", "Expired"),
+    ('BON_COMMANDE', 'Bon de commande administratif'),
+    ("BON_COMMANDE", "Bon de commande administratif"),
+]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="cart")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="OPEN")
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default="OPEN")
     coupon_code = models.CharField(max_length=30, blank=True)
     coupon_discount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -37,13 +40,14 @@ class Order(models.Model):
         ("EN_LIVRAISON", "En livraison"),
         ("LIVREE", "Livrée"),
         ("ANNULEE", "Annulée"),
-    ]
+    ("BON_COMMANDE", "Bon de commande administratif"),
+]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="orders")
     order_number = models.CharField(max_length=30, unique=True)
     member = models.ForeignKey("accounts.User", on_delete=models.PROTECT, related_name="orders")
-    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="EN_ATTENTE_VALIDATION")
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default="EN_ATTENTE_VALIDATION")
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency_code = models.CharField(max_length=3)
     delivery_address = models.TextField()
@@ -62,8 +66,8 @@ class OrderItem(models.Model):
 class OrderStatusHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="status_history")
-    from_status = models.CharField(max_length=25, blank=True)
-    to_status = models.CharField(max_length=25)
+    from_status = models.CharField(max_length=32, blank=True)
+    to_status = models.CharField(max_length=32)
     actor = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True)
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -77,7 +81,8 @@ class MonthlyReport(models.Model):
         ("GENERATING", "Generation en cours"),
         ("READY", "Pret"),
         ("FAILED", "Echec"),
-    ]
+    ("BON_COMMANDE", "Bon de commande administratif"),
+]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(
@@ -99,7 +104,7 @@ class MonthlyReport(models.Model):
     members_active = models.PositiveIntegerField(default=0)
 
     # Meta
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="PENDING")
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default="PENDING")
     generated_at = models.DateTimeField(null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     sent_to = models.JSONField(default=list, blank=True)

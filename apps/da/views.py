@@ -26,12 +26,186 @@ from .services import (
 # ═══════════════════════════════════════════════════════════════
 # HELPERS PERMISSIONS
 # ═══════════════════════════════════════════════════════════════
+def da_visa(request, request_id):
+    """Visa DA : GET affiche la page, POST traite le visa."""
+    from django.shortcuts import get_object_or_404, render, redirect
+    from django.contrib import messages
+    from django.core.exceptions import PermissionDenied, ValidationError
+    from apps.da.models import PurchaseRequest
+    from apps.da import workflow
+
+    da = get_object_or_404(
+        PurchaseRequest,
+        id=request_id,
+        organization=request.user.organization,
+    )
+    user = request.user
+
+    # Analyse du stock (utile pour GET et pour POST des achats)
+    stock_analysis = []
+    for line in da.items.all():
+        available = line.item.stock_quantity or 0
+        to_buy = max(0, line.quantity - available)
+        stock_analysis.append({
+            "item": line.item,
+            "quantity": line.quantity,
+            "available": available,
+            "to_buy": to_buy,
+            "unit_price": line.unit_price,
+        })
+
+    # Determination des droits
+    is_achats_user = _is_achats(user)
+    is_director_user = _can_validate_da(user, da)
+
+    can_visa = (
+        (is_achats_user and da.status in ("VISEE_DIRECTEUR", "STOCK_VERIFIE")) or
+        (is_director_user and da.status == "SOUMISE")
+    )
+
+    # GET : afficher la page
+    if request.method == "GET":
+        return render(request, "da/da_visa_page.html", {
+            "da": da,
+            "stock_analysis": stock_analysis,
+            "is_achats": is_achats_user,
+            "is_director": is_director_user,
+            "can_visa": can_visa,
+        })
+
+    # POST : traiter le visa
+    approved = request.POST.get("approved") == "yes"
+    comment = request.POST.get("comment", "").strip()
+
+    try:
+        if is_achats_user and da.status in ("VISEE_DIRECTEUR", "STOCK_VERIFIE"):
+            # 1. Verifier le stock si pas encore fait
+            if da.status == "VISEE_DIRECTEUR":
+                analysis = {}
+                for line in da.items.all():
+                    analysis[str(line.item_id)] = {
+                        "available": line.item.stock_quantity or 0,
+                        "to_buy": max(0, line.quantity - (line.item.stock_quantity or 0)),
+                    }
+                workflow.verify_stock(da, actor=user, stock_analysis=analysis)
+                da.refresh_from_db()
+
+            # 2. Apposer le visa des Achats
+            workflow.visa_by_achats(da, actor=user, comment=comment, approved=approved)
+
+            if approved:
+                messages.success(
+                    request,
+                    f"Stock verifie et visa des Achats accorde pour {da.number}."
+                )
+            else:
+                messages.warning(request, f"DA {da.number} refusee par les Achats.")
+
+        elif is_director_user and da.status == "SOUMISE":
+            workflow.visa_by_director(da, actor=user, comment=comment, approved=approved)
+            if approved:
+                messages.success(request, f"Visa Directeur accorde pour {da.number}.")
+            else:
+                messages.warning(request, f"DA {da.number} refusee par le Directeur.")
+        else:
+            messages.error(
+                request,
+                f"Action impossible : statut={da.status}, "
+                f"is_achats={is_achats_user}, is_director={is_director_user}"
+            )
+            return redirect("da_detail", request_id=da.id)
+
+    except ValidationError as e:
+        messages.error(request, str(e))
+
+    return redirect("da_detail", request_id=da.id)
+
+
+def da_sign_page(request, request_id):
+    """Page de signature simplifiee pour le DG (sans OTP obligatoire pour demo)."""
+    from django.shortcuts import get_object_or_404, render, redirect
+    from django.contrib import messages
+    from django.core.exceptions import PermissionDenied
+    from apps.da.models import PurchaseRequest
+
+    da = get_object_or_404(
+        PurchaseRequest,
+        id=request_id,
+        organization=request.user.organization,
+    )
+
+    # Verification des droits
+    is_dg = getattr(request.user, "is_dg", False) or request.user.role == "ADMIN"
+    if not is_dg:
+        raise PermissionDenied("Seul le DG peut signer.")
+
+    # Verification du statut
+    if da.status not in ("VISEE_ACHATS", "STOCK_VERIFIE", "VISEE_DIRECTEUR"):
+        messages.error(request, f"Cette DA ne peut pas etre signee (statut : {da.get_status_display()}).")
+        return redirect("da_detail", request_id=da.id)
+
+    # Si c'est un POST : valider directement
+    if request.method == "POST":
+        from apps.da import workflow
+        comment = request.POST.get("comment", "").strip() or "Signature DG"
+        try:
+            workflow.validate_da(da, actor=request.user, comment=comment)
+            messages.success(request, f"DA {da.number} signee et validee avec succes !")
+            return redirect("da_detail", request_id=da.id)
+        except Exception as e:
+            messages.error(request, f"Erreur : {e}")
+            return redirect("da_detail", request_id=da.id)
+
+    # GET : afficher la page de confirmation
+    return render(request, "da/sign_confirm.html", {"da": da})
+
+
+def da_sign_verify(request, request_id):
+    """Ancienne route redirigee vers da_sign_page (compatibilite)."""
+    return da_sign_page(request, request_id)
+
+
+def da_sign_refuse(request, request_id):
+    """Refus de signature : passe la DA en REFUSEE."""
+    from django.shortcuts import get_object_or_404, redirect
+    from django.contrib import messages
+    from apps.da.models import PurchaseRequest
+    from apps.da import workflow
+
+    da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
+
+    if not (getattr(request.user, "is_dg", False) or request.user.role == "ADMIN"):
+        raise PermissionDenied("Seul le DG peut refuser.")
+
+    comment = request.POST.get("comment", "").strip() or "Refusee par le DG"
+    da.status = "REFUSEE"
+    da.rejection_reason = comment
+    da.save()
+    messages.warning(request, f"DA {da.number} refusee.")
+    return redirect("da_detail", request_id=da.id)
+
+
 def _is_achats(user):
-    """Verifie si user fait partie de la Direction des Achats."""
-    if user.role in ("ADMIN",) or user.is_dg:
+    """Verifie si l'utilisateur fait partie de la Direction des Achats."""
+    # DG et ADMIN : toujours OK
+    if getattr(user, "is_dg", False) or user.role == "ADMIN":
         return True
-    if user.service and user.service.direction.is_achats:
+
+    # Si le user est directeur des achats (direction "Achats")
+    if getattr(user, "is_director", False):
+        for direction in user.directed_directions.all():
+            if direction.is_achats or "achat" in direction.name.lower():
+                return True
+
+    # Si le service du user depend d'une direction "Achats"
+    if user.service and user.service.direction:
+        if user.service.direction.is_achats or "achat" in user.service.direction.name.lower():
+            return True
+
+    # Fallback : email contenant "achats"
+    if "achat" in user.email.lower():
         return True
+
     return False
 
 
@@ -192,13 +366,15 @@ def da_create(request):
 # ═══════════════════════════════════════════════════════════════
 @login_required
 def da_detail(request, request_id):
-    """Detail d'une DA."""
+    """Detail d'une DA avec boutons d'action selon le role."""
+    from .models import PurchaseRequest
+    from .views import _is_achats, _can_validate_da
+
     da = get_object_or_404(
         PurchaseRequest.objects.select_related("requester", "service", "validated_by"),
         id=request_id,
         organization=request.user.organization,
     )
-
     lines = da.items.select_related("item", "item__category")
     history = da.history.select_related("actor")
     signatures = da.signatures.select_related("signer")
@@ -211,19 +387,20 @@ def da_detail(request, request_id):
         da.status == "SOUMISE"
         and request.user.is_director
         and da.service
-        and da.service.direction.director_id == request.user.id
+        and da.service.direction_id in getattr(request.user, "directed_directions", type("x", (), {"values_list": lambda *a, **k: []})()).values_list("id", flat=True)
     )
-    can_verify_stock = da.status == "VISEE_DIRECTEUR" and _is_achats(request.user)
-    can_sign_dg = (
-        da.status in ("STOCK_VERIFIE", "VISEE_DIRECTEUR")
-        and request.user.is_dg
-        and da.total_amount >= getattr(settings, "DA_THRESHOLD_DG", 2_000_000)
-    )
-    can_order = da.status in ("VALIDEE", "STOCK_VERIFIE") and _is_achats(request.user)
-    can_receive = da.status in ("COMMANDEE", "RECUE_PARTIELLE") and _is_achats(request.user)
-    can_close = da.status == "RECUE" and _is_achats(request.user)
 
-    return render(request, "da/request_detail.html", {
+    # Boutons d'action par role
+    is_achats_user = _is_achats(request.user)
+    is_director_user = getattr(request.user, "is_director", False)
+    is_dg_user = getattr(request.user, "is_dg", False) or request.user.role == "ADMIN"
+
+    can_visa_director = is_director_user and da.status == "SOUMISE" and _can_validate_da(request.user, da)
+    can_visa_achats = is_achats_user and da.status in ("VISEE_DIRECTEUR", "STOCK_VERIFIE")
+    can_sign_dg = is_dg_user and da.status == "VISEE_ACHATS"
+    can_validate_dg = is_dg_user and da.status == "STOCK_VERIFIE"
+
+    context = {
         "da": da,
         "lines": lines,
         "history": history,
@@ -232,19 +409,14 @@ def da_detail(request, request_id):
         "can_edit": can_edit,
         "can_submit": can_submit,
         "can_visa": can_visa,
-        "can_verify_stock": can_verify_stock,
+        "can_visa_director": can_visa_director,
+        "can_visa_achats": can_visa_achats,
         "can_sign_dg": can_sign_dg,
-        "can_order": can_order,
-        "can_receive": can_receive,
-        "can_close": can_close,
-    })
+        "can_validate_dg": can_validate_dg,
+    }
+    return render(request, "da/request_detail.html", context)
 
 
-# ═══════════════════════════════════════════════════════════════
-# SOUMETTRE
-# ═══════════════════════════════════════════════════════════════
-@login_required
-@require_POST
 def da_submit(request, request_id):
     da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
 
@@ -265,42 +437,8 @@ def da_submit(request, request_id):
 # ═══════════════════════════════════════════════════════════════
 @login_required
 @require_POST
-def da_visa(request, request_id):
-    da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
-
-    if not _can_validate_da(request.user, da):
-        raise PermissionDenied("Vous ne pouvez pas viser cette DA.")
-
-    approved = request.POST.get("approved") == "yes"
-    comment = request.POST.get("comment", "").strip()
-
-    try:
-        if approved:
-            # Creer une signature
-            sig = create_signature(
-                purchase_request=da,
-                signer=request.user,
-                signer_role="DIRECTOR",
-                signature_level="PIN_OTP",
-                comment=comment or "Visa accorde",
-                request=request,
-                otp_verified=True,
-            )
-            workflow.visa_by_director(da, actor=request.user, comment=comment, approved=True)
-            messages.success(request, f"Visa accorde pour {da.number}.")
-        else:
-            workflow.visa_by_director(da, actor=request.user, comment=comment, approved=False)
-            messages.warning(request, f"DA {da.number} refusee.")
-    except ValidationError as e:
-        messages.error(request, str(e))
-
-    return redirect("da_detail", request_id=da.id)
 
 
-# ═══════════════════════════════════════════════════════════════
-# VERIFICATION STOCK (Direction des Achats)
-# ═══════════════════════════════════════════════════════════════
-@login_required
 def da_verify_stock(request, request_id):
     da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
 
@@ -330,114 +468,8 @@ def da_verify_stock(request, request_id):
 # SIGNATURE DG (avec OTP)
 # ═══════════════════════════════════════════════════════════════
 @login_required
-def da_sign_page(request, request_id):
-    """Page de signature pour le DG (etape 1 : envoi OTP)."""
-    da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
-
-    if not request.user.is_dg:
-        raise PermissionDenied("Seul le DG peut signer.")
-
-    if da.status not in ("STOCK_VERIFIE", "VISEE_DIRECTEUR"):
-        messages.error(request, "Cette DA n'est pas prete pour la signature.")
-        return redirect("da_detail", request_id=da.id)
-
-    flow = DASignatureFlow.objects.filter(
-        purchase_request=da, role_required="DG", status="PENDING",
-    ).first()
-
-    if not flow:
-        messages.error(request, "Aucune etape de signature DG en attente.")
-        return redirect("da_detail", request_id=da.id)
-
-    # Etape 1 : Envoyer un OTP
-    if request.method == "POST" and request.POST.get("action") == "send_otp":
-        if not request.user.phone:
-            messages.error(request, "Votre numero de telephone n'est pas renseigne.")
-            return redirect("da_sign_page", request_id=da.id)
-
-        code = generate_otp_code()
-        from django.conf import settings as _s
-        expiry = timezone.now() + timedelta(minutes=getattr(_s, "DA_OTP_EXPIRY_MINUTES", 10))
-
-        DAOtpCode.objects.create(
-            user=request.user,
-            signature_flow=flow,
-            code_hash=hash_otp_code(code),
-            sent_to=request.user.phone,
-            expires_at=expiry,
-        )
-        send_otp_sms(request.user, code)
-        messages.success(request, f"Code envoye au {request.user.phone}.")
-        return redirect("da_sign_verify", request_id=da.id)
-
-    return render(request, "da/sign_start.html", {"da": da, "flow": flow})
 
 
-@login_required
-def da_sign_verify(request, request_id):
-    """Etape 2 : saisie du code OTP + signature."""
-    da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
-
-    if not request.user.is_dg:
-        raise PermissionDenied("Seul le DG peut signer.")
-
-    flow = DASignatureFlow.objects.filter(
-        purchase_request=da, role_required="DG", status="PENDING",
-    ).first()
-
-    if not flow:
-        messages.error(request, "Aucune signature DG en attente.")
-        return redirect("da_detail", request_id=da.id)
-
-    if request.method == "POST":
-        code = request.POST.get("code", "").strip()
-        comment = request.POST.get("comment", "").strip()
-
-        otp = DAOtpCode.objects.filter(
-            user=request.user, signature_flow=flow, is_used=False,
-        ).order_by("-created_at").first()
-
-        if not otp:
-            messages.error(request, "Aucun code actif. Demandez un nouveau code.")
-            return redirect("da_sign_page", request_id=da.id)
-
-        if not otp.is_valid:
-            messages.error(request, "Code expire ou trop de tentatives.")
-            return redirect("da_sign_page", request_id=da.id)
-
-        if hash_otp_code(code) != otp.code_hash:
-            otp.attempts += 1
-            otp.save(update_fields=["attempts"])
-            messages.error(request, f"Code invalide ({otp.attempts}/{otp.max_attempts}).")
-            return redirect("da_sign_verify", request_id=da.id)
-
-        # OTP valide -> Creer la signature
-        otp.is_used = True
-        otp.used_at = timezone.now()
-        otp.save()
-
-        sig = create_signature(
-            purchase_request=da,
-            signer=request.user,
-            signer_role="DG",
-            signature_level="PIN_OTP",
-            comment=comment or "Signature DG",
-            request=request,
-            otp_verified=True,
-        )
-
-        workflow.sign_by_dg(da, actor=request.user, signature=sig, comment=comment)
-        messages.success(request, f"DA {da.number} signee et validee !")
-        return redirect("da_detail", request_id=da.id)
-
-    return render(request, "da/sign_verify.html", {"da": da, "flow": flow})
-
-
-# ═══════════════════════════════════════════════════════════════
-# COMMANDER + RECEPTION + CLOTURE
-# ═══════════════════════════════════════════════════════════════
-@login_required
-@require_POST
 def da_order(request, request_id):
     da = get_object_or_404(PurchaseRequest, id=request_id, organization=request.user.organization)
     if not _is_achats(request.user):
@@ -520,7 +552,6 @@ def da_items_catalog(request):
     })
 
 
-
 # ═══════════════════════════════════════════════════════════════
 # DOWNLOAD PDF
 # ═══════════════════════════════════════════════════════════════
@@ -555,7 +586,6 @@ def da_preview_pdf(request, request_id):
 
     pdf = generate_da_pdf(da)
     return FileResponse(pdf, content_type="application/pdf", as_attachment=False)
-
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -624,46 +654,7 @@ def da_close_page(request, request_id):
 # ═══════════════════════════════════════════════════════════════
 @login_required
 @require_POST
-def da_sign_refuse(request, request_id):
-    """Le DG refuse de signer la DA."""
-    da = get_object_or_404(
-        PurchaseRequest, id=request_id, organization=request.user.organization,
-    )
 
-    if not request.user.is_dg:
-        raise PermissionDenied("Seul le DG peut refuser.")
-
-    if da.status not in ("STOCK_VERIFIE", "VISEE_DIRECTEUR"):
-        messages.error(request, "Cette DA n'est pas en attente de signature.")
-        return redirect("da_detail", request_id=da.id)
-
-    reason = (request.POST.get("reason") or "").strip() or "Refus sans motif"
-
-    old_status = da.status
-    da.status = "REFUSEE"
-    da.rejection_reason = reason
-    da.validated_by = request.user
-    da.validated_at = timezone.now()
-    da.save(update_fields=["status", "rejection_reason", "validated_by", "validated_at", "updated_at"])
-
-    from .models import PurchaseRequestHistory
-    PurchaseRequestHistory.objects.create(
-        request=da,
-        from_status=old_status,
-        to_status="REFUSEE",
-        actor=request.user,
-        comment=f"Refus DG : {reason}",
-    )
-
-    messages.warning(request, f"DA {da.number} refusee.")
-    return redirect("da_detail", request_id=da.id)
-
-
-
-# ═══════════════════════════════════════════════════════════════
-# EXPORT EXCEL
-# ═══════════════════════════════════════════════════════════════
-@login_required
 def da_export_excel_list(request):
     """Export Excel de la liste des DA (avec filtres)."""
     from django.http import HttpResponse

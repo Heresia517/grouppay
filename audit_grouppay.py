@@ -1,4 +1,4 @@
-"""Audit GroupPay v2.1 - Complet (fonctions + champs + contraintes)."""
+"""Audit ZionPay v2.1 - Complet (fonctions + champs + contraintes)."""
 import os, sys, ast
 from pathlib import Path
 
@@ -29,7 +29,7 @@ EXCLUDE = {"venv", ".venv", "__pycache__", "migrations", ".git",
 for path in Path(".").rglob("*.py"):
     if set(path.parts) & EXCLUDE:
         continue
-    if "audit_grouppay" in str(path):
+    if "audit_zionpay" in str(path):
         continue
     FILES.add(str(path))
     try:
@@ -98,7 +98,7 @@ def warn(msg, section=None):
 
 print()
 print("=" * 72)
-print("  AUDIT GROUPPAY v2.1 - Verification PRD v2.0".center(72))
+print("  AUDIT ZIONPAY v2.1 - Verification PRD v2.0".center(72))
 print("=" * 72)
 
 # ═══════════════════════════════════════════════════════════════

@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from apps.core.post_login_views import post_login_redirect
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
@@ -73,6 +74,13 @@ router.register(r'orders', OrderViewSet, basename='order')
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+
+def admin_login_redirect(request):
+    """Redirige /admin/login/ vers le login unifie."""
+    from django.shortcuts import redirect
+    return redirect("/accounts/login/?next=/admin/")
+
+
 urlpatterns = [
     # Monitoring
     path("health/", health, name="health_check"),
@@ -84,6 +92,7 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path('admin/login/', admin_login_redirect, name='admin_login_redirect'),
     path('admin/', admin.site.urls),
     path('da/', include('apps.da.urls')),
     path('inventory/', include('apps.inventory.urls')),
@@ -227,6 +236,9 @@ urlpatterns = [
 
 
     path("accounts/", include("django.contrib.auth.urls")),
+
+    path("post-login/", post_login_redirect, name="post_login"),
+    path("orders/", include("apps.orders.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

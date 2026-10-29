@@ -296,7 +296,7 @@ write("templates/emails/order_validated.html", '''<!DOCTYPE html>
 <table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
 <tr><td style="background:linear-gradient(135deg,{{ color_primary|default:'#2563eb' }},{{ color_secondary|default:'#1e40af' }});padding:32px;color:#fff">
 <h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
-<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Achat groupé</p>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">ZionPay — Achat groupé</p>
 </td></tr>
 <tr><td style="padding:32px">
 <h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">✓ Commande validée</h2>
@@ -314,7 +314,7 @@ write("templates/emails/order_validated.html", '''<!DOCTYPE html>
 <a href="{{ order_url }}" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Voir ma commande →</a>
 </td></tr>
 <tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">
-© {% now "Y" %} GroupPay — Ne pas répondre à cet email
+© {% now "Y" %} ZionPay — Ne pas répondre à cet email
 </td></tr>
 </table>
 </td></tr></table>
@@ -328,7 +328,7 @@ write("templates/emails/order_delivered.html", '''<!DOCTYPE html>
 <table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
 <tr><td style="background:linear-gradient(135deg,#10b981,#059669);padding:32px;color:#fff">
 <h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
-<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Achat groupé</p>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">ZionPay — Achat groupé</p>
 </td></tr>
 <tr><td style="padding:32px">
 <h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">🎉 Commande livrée</h2>
@@ -340,7 +340,7 @@ write("templates/emails/order_delivered.html", '''<!DOCTYPE html>
 <a href="{{ order_url }}" style="display:inline-block;background:#10b981;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Voir le détail →</a>
 </td></tr>
 <tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">
-© {% now "Y" %} GroupPay
+© {% now "Y" %} ZionPay
 </td></tr>
 </table>
 </td></tr></table>
@@ -362,7 +362,7 @@ def send_email(recipient_email, subject, template_name, context):
     try:
         html = render_to_string(template_name, context)
         text = strip_tags(html)
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "GroupPay <noreply@grouppay.app>")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "ZionPay <noreply@zionpay.app>")
         msg = EmailMultiAlternatives(subject, text, from_email, [recipient_email])
         msg.attach_alternative(html, "text/html")
         msg.send(fail_silently=True)
@@ -452,7 +452,7 @@ if "SITE_URL" not in src:
 # EMAIL & SITE
 # ============================================================
 SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="GroupPay <noreply@grouppay.app>")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="ZionPay <noreply@zionpay.app>")
 
 # Dev = console, prod = SMTP
 if DEBUG:

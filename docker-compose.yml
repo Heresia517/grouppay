@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: grouppay
-      POSTGRES_USER: grouppay
-      POSTGRES_PASSWORD: grouppay
+      POSTGRES_DB: zionpay
+      POSTGRES_USER: zionpay
+      POSTGRES_PASSWORD: zionpay
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -25,7 +25,7 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
-      DATABASE_URL: postgres://grouppay:grouppay@db:5432/grouppay
+      DATABASE_URL: postgres://zionpay:zionpay@db:5432/zionpay
       REDIS_URL: redis://redis:6379/2
       CELERY_BROKER_URL: redis://redis:6379/0
     depends_on:
@@ -39,7 +39,7 @@ services:
       - .:/app
     env_file: .env
     environment:
-      DATABASE_URL: postgres://grouppay:grouppay@db:5432/grouppay
+      DATABASE_URL: postgres://zionpay:zionpay@db:5432/zionpay
       CELERY_BROKER_URL: redis://redis:6379/0
     depends_on:
       - db

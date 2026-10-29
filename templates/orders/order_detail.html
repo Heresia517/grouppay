@@ -154,3 +154,17 @@
     </div>
 </div>
 {% endblock %}
+
+<div style="margin: 16px 0; padding: 16px; background: #eff6ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+  <p style="margin: 0 0 8px; font-weight: 600; color: #1e40af;">📄 Bon de commande administratif</p>
+  <p style="margin: 0 0 12px; font-size: 13px; color: #475569;">
+    Document officiel avec références, montants FCFA et signatures hiérarchiques.
+  </p>
+  <a href="{% url 'orders:bon_commande_pdf' order.pk %}"
+     target="_blank"
+     style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+            background: #2563eb; color: white; border-radius: 6px;
+            text-decoration: none; font-weight: 500;">
+    📥 Télécharger le bon de commande
+  </a>
+</div>

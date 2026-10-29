@@ -29,5 +29,5 @@ class SyncConfig(AppConfig):
                         pass
                     time.sleep(120)
 
-            t = threading.Thread(target=_loop, daemon=True, name="grouppay-sync")
+            t = threading.Thread(target=_loop, daemon=True, name="zionpay-sync")
             t.start()

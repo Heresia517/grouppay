@@ -93,7 +93,7 @@ def notify_da_submitted(purchase_request, director):
     )
     _send_sms(
         director,
-        f"GroupPay: DA {purchase_request.number} a viser. {ctx['da_amount']} {ctx['da_currency']}",
+        f"ZionPay: DA {purchase_request.number} a viser. {ctx['da_amount']} {ctx['da_currency']}",
     )
 
 
@@ -120,7 +120,7 @@ def notify_da_visa_approved(purchase_request, achats_director):
         )
         _send_sms(
             achats_director,
-            f"GroupPay: DA {purchase_request.number} a verifier (stock).",
+            f"ZionPay: DA {purchase_request.number} a verifier (stock).",
         )
 
     # Demandeur
@@ -161,7 +161,7 @@ def notify_da_rejected(purchase_request, reason, rejected_by=None):
     )
     _send_sms(
         purchase_request.requester,
-        f"GroupPay: DA {purchase_request.number} REFUSEE. Motif: {reason[:60]}",
+        f"ZionPay: DA {purchase_request.number} REFUSEE. Motif: {reason[:60]}",
     )
 
 
@@ -187,7 +187,7 @@ def notify_da_stock_verified(purchase_request, dg=None, needs_purchase=False):
         )
         _send_sms(
             dg,
-            f"GroupPay: DA {purchase_request.number} a signer ({ctx['da_amount']} {ctx['da_currency']})",
+            f"ZionPay: DA {purchase_request.number} a signer ({ctx['da_amount']} {ctx['da_currency']})",
         )
     else:
         _notify_in_app(
@@ -219,7 +219,7 @@ def notify_da_validated(purchase_request, achats_director=None):
     )
     _send_sms(
         purchase_request.requester,
-        f"GroupPay: DA {purchase_request.number} VALIDEE par le DG.",
+        f"ZionPay: DA {purchase_request.number} VALIDEE par le DG.",
     )
 
     if achats_director:
@@ -274,7 +274,7 @@ def notify_da_received(purchase_request):
     )
     _send_sms(
         purchase_request.requester,
-        f"GroupPay: DA {purchase_request.number} receptionnee. Retrait au magasin.",
+        f"ZionPay: DA {purchase_request.number} receptionnee. Retrait au magasin.",
     )
 
 

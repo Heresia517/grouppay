@@ -2,7 +2,7 @@
 from .helpers import is_internal_staff, is_member
 
 
-def grouppay_context(request):
+def zionpay_context(request):
     """Ajoute des variables globales a tous les templates."""
     user = request.user
 

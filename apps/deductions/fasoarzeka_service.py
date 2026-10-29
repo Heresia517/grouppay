@@ -50,7 +50,7 @@ class FasoArzekaClient:
                 "first_name": prenom,
                 "last_name": nom,
                 "mobile": mobile,
-                "paymentDescription": description or f"Paiement GroupPay {reference}",
+                "paymentDescription": description or f"Paiement ZionPay {reference}",
             },
             "mapped_order_id": reference,
             "hash_secret": self.hash_secret,

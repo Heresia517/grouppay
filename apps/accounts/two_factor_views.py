@@ -37,7 +37,7 @@ def two_factor_setup(request):
     unconfirmed = TOTPDevice.objects.filter(user=user, confirmed=False).first()
     if not unconfirmed:
         unconfirmed = TOTPDevice.objects.create(
-            user=user, name="GroupPay", confirmed=False,
+            user=user, name="ZionPay", confirmed=False,
         )
 
     # Générer QR code

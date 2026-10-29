@@ -78,7 +78,7 @@ async function refreshSub() {
 
 async function step1_checkSupport() {
     console.log('=== STEP 1: SUPPORT ===');
-    const r = await GroupPayPush.checkSupport();
+    const r = await ZionPayPush.checkSupport();
     setStatus(r.ok ? '✓ Navigateur compatible' : 'XX Non supporte', r.ok ? 'success' : 'error');
     console.log(r);
 }
@@ -96,7 +96,7 @@ async function step2_fixSW() {
         for (const k of caches_keys) {
             await caches.delete(k);
         }
-        const result = await GroupPayPush.ensureServiceWorker();
+        const result = await ZionPayPush.ensureServiceWorker();
         if (result.ok) {
             setStatus('✓ SW reset OK - scope: ' + result.registration.scope, 'success');
         } else {
@@ -111,7 +111,7 @@ async function step2_fixSW() {
 async function step3_subscribe() {
     console.log('=== STEP 3: SUBSCRIBE ===');
     setStatus('Abonnement en cours...', 'info');
-    const r = await GroupPayPush.subscribe();
+    const r = await ZionPayPush.subscribe();
     console.log('Result:', r);
     if (r.ok) {
         setStatus('✓ ABONNE avec succes !', 'success');
@@ -147,8 +147,8 @@ function getCookie(name) {
 
 window.addEventListener('load', async () => {
     console.log('=== /push/ CHARGE ===');
-    if (typeof GroupPayPush === 'undefined') {
-        setStatus('XX GroupPayPush non charge - Ctrl+Shift+R', 'error');
+    if (typeof ZionPayPush === 'undefined') {
+        setStatus('XX ZionPayPush non charge - Ctrl+Shift+R', 'error');
     } else {
         setStatus('Page chargee - clique sur 2 (Reset SW)', 'info');
     }

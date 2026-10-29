@@ -418,3 +418,62 @@ def remove_coupon(request):
     if request.headers.get("HX-Request"):
         return _render_cart_page(request)
     return redirect("view_cart")
+
+
+# ============================================================
+# BON DE COMMANDE ADMINISTRATIF — ZionPay
+# ============================================================
+import logging
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponse, Http404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.urls import reverse
+
+logger = logging.getLogger(__name__)
+
+
+@login_required
+def order_bon_commande_pdf(request, order_id):
+    """Génère le PDF du bon de commande administratif."""
+    from apps.orders.models import Order
+
+    order = get_object_or_404(Order, pk=order_id)
+
+    # Permissions : propriétaire, org user, ou staff
+    user = request.user
+    if not (
+        getattr(user, "is_staff", False)
+        or getattr(order, "organization_id", None) == getattr(user, "organization_id", None)
+        or getattr(order, "user_id", None) == user.pk
+    ):
+        raise Http404("Commande introuvable")
+
+    # Modules activés ?
+    org = getattr(order, "organization", None)
+    modules = getattr(org, "modules_enabled", []) if org else []
+    if org and "bon_commande" not in (modules or []):
+        messages.warning(request, "Module 'bon de commande' non activé pour cette organisation.")
+        return redirect(request.META.get("HTTP_REFERER") or "/")
+
+    # Rendu HTML
+    html = render_to_string(
+        "bon_commande_administratif.html",
+        {"order": order, "now": timezone.now()},
+        request=request,
+    )
+
+    # WeasyPrint si dispo, sinon HTML en fallback
+    try:
+        from weasyprint import HTML
+        pdf = HTML(string=html, base_url=request.build_absolute_uri("/")).write_pdf()
+        resp = HttpResponse(pdf, content_type="application/pdf")
+        resp["Content-Disposition"] = f'inline; filename="bon-commande-{order.pk}.pdf"'
+        return resp
+    except ImportError:
+        logger.warning("WeasyPrint non installé — fallback HTML")
+        resp = HttpResponse(html)
+        resp["Content-Type"] = "text/html; charset=utf-8"
+        return resp

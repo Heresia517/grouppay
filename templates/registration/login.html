@@ -3,62 +3,105 @@
 
 {% block content %}
 <div class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-    
+  <div class="max-w-lg w-full space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+
+    {# Logo + Titre #}
     <div class="text-center">
-      <div class="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-sm mb-4"
+      <div class="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg mb-4"
            style="background: linear-gradient(135deg, #2563eb, #1e40af);">
         G
       </div>
-      <h2 class="text-2xl font-bold text-slate-900">Connexion à GroupPay</h2>
-      <p class="mt-2 text-sm text-slate-500">Accédez à votre espace sécurisé</p>
+      <h2 class="text-2xl font-bold text-slate-900">Connexion à ZionPay</h2>
+      <p class="mt-2 text-sm text-slate-500">Un seul compte pour toute la plateforme</p>
     </div>
 
+    {# Messages d'erreur #}
     {% if form.errors %}
     <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-      <p class="text-sm text-red-700 font-medium">Identifiants incorrects.</p>
+      <p class="text-sm text-red-700 font-medium">
+        Identifiants incorrects. Vérifiez votre email et mot de passe.
+      </p>
     </div>
     {% endif %}
 
-    <form class="mt-8 space-y-6" method="post" action="{% url 'login' %}">
+    {# Formulaire principal #}
+    <form class="space-y-5" method="post" action="{% url 'login' %}">
       {% csrf_token %}
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Adresse email</label>
-          <input name="username" type="email" required class="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="votre@email.com" value="{{ form.username.value|default:'' }}">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Mot de passe</label>
-          <input name="password" type="password" required class="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
-        </div>
+
+      <div>
+        <label for="id_username" class="block text-sm font-medium text-slate-700 mb-2">Adresse email</label>
+        <input id="id_username" name="username" type="email" autocomplete="email" required
+               class="w-full px-4 py-3 border border-slate-300 rounded-xl placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               placeholder="votre@email.com"
+               value="{{ form.username.value|default:'' }}">
       </div>
-      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-      <button type="submit" class="w-full py-3 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition-colors">
+
+      <div>
+        <label for="id_password" class="block text-sm font-medium text-slate-700 mb-2">Mot de passe</label>
+        <input id="id_password" name="password" type="password" autocomplete="current-password" required
+               class="w-full px-4 py-3 border border-slate-300 rounded-xl placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               placeholder="••••••••">
+      </div>
+
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <button type="submit"
+              class="w-full py-3.5 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
         Se connecter
       </button>
     </form>
 
-    <div class="mt-6 border-t border-slate-100 pt-5">
-      <p class="text-xs text-center text-slate-400 mb-3 uppercase tracking-wider font-semibold">Comptes de démonstration</p>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-          <span class="block font-bold text-slate-700">Admin</span>
-          <span class="text-slate-500">admin@sonabel-demo.com</span>
-        </div>
-        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-          <span class="block font-bold text-slate-700">Membre</span>
-          <span class="text-slate-500">membre1@sonabel-demo.com</span>
-        </div>
-        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-          <span class="block font-bold text-slate-700">Chef</span>
-          <span class="text-slate-500">chef.maint@sonabel-demo.com</span>
-        </div>
-        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-center">
-          <span class="block font-bold text-slate-700">RH</span>
-          <span class="text-slate-500">rh@sonabel-demo.com</span>
-        </div>
+    {# SEPARATEUR #}
+    <div class="relative">
+      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+      <div class="relative flex justify-center text-sm">
+        <span class="px-3 bg-white text-slate-400 font-medium">Accès rapide (Démo)</span>
       </div>
     </div>
+
+    {# BOUTONS DE SWITCH RAPIDE #}
+    <div class="grid grid-cols-2 gap-3">
+      <button type="button" onclick="quickLogin('membre1@sonabel-demo.com', 'membre123')"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition border border-blue-200 text-sm font-medium">
+        👤 Membre
+      </button>
+      <button type="button" onclick="quickLogin('rh@sonabel-demo.com', 'rh123')"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition border border-emerald-200 text-sm font-medium">
+        👥 RH
+      </button>
+      <button type="button" onclick="quickLogin('livreur1@sonabel-demo.com', 'livreur123')"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition border border-amber-200 text-sm font-medium">
+        🚚 Livreur
+      </button>
+      <button type="button" onclick="quickLogin('chef.maint@sonabel-demo.com', 'chef123')"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-50 text-purple-700 rounded-xl hover:bg-purple-100 transition border border-purple-200 text-sm font-medium">
+        👔 Chef
+      </button>
+      <button type="button" onclick="quickLogin('dir.tech@sonabel-demo.com', 'dir123')"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition border border-indigo-200 text-sm font-medium">
+        🎯 Directeur
+      </button>
+      <button type="button" onclick="quickLogin('admin@sonabel-demo.com', 'admin123')"
+              class="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition border border-red-200 text-sm font-medium">
+        ⚙️ Admin
+      </button>
+    </div>
+
+    <p class="text-center text-xs text-slate-400">
+      Cliquez sur un rôle pour vous connecter instantanément
+    </p>
+
   </div>
 </div>
+
+<script>
+function quickLogin(email, password) {
+    // Remplir le formulaire et soumettre
+    document.getElementById('id_username').value = email;
+    document.getElementById('id_password').value = password;
+    document.querySelector('form').submit();
+}
+</script>
 {% endblock %}

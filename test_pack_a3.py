@@ -88,7 +88,7 @@ except Exception as e:
 h2("1.3 send_sms() fonctionne (mode console)")
 try:
     from apps.notifications.sms_service import send_sms
-    result = send_sms("+22670000000", "Test GroupPay SMS")
+    result = send_sms("+22670000000", "Test ZionPay SMS")
     if result is True:
         ok("send_sms() retourne True (mode console)")
     else:

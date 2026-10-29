@@ -96,7 +96,7 @@ def test_push(request):
 
     sent = send_push_to_user(
         request.user,
-        title="GroupPay",
+        title="ZionPay",
         body="Les notifications push fonctionnent !",
         url="/",
     )

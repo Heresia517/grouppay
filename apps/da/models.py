@@ -97,6 +97,7 @@ class PurchaseRequest(TenantModel):
         ("BROUILLON", "Brouillon"),
         ("SOUMISE", "Soumise"),
         ("VISEE_DIRECTEUR", "Visee par Directeur"),
+        ("VISEE_ACHATS", "Visée par les Achats"),
         ("VISEE_CHEF", "Visee par Chef de service"),
         ("STOCK_VERIFIE", "Stock verifie par Achats"),
         ("VALIDEE", "Validee"),

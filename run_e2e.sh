@@ -3,7 +3,7 @@
 # Prerequis : serveur Django deja lance sur http://127.0.0.1:8000
 
 echo "============================================================"
-echo "  GROUPPAY E2E TESTS"
+echo "  ZIONPAY E2E TESTS"
 echo "============================================================"
 echo ""
 

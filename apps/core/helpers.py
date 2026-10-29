@@ -1,4 +1,4 @@
-"""Helpers globaux GroupPay."""
+"""Helpers globaux ZionPay."""
 
 
 def is_internal_staff(user):

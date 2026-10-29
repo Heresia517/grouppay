@@ -3672,7 +3672,7 @@
     "get_referral_stats",
     "get_session",
     "get_user_totp_device",
-    "grouppay_context",
+    "zionpay_context",
     "h1",
     "h2",
     "handle",

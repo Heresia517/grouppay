@@ -1,4 +1,4 @@
-/* Composants GroupPay */
+/* Composants ZionPay */
 
 /* Boutons */
 .gp-btn {
@@ -180,3 +180,16 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ===== ZionPay — barre de progression (anti-fuite) ===== */
+.htmx-request .htmx-indicator,
+.htmx-indicator.htmx-request { display: inline-block; }
+.htmx-indicator:not(.htmx-request):not(.htmx-request *) { display: none !important; }
+
+/* NProgress / barres génériques qui restent coincées */
+.progress-bar:not(.active),
+#nprogress .bar:not(.active),
+.loading-bar:not(.active) { display: none !important; opacity: 0 !important; }
+
+/* Fallback : si une barre avec width:100% traîne sans transition */
+.progress:not([data-active]):not(.htmx-request) { height: 0 !important; overflow: hidden; }

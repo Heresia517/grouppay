@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load fcfa %}
+
+{% block content %}
+<div class="p-6 max-w-3xl mx-auto">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">Signature finale du DG</h1>
+    <p class="text-sm text-slate-500 mt-1">DA {{ da.number }}</p>
+  </div>
+
+  {# Recapitulatif de la DA #}
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div>
+        <div class="text-xs text-slate-500 uppercase font-semibold">Demandeur</div>
+        <div class="font-medium">{{ da.requester.first_name }} {{ da.requester.last_name }}</div>
+        <div class="text-sm text-slate-500">{{ da.requester.email }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-slate-500 uppercase font-semibold">Service</div>
+        <div class="font-medium">{{ da.service.name|default:"—" }}</div>
+      </div>
+    </div>
+    <div class="mb-4">
+      <div class="text-xs text-slate-500 uppercase font-semibold">Objet</div>
+      <div class="text-slate-700">{{ da.purpose }}</div>
+    </div>
+    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+      <div class="flex items-center justify-between">
+        <span class="text-indigo-800 font-medium">Montant total a valider</span>
+        <span class="text-2xl font-bold text-indigo-900">{{ da.total_amount|fcfa }}</span>
+      </div>
+    </div>
+  </div>
+
+  {# Articles #}
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+    <h2 class="font-semibold text-slate-700 mb-3">Articles demandes</h2>
+    <table class="w-full text-sm">
+      <thead class="text-xs text-slate-500 border-b">
+        <tr>
+          <th class="text-left py-2">Article</th>
+          <th class="text-center">Qte</th>
+          <th class="text-right">P.U.</th>
+          <th class="text-right">Sous-total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in da.items.all %}
+        <tr class="border-b border-slate-100 last:border-0">
+          <td class="py-2">{{ line.item.name }}</td>
+          <td class="text-center">{{ line.quantity }}</td>
+          <td class="text-right">{{ line.unit_price|fcfa }}</td>
+          <td class="text-right font-medium">{{ line.subtotal|fcfa }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Formulaire de signature #}
+  <div class="bg-white rounded-xl shadow-sm border border-indigo-300 p-6">
+    <h2 class="font-semibold text-indigo-900 mb-3">Validation finale</h2>
+    <p class="text-sm text-slate-600 mb-4">
+      En signant, vous validez definitivement cette demande d'achat. Le bon de commande sera genere automatiquement.
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Commentaire (optionnel)</label>
+        <textarea name="comment" rows="2"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Valide, bon pour commande..."></textarea>
+      </div>
+      <div class="flex gap-3">
+        <button type="submit"
+                class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
+          ✍️ Signer et valider
+        </button>
+        <a href="{% url 'da_detail' da.id %}"
+           class="flex-1 text-center bg-slate-100 text-slate-700 px-6 py-3 rounded-lg font-medium hover:bg-slate-200 transition">
+          Annuler
+        </a>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

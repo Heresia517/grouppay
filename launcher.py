@@ -1,4 +1,4 @@
-"""Launcher GroupPay Desktop — démarre Django + ouvre une fenêtre native."""
+"""Launcher ZionPay Desktop — démarre Django + ouvre une fenêtre native."""
 import os
 import socket
 import sys
@@ -7,7 +7,7 @@ import time
 import urllib.request
 
 # Forcer le mode desktop AVANT d'importer Django
-os.environ.setdefault("GROUPPAY_MODE", "desktop")
+os.environ.setdefault("ZIONPAY_MODE", "desktop")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.base")
 
 
@@ -45,7 +45,7 @@ def main():
     url = f"http://127.0.0.1:{port}"
     try:
         import webview
-        webview.create_window("GroupPay", url, width=1280, height=820)
+        webview.create_window("ZionPay", url, width=1280, height=820)
         webview.start()
     except ImportError:
         import webbrowser

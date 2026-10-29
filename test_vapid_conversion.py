@@ -37,7 +37,7 @@ try:
     print(f"    Type : {type(vapid_obj).__name__}")
 
     # Recuperer l'email claims
-    claims = {"sub": "mailto:admin@grouppay.app"}
+    claims = {"sub": "mailto:admin@zionpay.app"}
     print(f"  OK Claims : {claims}")
 
 except Exception as e:

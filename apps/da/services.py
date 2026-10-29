@@ -92,7 +92,7 @@ def generate_visual_signature(signer, signer_role, signed_at, signature_hash):
     draw.text((20, y), "Empreinte :", fill=(100, 116, 139), font=font_small)
     draw.text((130, y), signature_hash[:32] + "...", fill=(37, 99, 235), font=font_mono)
 
-    draw.text((20, H - 25), "Verifiable sur GroupPay — Document signe",
+    draw.text((20, H - 25), "Verifiable sur ZionPay — Document signe",
               fill=(148, 163, 184), font=font_small)
 
     buf = io.BytesIO()
@@ -143,7 +143,7 @@ def send_otp_sms(user, code):
         return False, "Numero non renseigne"
 
     message = (
-        f"GroupPay: votre code de signature est {code}. "
+        f"ZionPay: votre code de signature est {code}. "
         f"Valable 10 minutes. Ne le partagez avec personne."
     )
     success = send_sms(user.phone, message)

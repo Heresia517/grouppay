@@ -12,9 +12,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: grouppay_test
-          POSTGRES_USER: grouppay
-          POSTGRES_PASSWORD: grouppay
+          POSTGRES_DB: zionpay_test
+          POSTGRES_USER: zionpay
+          POSTGRES_PASSWORD: zionpay
         ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready
@@ -41,25 +41,25 @@ jobs:
       - name: Django check
         env:
           SECRET_KEY: test-key
-          DATABASE_URL: postgres://grouppay:grouppay@localhost:5432/grouppay_test
+          DATABASE_URL: postgres://zionpay:zionpay@localhost:5432/zionpay_test
         run: python manage.py check
 
       - name: Run tests
         env:
           SECRET_KEY: test-key
-          DATABASE_URL: postgres://grouppay:grouppay@localhost:5432/grouppay_test
+          DATABASE_URL: postgres://zionpay:zionpay@localhost:5432/zionpay_test
         run: pytest tests/ -v --tb=short
 
       - name: Audit score
         env:
           SECRET_KEY: test-key
-        run: python audit_grouppay.py || true
+        run: python audit_zionpay.py || true
 
-      - name: GroupPay PRD compliance audit
+      - name: ZionPay PRD compliance audit
         env:
           DJANGO_SETTINGS_MODULE: config.settings.dev
         run: |
-          python audit_grouppay_v2.py | tee audit_output.txt
+          python audit_zionpay_v2.py | tee audit_output.txt
           if ! grep -q "SCORE GLOBAL : 100.0%" audit_output.txt; then
             echo "❌ Régression de conformité PRD détectée"
             grep "XX" audit_output.txt || true

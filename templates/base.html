@@ -17,7 +17,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ organization.name }} — GroupPay{% endblock %}</title>
+    <title>{% block title %}{{ organization.name }} — ZionPay{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -188,7 +188,7 @@
         *:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; border-radius: 4px; }
     </style>
 
-    <!-- GroupPay Design System -->
+    <!-- ZionPay Design System -->
     <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
 
@@ -319,7 +319,7 @@
         }
 
         // ─── WebSocket : notifications temps réel ───
-        window.GroupPayWS = (function() {
+        window.ZionPayWS = (function() {
             let ws = null;
             let reconnectDelay = 1000;
             const listeners = [];
@@ -356,8 +356,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Init seulement si user authentifié (la cloche existe)
             if (document.querySelector('[x-data*="notifBell"]')) {
-                window.GroupPayWS.init();
-                window.GroupPayWS.onMessage((data) => {
+                window.ZionPayWS.init();
+                window.ZionPayWS.onMessage((data) => {
                     // Mettre à jour le badge + afficher toast + recharger la liste si ouverte
                     const badge = document.querySelector('[x-data*="notifBell"] .bg-red-500');
                     if (badge) {
@@ -383,7 +383,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-bold text-sm">Installer GroupPay</p>
+                    <p class="font-bold text-sm">Installer ZionPay</p>
                     <p class="text-xs text-slate-300 mt-0.5">Accédez à vos commandes depuis l'écran d'accueil, même hors connexion.</p>
                     <div class="flex gap-2 mt-3">
                         <button id="gp-pwa-install" class="px-4 py-2 rounded-lg bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 transition">
@@ -445,11 +445,24 @@
         })();
     </script>
 
-    <!-- GroupPay Push (cache-bust v3) -->
+    <!-- ZionPay Push (cache-bust v3) -->
     <script src="{% static 'js/push.js' %}?v=5"></script>
 
     {% block extra_js %}{% endblock %}
 
 </div>
+<script id="zionpay-progress-fix">
+document.addEventListener('DOMContentLoaded', () => {
+  // Reset barres de chargement coincées
+  const reset = () => {
+    document.querySelectorAll('.progress-bar, .loading-bar, #nprogress .bar')
+      .forEach(el => { el.style.display = 'none'; el.style.opacity = 0; });
+  };
+  reset();
+  // Après chaque requête HTMX
+  document.body.addEventListener('htmx:afterRequest', reset);
+  document.body.addEventListener('htmx:afterSettle', reset);
+});
+</script>
 </body>
 </html>

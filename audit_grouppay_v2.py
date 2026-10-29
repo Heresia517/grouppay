@@ -1,4 +1,4 @@
-"""Audit GroupPay v2.0 — Vérification PRD v2.0 + Inventaire exhaustif du projet."""
+"""Audit ZionPay v2.0 — Vérification PRD v2.0 + Inventaire exhaustif du projet."""
 import os, sys, ast, json
 from pathlib import Path
 from datetime import datetime
@@ -35,7 +35,7 @@ total_lines = 0
 
 for p in Path(".").rglob("*.py"):
     if set(p.parts) & EXCLUDE: continue
-    if "audit_grouppay" in str(p): continue
+    if "audit_zionpay" in str(p): continue
     FILES.add(str(p))
     try:
         src = p.read_text(encoding="utf-8")
@@ -123,7 +123,7 @@ def warn(m, section=None):
 
 
 print("\n" + "╔" + "═" * 70 + "╗")
-print("║" + " AUDIT GROUPPAY v2.0 — VERIFICATION + INVENTAIRE ".center(70) + "║")
+print("║" + " AUDIT ZIONPAY v2.0 — VERIFICATION + INVENTAIRE ".center(70) + "║")
 print("╚" + "═" * 70 + "╝")
 
 # ═══════════════════════════════════════════════════════════════
@@ -726,7 +726,7 @@ print(f"  ✓ {json_path} écrit ({json_path.stat().st_size // 1024} Ko)")
 
 # Markdown
 md = []
-md.append(f"# Inventaire GroupPay v2.0 — {inventory['timestamp']}\n")
+md.append(f"# Inventaire ZionPay v2.0 — {inventory['timestamp']}\n")
 md.append(f"**Score global PRD : {global_score:.1f}%**  ")
 md.append(f"**{results['passed']} OK / {results['failed']} échecs / {results['warned']} warnings**\n")
 

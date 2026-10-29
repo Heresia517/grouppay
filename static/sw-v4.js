@@ -1,5 +1,5 @@
-/* GroupPay Service Worker */
-const CACHE_NAME = "grouppay-v1";
+/* ZionPay Service Worker */
+const CACHE_NAME = "zionpay-v1";
 const OFFLINE_URLS = ["/", "/static/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -45,10 +45,10 @@ self.addEventListener('push', (event) => {
     try {
         data = event.data ? event.data.json() : {};
     } catch (e) {
-        data = { title: 'GroupPay', body: event.data ? event.data.text() : '' };
+        data = { title: 'ZionPay', body: event.data ? event.data.text() : '' };
     }
 
-    const title = data.title || 'GroupPay';
+    const title = data.title || 'ZionPay';
     const options = {
         body: data.body || '',
         icon: data.icon || '/static/img/icon-192.svg',
@@ -56,7 +56,7 @@ self.addEventListener('push', (event) => {
         data: { url: data.url || '/' },
         vibrate: [100, 50, 100],
         requireInteraction: false,
-        tag: data.tag || 'grouppay-notification',
+        tag: data.tag || 'zionpay-notification',
     };
 
     event.waitUntil(self.registration.showNotification(title, options));

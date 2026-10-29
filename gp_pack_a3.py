@@ -60,7 +60,7 @@ def send_order_validated_sms(order):
     phone = getattr(order.member, "phone", "") or ""
     if not phone:
         return False
-    msg = f"GroupPay: commande {order.order_number} VALIDEE ({order.total_amount} {order.currency_code})."
+    msg = f"ZionPay: commande {order.order_number} VALIDEE ({order.total_amount} {order.currency_code})."
     return send_sms(phone, msg)
 
 
@@ -69,7 +69,7 @@ def send_order_delivered_sms(order):
     phone = getattr(order.member, "phone", "") or ""
     if not phone:
         return False
-    msg = f"GroupPay: commande {order.order_number} LIVREE. Merci !"
+    msg = f"ZionPay: commande {order.order_number} LIVREE. Merci !"
     return send_sms(phone, msg)
 
 
@@ -78,7 +78,7 @@ def send_order_rejected_sms(order, reason=""):
     phone = getattr(order.member, "phone", "") or ""
     if not phone:
         return False
-    msg = f"GroupPay: commande {order.order_number} REFUSEE. Motif: {reason[:80]}"
+    msg = f"ZionPay: commande {order.order_number} REFUSEE. Motif: {reason[:80]}"
     return send_sms(phone, msg)
 ''', "apps/notifications/sms_service.py")
 
@@ -92,7 +92,7 @@ write("templates/emails/order_rejected.html", '''<!DOCTYPE html>
 <table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
 <tr><td style="background:linear-gradient(135deg,#ef4444,#dc2626);padding:32px;color:#fff">
 <h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
-<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Achat groupé</p>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">ZionPay — Achat groupé</p>
 </td></tr>
 <tr><td style="padding:32px">
 <h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">Commande refusée</h2>
@@ -107,7 +107,7 @@ write("templates/emails/order_rejected.html", '''<!DOCTYPE html>
 </div>
 <a href="{{ order_url }}" style="display:inline-block;background:#0f172a;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Voir la commande →</a>
 </td></tr>
-<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">© {% now "Y" %} GroupPay</td></tr>
+<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">© {% now "Y" %} ZionPay</td></tr>
 </table>
 </td></tr></table>
 </body></html>
@@ -120,7 +120,7 @@ write("templates/emails/order_shipping.html", '''<!DOCTYPE html>
 <table width="560" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
 <tr><td style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:32px;color:#fff">
 <h1 style="margin:0;font-size:24px;font-weight:800">{{ organization.name }}</h1>
-<p style="margin:8px 0 0;opacity:.9;font-size:14px">GroupPay — Achat groupé</p>
+<p style="margin:8px 0 0;opacity:.9;font-size:14px">ZionPay — Achat groupé</p>
 </td></tr>
 <tr><td style="padding:32px">
 <h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">🚚 En cours de livraison</h2>
@@ -131,7 +131,7 @@ write("templates/emails/order_shipping.html", '''<!DOCTYPE html>
 </div>
 <a href="{{ order_url }}" style="display:inline-block;background:#8b5cf6;color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px">Suivre la livraison →</a>
 </td></tr>
-<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">© {% now "Y" %} GroupPay</td></tr>
+<tr><td style="padding:24px;background:#f8fafc;text-align:center;font-size:12px;color:#94a3b8">© {% now "Y" %} ZionPay</td></tr>
 </table>
 </td></tr></table>
 </body></html>

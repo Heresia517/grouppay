@@ -11,11 +11,11 @@ import os as _os
 import sys as _sys
 
 _is_frozen = getattr(_sys, "frozen", False)
-_mode = _os.environ.get("GROUPPAY_MODE", "").lower()
+_mode = _os.environ.get("ZIONPAY_MODE", "").lower()
 _has_db_url = bool(_os.environ.get("DATABASE_URL", "").strip())
 
-# Mode desktop par defaut (dev local, SQLite, ~/.grouppay/)
-# Mode serveur si : GROUPPAY_MODE=server OU DATABASE_URL defini (Render, prod)
+# Mode desktop par defaut (dev local, SQLite, ~/.zionpay/)
+# Mode serveur si : ZIONPAY_MODE=server OU DATABASE_URL defini (Render, prod)
 if _is_frozen:
     IS_DESKTOP = True
 elif _mode == "server":
@@ -33,7 +33,7 @@ else:
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Dossier de données utilisateur (survit à une réinstallation)
-DATA_DIR = Path.home() / '.grouppay'
+DATA_DIR = Path.home() / '.zionpay'
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -111,6 +111,7 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.core.middleware.OrganizationActiveMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -125,7 +126,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'apps.core.context_processors.grouppay_context',
+                'apps.core.context_processors.zionpay_context',
             ],
         },
     },
@@ -141,7 +142,7 @@ if IS_DESKTOP:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': DATA_DIR / 'grouppay.db',
+            'NAME': DATA_DIR / 'zionpay.db',
             'OPTIONS': {
                 'timeout': 30,
                 'init_command': '''
@@ -157,8 +158,8 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': env('DB_NAME', default='grouppay'),
-            'USER': env('DB_USER', default='grouppay'),
+            'NAME': env('DB_NAME', default='zionpay'),
+            'USER': env('DB_USER', default='zionpay'),
             'PASSWORD': env('DB_PASSWORD', default=''),
             'HOST': env('DB_HOST', default='localhost'),
             'PORT': env('DB_PORT', default='5432'),
@@ -259,7 +260,7 @@ CELERY_BEAT_SCHEDULE = {
 
 # --- OpenAPI / Swagger ---
 SPECTACULAR_SETTINGS = {
-    "TITLE": "GroupPay API",
+    "TITLE": "ZionPay API",
     "DESCRIPTION": "Plateforme d'achat groupé sur retenue salariale",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -301,7 +302,7 @@ if IS_DESKTOP:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "grouppay-desktop",
+            "LOCATION": "zionpay-desktop",
         }
     }
 else:
@@ -317,7 +318,7 @@ else:
 # EMAIL & SITE
 # ============================================================
 SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="GroupPay <noreply@grouppay.app>")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="ZionPay <noreply@zionpay.app>")
 
 # Dev = console, prod = SMTP
 if DEBUG:
@@ -341,7 +342,7 @@ AFRICASTALKING_API_KEY = env("AFRICASTALKING_API_KEY", default="")
 # ============================================================
 # 2FA (django-otp)
 # ============================================================
-OTP_TOTP_ISSUER = env("OTP_TOTP_ISSUER", default="GroupPay")
+OTP_TOTP_ISSUER = env("OTP_TOTP_ISSUER", default="ZionPay")
 OTP_LOGIN_URL = "/accounts/2fa/verify/"
 
 
@@ -369,7 +370,7 @@ REFERRAL_REWARD_AMOUNT = env.int("REFERRAL_REWARD_AMOUNT", default=5000)
 #   python -c "from py_vapid import Vapid; v = Vapid(); v.generate_keys(); print(v.private_pem().decode()); print(v.public_key_urlsafe_base64())"
 VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
 VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
-PUSH_CONTACT_EMAIL = env("PUSH_CONTACT_EMAIL", default="admin@grouppay.app")
+PUSH_CONTACT_EMAIL = env("PUSH_CONTACT_EMAIL", default="admin@zionpay.app")
 
 # ═══════════════════════════════════════════════════════════════
 # MODE HYBRIDE — Config additionnelle
@@ -427,18 +428,18 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # ═══════════════════════════════════════════════════════════════
 # SPÉCIFICITÉS BURKINA FASO
 # ═══════════════════════════════════════════════════════════════
-GROUPPAY_COUNTRY = env("GROUPPAY_COUNTRY", default="BF")
-GROUPPAY_CURRENCY = "XOF"
-GROUPPAY_CURRENCY_SYMBOL = "FCFA"
-GROUPPAY_LOCALE = "fr-BF"
+ZIONPAY_COUNTRY = env("ZIONPAY_COUNTRY", default="BF")
+ZIONPAY_CURRENCY = "XOF"
+ZIONPAY_CURRENCY_SYMBOL = "FCFA"
+ZIONPAY_LOCALE = "fr-BF"
 
 # Fiscalité
-GROUPPAY_TVA_RATE = Decimal("0.18")           # TVA standard BF
-GROUPPAY_TVA_REDUIT = Decimal("0.11")          # TVA réduite (prestations)
-GROUPPAY_TVA_EXO = Decimal("0.00")
-GROUPPAY_IUTS_ANNEE = 2024
-GROUPPAY_SMIG = 45000                          # SMIG mensuel FCFA
-GROUPPAY_CNSS_PLAFOND = 600000                 # Plafond cotisable FCFA
+ZIONPAY_TVA_RATE = Decimal("0.18")           # TVA standard BF
+ZIONPAY_TVA_REDUIT = Decimal("0.11")          # TVA réduite (prestations)
+ZIONPAY_TVA_EXO = Decimal("0.00")
+ZIONPAY_IUTS_ANNEE = 2024
+ZIONPAY_SMIG = 45000                          # SMIG mensuel FCFA
+ZIONPAY_CNSS_PLAFOND = 600000                 # Plafond cotisable FCFA
 
 # Devise par défaut
 DEFAULT_CURRENCY = "XOF"
@@ -447,7 +448,7 @@ THOUSAND_SEPARATOR = " "
 USE_THOUSAND_SEPARATOR = True
 
 # Mentions légales BF (à personnaliser par organisation)
-GROUPPAY_LEGAL = {
+ZIONPAY_LEGAL = {
     "pays": "Burkina Faso",
     "devise_iso": "XOF",
     "tva_standard": 18,
@@ -468,14 +469,19 @@ FASOARZEKA = {
     "MERCHANT_ID": env("FASOARZEKA_MERCHANT_ID", default=""),
     "HASH_SECRET": env("FASOARZEKA_HASH_SECRET", default=""),
     "WEBHOOK_URL": env("FASOARZEKA_WEBHOOK_URL",
-                       default="https://grouppay.bf/webhook/fasoarzeka/"),
+                       default="https://zionpay.bf/webhook/fasoarzeka/"),
     "RETURN_URL": env("FASOARZEKA_RETURN_URL",
-                      default="https://grouppay.bf/retour-paiement/"),
+                      default="https://zionpay.bf/retour-paiement/"),
     "PROTOCOL": env("FASOARZEKA_PROTOCOL", default="https"),
     "SANDBOX": env.bool("FASOARZEKA_SANDBOX", default=True),
 }
 
 # --- Authentication ---
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "login"
+
+
+# ═══════════════════════════════════════════════════════════════
+# AUTHENTIFICATION UNIFIÉE — Un seul login pour tous les comptes
+# ═══════════════════════════════════════════════════════════════
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/post-login/"          # Vue qui dispatche selon le rôle
+LOGOUT_REDIRECT_URL = "/accounts/login/"

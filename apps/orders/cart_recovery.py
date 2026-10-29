@@ -91,7 +91,7 @@ def send_cart_recovery(cart, channel="EMAIL"):
         try:
             from apps.notifications.sms_service import send_sms
             message = (
-                f"GroupPay: votre panier de {context['item_count']} articles "
+                f"ZionPay: votre panier de {context['item_count']} articles "
                 f"({context['total']:.0f} {context['currency']}) vous attend. "
                 f"Commandez: {context['cart_url']}"
             )

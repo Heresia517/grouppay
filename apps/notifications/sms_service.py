@@ -36,7 +36,7 @@ def send_order_validated_sms(order):
     phone = getattr(order.member, "phone", "") or ""
     if not phone:
         return False
-    msg = f"GroupPay: commande {order.order_number} VALIDEE ({order.total_amount} {order.currency_code})."
+    msg = f"ZionPay: commande {order.order_number} VALIDEE ({order.total_amount} {order.currency_code})."
     return send_sms(phone, msg)
 
 
@@ -45,7 +45,7 @@ def send_order_delivered_sms(order):
     phone = getattr(order.member, "phone", "") or ""
     if not phone:
         return False
-    msg = f"GroupPay: commande {order.order_number} LIVREE. Merci !"
+    msg = f"ZionPay: commande {order.order_number} LIVREE. Merci !"
     return send_sms(phone, msg)
 
 
@@ -54,5 +54,5 @@ def send_order_rejected_sms(order, reason=""):
     phone = getattr(order.member, "phone", "") or ""
     if not phone:
         return False
-    msg = f"GroupPay: commande {order.order_number} REFUSEE. Motif: {reason[:80]}"
+    msg = f"ZionPay: commande {order.order_number} REFUSEE. Motif: {reason[:80]}"
     return send_sms(phone, msg)

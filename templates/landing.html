@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name|default:"GroupPay" }} — Accueil</title>
+    <title>{{ organization.name|default:"ZionPay" }} — Accueil</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
                     </div>
                 {% endif %}
                 <div>
-                    <p class="font-bold text-slate-900 leading-tight">{{ organization.name|default:"GroupPay" }}</p>
+                    <p class="font-bold text-slate-900 leading-tight">{{ organization.name|default:"ZionPay" }}</p>
                     <p class="text-xs text-slate-500">Plateforme interne</p>
                 </div>
             </div>
@@ -75,7 +75,7 @@
         <!-- Hero -->
         <div class="text-center mb-12">
             <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4">
-                {% if is_public %}Bienvenue sur {{ organization.name|default:"GroupPay" }}{% else %}Choisissez votre espace{% endif %}
+                {% if is_public %}Bienvenue sur {{ organization.name|default:"ZionPay" }}{% else %}Choisissez votre espace{% endif %}
             </h1>
             <p class="text-slate-500 max-w-2xl mx-auto text-lg">
                 {% if is_public %}
@@ -97,9 +97,9 @@
                     </svg>
                 </div>
                 <div class="p-6">
-                    <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Espace Mutuelle</h2>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Espace ASECNA</h2>
                     <p class="text-slate-500 text-sm mb-4">
-                        Achetez vos produits au meilleur prix grâce à l'achat groupé. Paiement par retenue salariale automatique.
+                        Commandez vos fournitures en quelques clics. Validation hiérarchique, suivi de livraison, facturation automatique.
                     </p>
                     <div class="flex items-center gap-2 text-brand-600 font-semibold text-sm">
                         Accéder au catalogue
@@ -145,7 +145,7 @@
     </main>
 
     <footer class="py-8 text-center text-xs text-slate-400">
-        © {% now "Y" %} {{ organization.name|default:"GroupPay" }} — Tous droits réservés
+        © {% now "Y" %} {{ organization.name|default:"ZionPay" }} — Tous droits réservés
     </footer>
 </body>
 </html>

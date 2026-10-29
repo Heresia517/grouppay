@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #222; }
+  .header { border-bottom: 3px solid #0066cc; padding-bottom: 8px; margin-bottom: 20px; }
+  .header h1 { color: #0066cc; margin: 0; font-size: 16pt; }
+  .header .ref { float: right; font-size: 9pt; color: #666; text-align: right; }
+  .header .ref strong { color: #0066cc; font-size: 11pt; display: block; }
+  .info { margin: 20px 0; }
+  .info table { width: 100%; border-collapse: collapse; }
+  .info td { padding: 6px; border-bottom: 1px solid #eee; }
+  .info td:first-child { font-weight: bold; width: 30%; color: #555; }
+  table.items { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  table.items th { background: #0066cc; color: white; padding: 8px; text-align: left; font-size: 9pt; }
+  table.items td { padding: 8px; border-bottom: 1px solid #eee; }
+  table.items td.num { text-align: right; }
+  .total { text-align: right; font-size: 13pt; font-weight: bold; margin-top: 15px; padding: 10px; background: #f0f7ff; }
+  .signatures { margin-top: 50px; display: flex; justify-content: space-between; }
+  .signatures div { width: 30%; border-top: 1px solid #333; padding-top: 8px; text-align: center; font-size: 9pt; }
+  .footer { margin-top: 40px; text-align: center; font-size: 8pt; color: #888; border-top: 1px solid #ddd; padding-top: 10px; }
+  .badge { display: inline-block; padding: 3px 10px; background: #eff6ff; color: #1e40af; border-radius: 4px; font-size: 9pt; font-weight: 600; }
+</style></head><body>
+
+<div class="header">
+  <div class="ref">
+    <strong>{{ order.order_number }}</strong>
+    Date : {{ order.created_at|date:"d/m/Y" }}
+  </div>
+  <h1>BON DE COMMANDE ADMINISTRATIF</h1>
+  <div style="font-size: 9pt; color: #888; margin-top: 4px;">Document officiel — ZionPay</div>
+</div>
+
+<div class="info"><table>
+  <tr><td>Organisation</td><td>{{ order.organization.name }}</td></tr>
+  <tr><td>Demandeur</td><td>{% if order.member %}{{ order.member.get_full_name|default:order.member.email }}{% else %}—{% endif %}</td></tr>
+  <tr><td>Statut</td><td><span class="badge">{{ order.get_status_display }}</span></td></tr>
+  <tr><td>Devise</td><td>{{ order.currency_code|default:"XOF" }}</td></tr>
+  <tr><td>Adresse de livraison</td><td>{{ order.delivery_address|default:"—" }}</td></tr>
+</table></div>
+
+<table class="items">
+  <thead><tr>
+    <th>Désignation</th>
+    <th style="text-align:right;">Qté</th>
+    <th style="text-align:right;">P.U. ({{ order.currency_code|default:"XOF" }})</th>
+    <th style="text-align:right;">Total</th>
+  </tr></thead>
+  <tbody>
+    {% for item in order.items.all %}
+    <tr>
+      <td>{{ item.product.name }}</td>
+      <td class="num">{{ item.quantity }}</td>
+      <td class="num">{{ item.unit_price|floatformat:0 }}</td>
+      <td class="num">{{ item.unit_price|floatformat:0 }} × {{ item.quantity }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" style="text-align:center; color:#999;">Aucun article</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="total">
+  TOTAL : {{ order.total_amount|floatformat:0 }} {{ order.currency_code|default:"XOF" }}
+</div>
+
+<div class="signatures">
+  <div>Le Demandeur<br><br>{{ order.member.get_full_name|default:"_" }}</div>
+  <div>Le Directeur des Achats<br><br>_____________________</div>
+  <div>Le Directeur Général<br><br>_____________________</div>
+</div>
+
+<div class="footer">
+  Document généré par ZionPay — Réf. {{ order.order_number }} — {{ order.created_at|date:"d/m/Y H:i" }}
+</div>
+
+</body></html>

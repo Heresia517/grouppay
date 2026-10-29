@@ -35,7 +35,7 @@ def _normalize_vapid_key(private_key_str):
 
 
 def _get_vapid_claims():
-    email = getattr(settings, "PUSH_CONTACT_EMAIL", "admin@grouppay.app")
+    email = getattr(settings, "PUSH_CONTACT_EMAIL", "admin@zionpay.app")
     return {"sub": f"mailto:{email}"}
 
 

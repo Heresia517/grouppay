@@ -1,4 +1,4 @@
-# GroupPay v2.0
+# ZionPay v2.0
 
 **Conformité PRD : 100.0%** — 188 fichiers · 21322 lignes · 432 fonctions · 133 classes
 
@@ -117,7 +117,7 @@ Plateforme de gestion de commandes groupées pour mutuelles et organisations : c
 Le projet est vérifié automatiquement contre le PRD v2.0 :
 
 ```bash
-python audit_grouppay_v2.py
+python audit_zionpay_v2.py
 ```
 
 Le script vérifie **167 points** : 25 modèles, 45 règles métier, 51 URLs, 35 templates, 29 services, 15 tests unitaires, 10 suites E2E, 3 packs (RH/Marketplace/Professional).

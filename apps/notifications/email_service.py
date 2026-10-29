@@ -10,7 +10,7 @@ def send_email(recipient_email, subject, template_name, context):
     try:
         html = render_to_string(template_name, context)
         text = strip_tags(html)
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "GroupPay <noreply@grouppay.app>")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "ZionPay <noreply@zionpay.app>")
         msg = EmailMultiAlternatives(subject, text, from_email, [recipient_email])
         msg.attach_alternative(html, "text/html")
         msg.send(fail_silently=True)

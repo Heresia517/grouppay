@@ -2,7 +2,7 @@
 REM Script Windows pour lancer les tests E2E
 
 echo ============================================================
-echo   GROUPPAY E2E TESTS (Windows)
+echo   ZIONPAY E2E TESTS (Windows)
 echo ============================================================
 echo.
 

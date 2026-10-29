@@ -1,4 +1,4 @@
-// GroupPay Push Notifications — v4 (fix scope)
+// ZionPay Push Notifications — v4 (fix scope)
 (function() {
     'use strict';
 
@@ -192,7 +192,7 @@
     // ═══════════════════════════════════════════════════════════
     // API PUBLIQUE
     // ═══════════════════════════════════════════════════════════
-    window.GroupPayPush = {
+    window.ZionPayPush = {
         subscribe: subscribeUser,
         unsubscribe: unsubscribeUser,
         isSubscribed: isSubscribed,
@@ -208,5 +208,5 @@
         },
     };
 
-    console.log('[Push] GroupPayPush v4 pret');
+    console.log('[Push] ZionPayPush v4 pret');
 })();

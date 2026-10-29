@@ -1,7 +1,7 @@
 """Patch v2 : détecte les UniqueConstraint par lecture textuelle des models.py."""
 from pathlib import Path
 
-p = Path("audit_grouppay_v2.py")
+p = Path("audit_zionpay_v2.py")
 src = p.read_text(encoding="utf-8")
 original = src
 
@@ -44,4 +44,4 @@ if src != original:
 else:
     print("\n⚠️  aucune modification")
 
-print("\n→ Relance : python audit_grouppay_v2.py")
+print("\n→ Relance : python audit_zionpay_v2.py")

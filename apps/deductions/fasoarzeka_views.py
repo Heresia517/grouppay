@@ -28,7 +28,7 @@ def fasoarzeka_payer(request, order_id):
             prenom=request.user.first_name,
             nom=request.user.last_name,
             telephone=getattr(request.user, "phone", "") or "",
-            description=f"Commande GroupPay #{order.id}",
+            description=f"Commande ZionPay #{order.id}",
         )
         return JsonResponse(result)
     except Exception as e:
